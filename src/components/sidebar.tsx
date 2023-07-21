@@ -16,13 +16,7 @@ import {
   HiArrowNarrowRight,
   HiArrowSmRight,
   HiChartPie,
-  HiCheck,
-  HiClipboardList,
-  HiCloudDownload,
-  HiDatabase,
-  HiExclamation,
-  HiEye,
-  HiHome,
+  HiOutlineCalendar,
   HiInbox,
   HiOutlineAdjustments,
   HiShoppingBag,
@@ -32,6 +26,7 @@ import {
   HiViewBoards,
   HiX,
 } from "react-icons/hi";
+import { RiFilePaper2Line } from "react-icons/ri";
 
 const Sidebar: FC<PropsWithChildren<Record<string, unknown>>> = function ({
   children,
@@ -65,26 +60,14 @@ function ActualSidebar(): JSX.Element {
           <FlowbiteSidebar.Item href="/orders" icon={HiChartPie}>
             Orders
           </FlowbiteSidebar.Item>
-          <FlowbiteSidebar.Item href="/" icon={HiViewBoards}>
-            Account
-          </FlowbiteSidebar.Item>
-          <FlowbiteSidebar.Item href="/calendar" icon={HiInbox}>
+          <FlowbiteSidebar.Item href="/calendar" icon={HiOutlineCalendar}>
             Calendar
           </FlowbiteSidebar.Item>
-          <FlowbiteSidebar.Item href="#" icon={HiUser}>
+          <FlowbiteSidebar.Item href="#" icon={RiFilePaper2Line}>
             Warrenties
-          </FlowbiteSidebar.Item>
-          <FlowbiteSidebar.Item href="#" icon={HiShoppingBag}>
-            Change Orders
           </FlowbiteSidebar.Item>
         </FlowbiteSidebar.ItemGroup>
         <FlowbiteSidebar.ItemGroup>
-          <FlowbiteSidebar.Item href="#" icon={HiChartPie}>
-            Upgrade to Pro
-          </FlowbiteSidebar.Item>
-          <FlowbiteSidebar.Item href="#" icon={HiViewBoards}>
-            Documentation
-          </FlowbiteSidebar.Item>
           <FlowbiteSidebar.Item href="#" icon={BiBuoy}>
             Help
           </FlowbiteSidebar.Item>

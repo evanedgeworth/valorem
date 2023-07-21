@@ -1,5 +1,5 @@
 "use client";
-import { DarkThemeToggle, Navbar } from "flowbite-react";
+import { DarkThemeToggle, Navbar, Dropdown, Avatar } from "flowbite-react";
 import Image from "next/image";
 import { FC } from "react";
 import { useSidebarContext } from "../context/SidebarContext";
@@ -48,21 +48,43 @@ const Header: FC<Record<string, never>> = function () {
           </button>
         )}
         <Navbar.Brand href="/">
-          <Image
+          {/* <Image
             alt="Flowbite logo"
             height="24"
             src="/favicon.png"
             width="24"
-          />
+          /> */}
           <span className="self-center whitespace-nowrap px-3 text-xl font-semibold dark:text-white">
-            Flowbite
+            Valorem
           </span>
         </Navbar.Brand>
         <div className="flex md:order-2">
           <Navbar.Toggle />
-          <DarkThemeToggle />
+          {/* <DarkThemeToggle /> */}
+          <Dropdown
+            inline
+            label={
+              <Avatar
+                alt="User settings"
+                img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                rounded
+              />
+            }
+          >
+            <Dropdown.Header>
+              <span className="block text-sm">Bonnie Green</span>
+              <span className="block truncate text-sm font-medium">
+                name@flowbite.com
+              </span>
+            </Dropdown.Header>
+            <Dropdown.Item>Dashboard</Dropdown.Item>
+            <Dropdown.Item>Settings</Dropdown.Item>
+            <Dropdown.Item>Earnings</Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item>Sign out</Dropdown.Item>
+          </Dropdown>
         </div>
-        <Navbar.Collapse>
+        {/* <Navbar.Collapse>
           <Navbar.Link href="/" active>
             Home
           </Navbar.Link>
@@ -70,7 +92,7 @@ const Header: FC<Record<string, never>> = function () {
           <Navbar.Link href="/">Services</Navbar.Link>
           <Navbar.Link href="/">Pricing</Navbar.Link>
           <Navbar.Link href="/">Contact</Navbar.Link>
-        </Navbar.Collapse>
+        </Navbar.Collapse> */}
       </Navbar>
     </header>
   );
