@@ -53,7 +53,7 @@ const LoginFormWithDescription: FC = function () {
               Sign in to your account
             </Button>
             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a
                 href="#"
                 className="font-medium text-primary-600 hover:underline dark:text-primary-500"
@@ -76,14 +76,14 @@ const LoginFormWithDescription: FC = function () {
               />
               Flowbite
             </a>
-            <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-white xl:text-5xl">
+            {/* <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-white xl:text-5xl">
               Explore the world’s leading design portfolios.
             </h1>
             <p className="mb-4 font-light text-primary-200 lg:mb-8">
               Millions of designers and agencies around the world showcase their
-              portfolio work on Flowbite - the home to the world’s best design
+              portfolio work on Flowbite - the home to the world&apos;s best design
               and creative professionals.
-            </p>
+            </p> */}
             <div className="flex items-center divide-x divide-primary-500">
               <Avatar.Group>
                 <Avatar

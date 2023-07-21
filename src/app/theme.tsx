@@ -2,7 +2,6 @@ import { CustomFlowbiteTheme } from "flowbite-react/lib/esm/components/Flowbite/
 
 export const flowbiteTheme: CustomFlowbiteTheme = {
   footer: {
-    base: "flex flex-col",
     brand: {
       base: "m-6 flex items-center",
     },
