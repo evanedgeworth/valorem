@@ -8,7 +8,7 @@ import AuthForm from "./auth-form";
 
 import type { Database } from "../../../types/supabase";
 
-export default async function Login() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();

@@ -53,7 +53,7 @@ export default function SetAvailabiltyModal({ showModal, setShowModal }: { showM
           <div className="space-y-6">
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">Set Availability</h3>
             {days.map((day) => (
-              <div className="flex flex-row justify-between items-center h-8">
+              <div className="flex flex-row justify-between items-center h-8" key={day.name}>
                 <ToggleSwitch label={day.name} checked={day.enabled} onChange={() => handleChangeEnabled(day.name)} />
                 {day.enabled && (
                   <div className="flex flex-row gap-2">
