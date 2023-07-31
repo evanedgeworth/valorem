@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/react-big-calendar": "^1.6.4",
+    "encoding": "^0.1.13",
     "supabase": "^1.82.2"
   }
 }
