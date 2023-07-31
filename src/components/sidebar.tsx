@@ -3,14 +3,8 @@ import classNames from "classnames";
 import { Sidebar as FlowbiteSidebar } from "flowbite-react";
 import type { FC, PropsWithChildren } from "react";
 import { useSidebarContext } from "../context/SidebarContext";
-import { BiBuoy } from "react-icons/bi";
-import {
-  BsDribbble,
-  BsFacebook,
-  BsGithub,
-  BsInstagram,
-  BsTwitter,
-} from "react-icons/bs";
+import { BiBuoy, BiBriefcaseAlt } from "react-icons/bi";
+import { BsBriefcase } from "react-icons/bs";
 import {
   HiAdjustments,
   HiArrowNarrowRight,
@@ -57,7 +51,7 @@ function ActualSidebar(): JSX.Element {
     <FlowbiteSidebar>
       <FlowbiteSidebar.Items>
         <FlowbiteSidebar.ItemGroup>
-          <FlowbiteSidebar.Item href="/orders" icon={HiChartPie}>
+          <FlowbiteSidebar.Item href="/orders" icon={BiBriefcaseAlt}>
             Orders
           </FlowbiteSidebar.Item>
           <FlowbiteSidebar.Item href="/calendar" icon={HiOutlineCalendar}>

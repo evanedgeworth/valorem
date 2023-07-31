@@ -14,9 +14,18 @@ module.exports = {
       primary: colors.blue,
     },
     fontFamily: {
-      sans: ["Inter"],
-      body: ["Inter"],
-      mono: ["ui-monospace"],
+      body: [
+        "Inter",
+        "ui-sans-serif",
+        "system-ui",
+        // other fallback fonts
+      ],
+      sans: [
+        "Inter",
+        "ui-sans-serif",
+        "system-ui",
+        // other fallback fonts
+      ],
     },
     extend: {
       maxWidth: {

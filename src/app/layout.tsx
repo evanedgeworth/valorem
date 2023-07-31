@@ -1,25 +1,21 @@
 import { FC, PropsWithChildren } from "react";
 import FlowbiteContext from "@/context/FlowbiteContext";
 import "./globals.css";
-import { SidebarProvider } from "@/context/SidebarContext";
-import Header from "@/components/header";
-import Sidebar from "@/components/sidebar";
+import NavbarWithDropdown from "@/components/navbar";
+import UserProvider from "@/context/userContext";
 
 const RootLayout: FC<PropsWithChildren> = function ({ children }) {
   return (
     <html lang="en">
-      <body>
-        <SidebarProvider>
-          <Header />
-          <div className="flex dark:bg-gray-900">
-            <main className="order-2 mx-4 mt-4 mb-24 flex-[1_0_16rem]">
+      <body className="flex flex-col dark:bg-gray-900">
+        <UserProvider>
+          <NavbarWithDropdown />
+          <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <div className="max-w-6xl mr-auto ml-auto">
               <FlowbiteContext>{children}</FlowbiteContext>
-            </main>
-            <div className="order-1">
-              <Sidebar />
             </div>
-          </div>
-        </SidebarProvider>
+          </main>
+        </UserProvider>
       </body>
     </html>
   );

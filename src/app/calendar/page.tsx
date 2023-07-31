@@ -1,43 +1,66 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Calendar, momentLocalizer, Event } from "react-big-calendar";
-import withDragAndDrop, {
-  withDragAndDropProps,
-} from "react-big-calendar/lib/addons/dragAndDrop";
+import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
 import moment from "moment";
+import { Card, Button, Table } from "flowbite-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Database } from "../../../types/supabase";
+import { MergeProductsbyKey } from "@/utils/commonUtils";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import SetAvailabiltyModal from "./setAvailability.modal";
 
 export default function Calenda() {
-  const [events, setEvents] = useState<Event[]>();
+  const supabase = createClientComponentClient<Database>();
+  const [events, setEvents] = useState<any[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
-  // const onEventResize: withDragAndDropProps["onEventResize"] = (data) => {
-  //   const { start, end } = data;
+  useEffect(() => {
+    getEvents();
+  }, []);
 
-  //   setEvents((currentEvents) => {
-  //     const firstEvent = {
-  //       start: new Date(start),
-  //       end: new Date(end),
-  //     };
-  //     return [...currentEvents, firstEvent];
-  //   });
-  // };
-
-  const onEventDrop: withDragAndDropProps["onEventDrop"] = (data) => {
-    console.log(data);
-  };
+  async function getEvents() {
+    let { data: events, error } = await supabase.from("events").select("*");
+    if (events) {
+      setEvents(events);
+      console.log(events);
+    }
+  }
 
   return (
-    <DnDCalendar
-      defaultView="month"
-      events={events}
-      localizer={localizer}
-      onEventDrop={onEventDrop}
-      //onEventResize={onEventResize}
-      resizable
-      style={{ height: "100vh" }}
-    />
+    <>
+      <section className="p-5">
+        <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Upcoming Events</h5>
+
+        <div className="flex justify-end mb-5">
+          <SetAvailabiltyModal showModal={showModal} setShowModal={setShowModal} />
+        </div>
+        <div className="flex flex-col gap-4">
+          <Card className="overflow-x-auto">
+            <Table>
+              <Table.Head>
+                <Table.HeadCell>Product name</Table.HeadCell>
+                <Table.HeadCell>Description</Table.HeadCell>
+                <Table.HeadCell>Date</Table.HeadCell>
+                <Table.HeadCell>Time</Table.HeadCell>
+              </Table.Head>
+              {events.map((event: any) => (
+                <Table.Body className="divide-y" key={event.id}>
+                  <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                    <Table.Cell className="font-medium text-gray-900 dark:text-white">{event.name}</Table.Cell>
+                    <Table.Cell>{event.description}</Table.Cell>
+                    <Table.Cell>{moment(event.date_time).format("MMMM DD, YYYY")}</Table.Cell>
+                    <Table.Cell>{moment(event.date_time).format("HH:mm a")}</Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              ))}
+            </Table>
+          </Card>
+        </div>
+      </section>
+    </>
   );
 }
 
