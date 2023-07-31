@@ -53,7 +53,7 @@ export default function NavbarWithDropdown() {
       <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-900 dark:border-gray-800 order-1 border-b">
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
-            <a href="https://flowbite.com" className="flex mr-6">
+            <a href="/" className="flex mr-6">
               {/* <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-3 h-8" alt="FlowBite Logo" /> */}
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </a>
