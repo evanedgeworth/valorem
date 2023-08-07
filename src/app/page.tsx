@@ -31,7 +31,7 @@ export default function Home() {
             Manage your rental investment properties and repair processes efficiently
           </p>
           <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4 lg:mb-16">
-            <Button color="info" href="#" size="lg">
+            <Button color="info" href="/signup" size="lg">
               Sign up
               <svg className="ml-2 -mr-1 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path

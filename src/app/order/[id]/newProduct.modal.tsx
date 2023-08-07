@@ -5,7 +5,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../types/supabase";
 import moment from "moment";
 type Order = Database["public"]["Tables"]["orders"]["Row"];
+type Catalog = Database["public"]["Tables"]["catalog"]["Row"];
 import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
+import { debounce } from "@mui/material/utils";
 
 export default function NewProductModal({
   showModal,
@@ -26,12 +31,16 @@ export default function NewProductModal({
   const [size, setSize] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(0);
   const [price, setPrice] = useState<number>(0);
+  const [catalog, setCatalog] = useState<Catalog[]>([]);
+  const [selectedCatalog, setSelectedCatalog] = useState<Catalog>();
+  const [open, setOpen] = useState(false);
+  const loading = open && catalog.length === 0;
 
   async function handleAddProduct() {
     console.log(name, description, quantity, price, size, type, orderId);
     const { data, error } = await supabase
       .from("products")
-      .insert([{ name: name, description: description, quantity: quantity, price: price, size: size, type: type, orderId: orderId }])
+      .insert([{ name: name, description: description, quantity: quantity, price: price || undefined, size: size, type: type, orderId: orderId }])
       .select();
     if (data) {
       alert("Order has been created");
@@ -44,6 +53,34 @@ export default function NewProductModal({
     setShowModal(false);
   }
 
+  async function searchCatalog() {
+    const { data, error } = await supabase.from("catalog").select().textSearch("description", name);
+    if (data) {
+      setCatalog(data);
+      console.log("DATA", data);
+    }
+  }
+
+  function handleSelectCatalogItem(value: Catalog) {
+    setSelectedCatalog(value);
+    setDescription(value.description || "");
+    setPrice(value.cost || 0);
+    setQuantity(1);
+  }
+
+  useEffect(() => {
+    const getData = setTimeout(() => {
+      searchCatalog();
+    }, 500);
+    return () => clearTimeout(getData);
+  }, [name]);
+
+  useEffect(() => {
+    if (!open) {
+      setCatalog([]);
+    }
+  }, [open]);
+
   return (
     <div ref={rootRef}>
       <Button onClick={() => setShowModal(true)}>+ Add Product</Button>
@@ -52,7 +89,7 @@ export default function NewProductModal({
         <Modal.Body>
           <div className="space-y-6">
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Product</h3>
-            <div>
+            {/* <div>
               <Label htmlFor="countries">Type</Label>
               <Select id="countries" required value={type} onChange={(e) => setType(e.target.value)}>
                 <option>Exterior / Landscaping</option>
@@ -69,38 +106,117 @@ export default function NewProductModal({
                 <option>Flooring</option>
                 <option>Other</option>
               </Select>
-            </div>
+            </div> */}
             <div>
               <Label>Product Name</Label>
-              <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div>
-              <Label>Sqft</Label>
-              <TextInput required type="number" value={size} onChange={(e) => setSize(e.target.valueAsNumber)} />
-            </div>
-            <div>
-              <Label>Quantity</Label>
-              <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
-            </div>
-            <div>
-              <Label>Price</Label>
-              <TextInput required type="number" value={price} onChange={(e) => setPrice(e.target.valueAsNumber)} />
-            </div>
-            <div className="max-w-md" id="textarea">
-              <Label htmlFor="comment">Description</Label>
-              <Textarea
-                id="comment"
-                placeholder="Please give a detailed description..."
-                required
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+              {/* <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} /> */}
+              <Autocomplete
+                open={open}
+                fullWidth
+                onOpen={() => {
+                  setOpen(true);
+                }}
+                onClose={() => {
+                  setOpen(false);
+                }}
+                filterOptions={(x) => x}
+                getOptionLabel={(option) => option.description || ""}
+                options={catalog}
+                loading={loading}
+                value={selectedCatalog}
+                onChange={(event: React.SyntheticEvent, value: any | null) => handleSelectCatalogItem(value)}
+                onInputChange={(event, newInputValue) => {
+                  setName(newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label=""
+                    id="productSelector"
+                    fullWidth
+                    variant="standard"
+                    size="small"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderStyle: "none",
+                        borderWidth: 0,
+                        backgroundColor: "#F9FAFB",
+                        borderRadius: ".5rem",
+                        "--tw-ring-color": "transparent",
+                        legend: {
+                          marginLeft: "30px",
+                        },
+                      },
+                      "& .MuiAutocomplete-inputRoot": {
+                        borderStyle: "none",
+                        borderWidth: 0,
+                        paddingLeft: "20px !important",
+                        borderRadius: ".5rem",
+                        "--tw-ring-color": "transparent",
+                      },
+                      "& .MuiInputLabel-outlined": {
+                        borderStyle: "none",
+                        borderWidth: 0,
+                        paddingLeft: "20px",
+                        "--tw-ring-color": "transparent",
+                      },
+                      "& .MuiInputLabel-shrink": {
+                        marginLeft: "20px",
+                        paddingLeft: "10px",
+                        paddingRight: 0,
+                        background: "white",
+                        borderStyle: "none",
+                        borderWidth: 0,
+                        "--tw-ring-color": "transparent",
+                      },
+                      border: "none",
+                      "& fieldset": { border: "none" },
+                    }}
+                    InputProps={{
+                      ...params.InputProps,
+                      disableUnderline: true,
+                      endAdornment: (
+                        <>
+                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
               />
             </div>
+            {selectedCatalog && (
+              <>
+                <div>
+                  <Label>Sqft</Label>
+                  <TextInput required type="number" value={size} onChange={(e) => setSize(e.target.valueAsNumber)} />
+                </div>
+                <div>
+                  <Label>Quantity</Label>
+                  <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
+                </div>
+                <div>
+                  <Label>Price</Label>
+                  <TextInput addon="$" required type="number" value={price} onChange={(e) => setPrice(e.target.valueAsNumber)} />
+                </div>
+                <div className="max-w-md" id="textarea">
+                  <Label htmlFor="comment">Description</Label>
+                  <Textarea
+                    id="comment"
+                    placeholder="Please give a detailed description..."
+                    required
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
 
-            <div className="flex justify-end">
-              <Button onClick={handleAddProduct}>Save</Button>
-            </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleAddProduct}>Save</Button>
+                </div>
+              </>
+            )}
           </div>
         </Modal.Body>
       </Modal>

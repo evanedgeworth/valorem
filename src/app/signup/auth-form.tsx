@@ -8,63 +8,34 @@ import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
   const [error, setError] = useState<boolean>(false);
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
-  const handleSignIn = async () => {
-    console.log("Signing in...");
-    const { data, error } = await supabase.auth.signInWithPassword({
+  const handleSignUp = async () => {
+    await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      },
     });
-    if (data) {
-      router.refresh();
-    }
-    if (error) {
-      setError(true);
-    }
+    // router.refresh();
   };
 
   return (
     <div className="w-full place-self-center lg:col-span-6">
       <div className="mx-auto rounded-lg bg-white p-6 shadow dark:bg-gray-800 sm:max-w-xl sm:p-8">
-        <a
-          href="#"
-          className="mb-4 inline-flex items-center text-xl font-semibold text-gray-900 dark:text-white"
-        >
-          <img
-            className="mr-2 h-8 w-8"
-            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg"
-            alt="logo"
-          />
-          Flowbite
-        </a>
-        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">
-          Welcome back
-        </h1>
-        <p className="text-sm font-light text-gray-500 dark:text-gray-300">
-          Start your website in seconds. Don’t have an account?{" "}
-          <a
-            href="#"
-            className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-          >
-            Sign up
-          </a>
-          .
-        </p>
+        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Request Access</h1>
+        <p className="text-sm font-light text-gray-500 dark:text-gray-300">Fill out this form to request access to Valorem.</p>
         <div className="mt-4 space-y-6 sm:mt-6">
           <div className="grid gap-6 sm:grid-rows-2">
             <div>
               <Label htmlFor="email">Email</Label>
-              <TextInput
-                id="email"
-                placeholder="name@company.com"
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
@@ -88,6 +59,18 @@ export default function AuthForm() {
                 <option>Germany</option>
               </Select>
             </div>
+            <div>
+              <Label>Company Name</Label>
+              <TextInput id="company" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+            </div>
+            <div>
+              <Label>Company Address</Label>
+              <TextInput id="address" required value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
+            </div>
+            <div>
+              <Label>Phone Number</Label>
+              <TextInput id="phone" required value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+            </div>
           </div>
 
           <div className="flex items-center justify-between">
@@ -96,18 +79,12 @@ export default function AuthForm() {
                 <Checkbox id="remember" required />
               </div>
               <div className="ml-3 text-sm">
-                <Label htmlFor="remember">Remember me</Label>
+                <Label htmlFor="remember">Recieve email notifications from Valorem</Label>
               </div>
             </div>
-            <a
-              href="#"
-              className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
-            >
-              Forgot password?
-            </a>
           </div>
-          <Button type="submit" className="w-full" onClick={handleSignIn}>
-            Sign in to your account
+          <Button className="w-full" onClick={handleSignUp}>
+            Request access
           </Button>
         </div>
       </div>

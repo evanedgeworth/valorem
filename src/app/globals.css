@@ -25,3 +25,7 @@
     )
     rgb(var(--background-start-rgb));
 } */
+
+.MuiInputBase-input {
+  --tw-ring-color: transparent !important;
+}

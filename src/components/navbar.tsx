@@ -58,30 +58,30 @@ export default function NavbarWithDropdown() {
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </a>
           </div>
-
-          <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex">
-            <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-              <a href="/" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                Home
-              </a>
-            </li>
-            <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-              <a href="/order" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                Orders
-              </a>
-            </li>
-            <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-              <a href="/calendar" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                Calendar
-              </a>
-            </li>
-            <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-              <a href="/warrenties" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                Warrenties
-              </a>
-            </li>
-          </ul>
-
+          {user && (
+            <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex">
+              {/* <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                <a href="/" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                  Home
+                </a>
+              </li> */}
+              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                <a href="/order" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                  Orders
+                </a>
+              </li>
+              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                <a href="/calendar" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                  Calendar
+                </a>
+              </li>
+              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                <a href="/warrenties" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                  Warrenties
+                </a>
+              </li>
+            </ul>
+          )}
           <div className="flex flex-shrink-0 justify-between items-center ml-4 lg:order-2">
             {user ? (
               <Dropdown inline label={<Avatar alt="User settings" img="https://flowbite.com/docs/images/people/profile-picture-5.jpg" rounded />}>

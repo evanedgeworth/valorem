@@ -20,14 +20,14 @@ export default function NewOrderModal({
   const supabase = createClientComponentClient<Database>();
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
-  const [type, setType] = useState<string>("");
+  const [trade, setTrade] = useState<string>("");
   const [size, setSize] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
 
   async function handleCreateOrder() {
     const { data, error } = await supabase
       .from("orders")
-      .insert([{ project_name: name, start_date: null, address: address, description: description, size: size, type: type }])
+      .insert([{ project_name: name, start_date: null, address: address, description: description, size: size, trade: trade }])
       .select();
     if (data) {
       alert("Order has been created");
@@ -48,16 +48,9 @@ export default function NewOrderModal({
           <div className="space-y-6">
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">New Order</h3>
             <div>
-              <Label>Project Name</Label>
-              <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="email">Address</Label>
-              <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="countries">Type</Label>
-              <Select id="countries" required value={type} onChange={(e) => setType(e.target.value)}>
+              <Label htmlFor="countries">Trade</Label>
+              <Select id="countries" required value={trade} onChange={(e) => setTrade(e.target.value)}>
+                <option disabled selected></option>
                 <option>Exterior / Landscaping</option>
                 <option>MEP / General</option>
                 <option>Living Room</option>
@@ -72,6 +65,14 @@ export default function NewOrderModal({
                 <option>Flooring</option>
                 <option>Other</option>
               </Select>
+            </div>
+            <div>
+              <Label>Project Name</Label>
+              <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="email">Address</Label>
+              <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} />
             </div>
             <div>
               <Label>Main Sqft</Label>

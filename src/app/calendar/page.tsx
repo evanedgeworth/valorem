@@ -1,12 +1,13 @@
 "use client";
 import { FC, useState, useEffect } from "react";
-import { Calendar, momentLocalizer, Event } from "react-big-calendar";
+import { Calendar, momentLocalizer } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
 import moment from "moment";
 import { Card, Button, Table } from "flowbite-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
+type Event = Database["public"]["Tables"]["events"]["Row"];
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -14,7 +15,7 @@ import SetAvailabiltyModal from "./setAvailability.modal";
 
 export default function Calenda() {
   const supabase = createClientComponentClient<Database>();
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function Calenda() {
           <SetAvailabiltyModal showModal={showModal} setShowModal={setShowModal} />
         </div>
         <div className="flex flex-col gap-4">
-          <Card className="overflow-x-auto">
+          {/* <Card className="overflow-x-auto">
             <Table>
               <Table.Head>
                 <Table.HeadCell>Product name</Table.HeadCell>
@@ -57,7 +58,19 @@ export default function Calenda() {
                 </Table.Body>
               ))}
             </Table>
-          </Card>
+          </Card> */}
+          {events.map((item) => (
+            <div className="my-4">
+              {" "}
+              <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{moment(item.date_time).format("dddd, MMMM DD")}</h5>
+              <Card>
+                <div className="flex justify-between  text-gray-900 dark:text-white">
+                  <p>{item.name}</p>
+                  <b>{moment(item.date_time).format("HH:mm a")}</b>
+                </div>
+              </Card>
+            </div>
+          ))}
         </div>
       </section>
     </>
