@@ -118,7 +118,7 @@ export default function Page() {
                     <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
                     {item.length > 1 &&
                       item.slice(1).map((co) => (
-                        <div>
+                        <div key={co.id}>
                           <b>{co.project_name}</b>
                           <p>{moment(co.created_at).format("MMMM DD, YYYY")}</p>
                         </div>
