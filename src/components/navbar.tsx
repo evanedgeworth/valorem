@@ -5,6 +5,8 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../types/supabase";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
+import Valorem from "../../public/valorem.svg";
+import Image from "next/image";
 
 export default function NavbarWithDropdown() {
   const supabase = createClientComponentClient<Database>();
@@ -54,7 +56,7 @@ export default function NavbarWithDropdown() {
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
             <a href="/" className="flex mr-6">
-              {/* <img src="https://flowbite.s3.amazonaws.com/logo.svg" className="mr-3 h-8" alt="FlowBite Logo" /> */}
+              <Image alt="Valorem logo" height="40" src={Valorem} width="40" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </a>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Accordion, Table, Badge } from "flowbite-react";
+import { Timeline, Table, Badge } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
@@ -24,7 +24,7 @@ export default function Page() {
   }, []);
 
   async function getOrders() {
-    let { data: orders, error } = await supabase.from("orders").select("*");
+    let { data: orders, error } = await supabase.from("orders").select("*").order("created_at");
     if (orders) {
       setOrders(MergeProductsbyKey(orders, "order_id"));
     }
@@ -76,14 +76,10 @@ export default function Page() {
             <>
               <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item[0].id}>
                 <Table.Cell className="p-1 cursor-pointer">
-                  {item.length >= 2 ? (
-                    viewHistory === item[0].id ? (
-                      <BiSolidChevronUp size={25} onClick={() => setViewHistory(null)} />
-                    ) : (
-                      <BiSolidChevronDown size={25} onClick={() => setViewHistory(item[0].id)} />
-                    )
+                  {viewHistory === item[0].id ? (
+                    <BiSolidChevronUp size={25} onClick={() => setViewHistory(null)} />
                   ) : (
-                    <></>
+                    <BiSolidChevronDown size={25} onClick={() => setViewHistory(item[0].id)} />
                   )}
                 </Table.Cell>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{item[0].order_id}</Table.Cell>
@@ -97,14 +93,14 @@ export default function Page() {
                   {item[0].status !== "co" ? (
                     <Link
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                      href={`/order/${encodeURIComponent(item[0].id)}`}
+                      href={`/order/${encodeURIComponent(item[item.length - 1].id)}`}
                     >
                       <p>View Order</p>
                     </Link>
                   ) : (
                     <Link
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                      href={`/order/co/${encodeURIComponent(item[0].id)}`}
+                      href={`/order/co/${encodeURIComponent(item[item.length - 1].id)}`}
                     >
                       <p>View CO</p>
                     </Link>
@@ -113,16 +109,24 @@ export default function Page() {
                 <Table.Cell className="p-1">{item[0].status === "co" && <AiOutlineExclamationCircle size={25} color="red" />}</Table.Cell>
               </Table.Row>
               {viewHistory === item[0].id && (
-                <Table.Cell colSpan={7}>
+                <Table.Cell colSpan={8}>
                   <div className="p-4">
                     <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
-                    {item.length > 1 &&
-                      item.slice(1).map((co) => (
-                        <div key={co.id}>
-                          <b>{co.project_name}</b>
-                          <p>{moment(co.created_at).format("MMMM DD, YYYY")}</p>
-                        </div>
+
+                    <Timeline>
+                      {[...item].reverse().map((co, index) => (
+                        <Timeline.Item>
+                          <Timeline.Point />
+                          <Timeline.Content>
+                            <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
+                            <Timeline.Title>{co.order_id + "-" + index}</Timeline.Title>
+                            <Timeline.Body>
+                              <p>{co.description}</p>
+                            </Timeline.Body>
+                          </Timeline.Content>
+                        </Timeline.Item>
                       ))}
+                    </Timeline>
                   </div>
                 </Table.Cell>
               )}

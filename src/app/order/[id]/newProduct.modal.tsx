@@ -25,7 +25,7 @@ export default function NewProductModal({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
-  const [type, setType] = useState<string>("");
+  const [category, setCategory] = useState<string | null>("");
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [size, setSize] = useState<number>(0);
@@ -37,10 +37,10 @@ export default function NewProductModal({
   const loading = open && catalog.length === 0;
 
   async function handleAddProduct() {
-    console.log(name, description, quantity, price, size, type, orderId);
+    console.log(name, description, quantity, price, "SIZE", size, category, orderId);
     const { data, error } = await supabase
       .from("products")
-      .insert([{ name: name, description: description, quantity: quantity, price: price || undefined, size: size, type: type, orderId: orderId }])
+      .insert([{ name: name, description: description, quantity: quantity, price: price || 0, size: size, type: category, orderId: orderId }])
       .select();
     if (data) {
       alert("Order has been created");
@@ -50,6 +50,9 @@ export default function NewProductModal({
       alert(error);
     }
     reload();
+    setName("");
+    setCategory("");
+    setDescription("");
     setShowModal(false);
   }
 
@@ -62,7 +65,9 @@ export default function NewProductModal({
   }
 
   function handleSelectCatalogItem(value: Catalog) {
+    console.log("ITEM", value);
     setSelectedCatalog(value);
+    setCategory(value.category);
     setDescription(value.description || "");
     setPrice(value.cost || 0);
     setQuantity(1);
@@ -89,24 +94,6 @@ export default function NewProductModal({
         <Modal.Body>
           <div className="space-y-6">
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Product</h3>
-            {/* <div>
-              <Label htmlFor="countries">Type</Label>
-              <Select id="countries" required value={type} onChange={(e) => setType(e.target.value)}>
-                <option>Exterior / Landscaping</option>
-                <option>MEP / General</option>
-                <option>Living Room</option>
-                <option>Family Room / Den</option>
-                <option>Dining Room</option>
-                <option>Kitchen / Nook</option>
-                <option>Master Bedroom</option>
-                <option>Applicances</option>
-                <option>Bedroom</option>
-                <option>Laundry Room</option>
-                <option>Garage</option>
-                <option>Flooring</option>
-                <option>Other</option>
-              </Select>
-            </div> */}
             <div>
               <Label>Product Name</Label>
               {/* <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} /> */}
@@ -188,6 +175,36 @@ export default function NewProductModal({
             </div>
             {selectedCatalog && (
               <>
+                <div>
+                  <Label htmlFor="countries">Category</Label>
+                  <Select id="countries" required value={category} onChange={(e) => setCategory(e.target.value)}>
+                    <option>Applicances</option>
+                    <option>Bathroom</option>
+                    <option>Bedroom</option>
+                    <option>Cabinet</option>
+                    <option>Ceiling Fan</option>
+                    <option>Cleaning</option>
+                    <option>Countertop</option>
+                    <option>Demo</option>
+                    <option>Door</option>
+                    <option>Drywall</option>
+                    <option>Electrical</option>
+                    <option>Exterior / Landscaping</option>
+                    <option>Flooring</option>
+                    <option>Garage</option>
+                    <option>General</option>
+                    <option>HVAC</option>
+                    <option>Kitchen</option>
+                    <option>Landscaping</option>
+                    <option>Laundry</option>
+                    <option>Lighting</option>
+                    <option>Paint</option>
+                    <option>Permit</option>
+                    <option>Plumbing</option>
+                    <option>Roofing</option>
+                    <option>Window</option>
+                  </Select>
+                </div>
                 <div>
                   <Label>Sqft</Label>
                   <TextInput required type="number" value={size} onChange={(e) => setSize(e.target.valueAsNumber)} />

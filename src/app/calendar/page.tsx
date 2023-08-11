@@ -60,15 +60,22 @@ export default function Calenda() {
             </Table>
           </Card> */}
           {events.map((item) => (
-            <div className="my-4" key={item.id}>
-              <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{moment(item.date_time).format("dddd, MMMM DD")}</h5>
+            <>
+              <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{moment(item.date_time).format("MMMM")}</h5>
               <Card>
-                <div className="flex justify-between  text-gray-900 dark:text-white">
-                  <p>{item.name}</p>
-                  <b>{moment(item.date_time).format("HH:mm a")}</b>
+                <div className="flex flex-row gap-8" key={item.id}>
+                  <div className="flex-col items-center w-28 border-r-gray-500 border-r-2">
+                    <h5 className="mb-2 text-2xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("ddd")}</h5>
+                    <h5 className="mb-2 text-5xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("DD")}</h5>
+                  </div>
+
+                  <div className="flex flex-1 justify-between items-center text-gray-900 dark:text-white">
+                    <p>{item.name}</p>
+                    <b>{moment(item.date_time).format("HH:mm a")}</b>
+                  </div>
                 </div>
               </Card>
-            </div>
+            </>
           ))}
         </div>
       </section>
