@@ -177,7 +177,8 @@ export default function NewProductModal({
               <>
                 <div>
                   <Label htmlFor="countries">Category</Label>
-                  <Select id="countries" required value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <Select id="countries" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
+                    <option>{category}</option>
                     <option>Applicances</option>
                     <option>Bathroom</option>
                     <option>Bedroom</option>
