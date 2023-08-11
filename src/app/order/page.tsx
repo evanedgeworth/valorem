@@ -115,7 +115,7 @@ export default function Page() {
 
                     <Timeline>
                       {[...item].reverse().map((co, index) => (
-                        <Timeline.Item>
+                        <Timeline.Item key={co.id}>
                           <Timeline.Point />
                           <Timeline.Content>
                             <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>

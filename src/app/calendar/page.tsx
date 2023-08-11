@@ -20,7 +20,7 @@ export default function Calenda() {
 
   useEffect(() => {
     getEvents();
-  }, []);
+  }, [getEvents()]);
 
   async function getEvents() {
     let { data: events, error } = await supabase.from("events").select("*");
