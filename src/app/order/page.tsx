@@ -93,14 +93,14 @@ export default function Page() {
                   {item[0].status !== "co" ? (
                     <Link
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                      href={`/order/${encodeURIComponent(item[item.length - 1].id)}`}
+                      href={`/order/${encodeURIComponent(item[item.length - 1].order_id)}`}
                     >
                       <p>View Order</p>
                     </Link>
                   ) : (
                     <Link
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                      href={`/order/co/${encodeURIComponent(item[item.length - 1].id)}`}
+                      href={{ pathname: `/order/co/${encodeURIComponent(item[item.length - 1].id)}`, query: { orderId: item[0].id } }}
                     >
                       <p>View CO</p>
                     </Link>
@@ -119,10 +119,10 @@ export default function Page() {
                           <Timeline.Point />
                           <Timeline.Content>
                             <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
-                            <Timeline.Title>{co.order_id + "-" + index}</Timeline.Title>
-                            <Timeline.Body>
+                            <Timeline.Title>{co.order_id + "-" + (item.length - index)}</Timeline.Title>
+                            {/* <Timeline.Body>
                               <p>{co.description}</p>
-                            </Timeline.Body>
+                            </Timeline.Body> */}
                           </Timeline.Content>
                         </Timeline.Item>
                       ))}
