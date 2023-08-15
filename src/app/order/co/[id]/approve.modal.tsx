@@ -19,7 +19,9 @@ export default function ApproveCOModal({
   const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
 
-  async function handleCreateOrder() {}
+  async function handleApproveCO() {
+    
+  }
 
   return (
     <div ref={rootRef}>

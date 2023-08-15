@@ -21,7 +21,7 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
         <Page size="A4" style={styles.page}>
           {products.map((pr: ProductArray) =>
             pr.map((item) => (
-              <View style={styles.section}>
+              <View style={styles.section} key={item.id}>
                 <Text>{item.type}</Text>
                 <Text>{item.name}</Text>
                 <Text>{item.description}</Text>
