@@ -8,8 +8,9 @@ import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [error, setError] = useState<boolean>(false);
   const router = useRouter();
@@ -21,51 +22,17 @@ export default function AuthForm() {
       password,
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+        },
       },
     });
-    if (!error) {
-      console.log("USER", data);
-      // updateProfile();
+    if (error) {
+      alert(error.message);
     }
-    // router.refresh();
-  };
-
-  // const signUp = async () => {
-  //   const { data, error } = await supabase.auth.signUp({
-  //     email: email,
-  //     password: password,
-  //   });
-  //   if (!error && !user) {
-  //     const { data, error } = await supabase.auth.getSession();
-  //     updateProfile(data);
-  //     console.log("UPDATING");
-  //   }
-  //   if (error) {
-  //     setLoading(false);
-  //     alert(error.message);
-  //   }
-  // };
-
-  const updateProfile = async () => {
-    const { data, error } = await supabase.auth.getSession();
-    console.log("DATA FOUND HERE", data);
-    //   try {
-    //     // const { user } = data.session;
-
-    //     const updates = {
-    //       id: user.id,
-    //       first_name: "Johnny",
-    //       last_name: "Test",
-    //       email: email,
-    //       phone: phoneNumber
-    //     };
-
-    //     let { error } = await supabase.from("profiles").upsert(updates);
-
-    //     if (error) {
-    //       throw error;
-    //     }
-    // }
+    router.refresh();
   };
 
   return (
@@ -75,6 +42,16 @@ export default function AuthForm() {
         <p className="text-sm font-light text-gray-500 dark:text-gray-300">Fill out this form to request access to Valorem.</p>
         <div className="mt-4 space-y-6 sm:mt-6">
           <div className="grid gap-6 sm:grid-rows-2">
+            <div className="flex flex-row gap-4">
+              <div className="flex flex-col flex-1">
+                <Label htmlFor="email">First Name</Label>
+                <TextInput id="first name" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              </div>
+              <div className="flex flex-col flex-1">
+                <Label htmlFor="email">Last Name</Label>
+                <TextInput id="last name" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
+            </div>
             <div>
               <Label htmlFor="email">Email</Label>
               <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -92,11 +69,11 @@ export default function AuthForm() {
             </div>
             <div>
               <Label>Phone Number</Label>
-              <TextInput id="phone" required value={phoneNumber} type="phone" onChange={(e) => setPhoneNumber(e.target.value)} />
+              <TextInput id="phone" required value={phone} type="phone" onChange={(e) => setPhone(e.target.value)} />
             </div>
             <div>
               <div className="mb-2 block">
-                <Label htmlFor="company" value="Select your company" />
+                <Label htmlFor="company" value="Company" />
               </div>
               <Select id="company" required>
                 <option>Test Company 1</option>
@@ -121,7 +98,7 @@ export default function AuthForm() {
                 <Checkbox id="remember" required />
               </div>
               <div className="ml-3 text-sm">
-                <Label htmlFor="remember">Recieve email notifications from Valorem</Label>
+                <Label htmlFor="remember">Receive email notifications from Valorem</Label>
               </div>
             </div>
           </div>

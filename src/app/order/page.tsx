@@ -62,7 +62,8 @@ export default function Page() {
 
   return (
     <section className="p-5">
-      <div className="flex justify-end mb-5">
+      <div className="flex justify-between mb-8">
+        <h5 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">Ongoing orders</h5>
         <NewOrderModal showModal={showModal} setShowModal={setShowModal} reload={getOrders} />
       </div>
       <Table striped>

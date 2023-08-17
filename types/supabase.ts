@@ -163,7 +163,6 @@ export interface Database {
       }
       profiles: {
         Row: {
-          approved: boolean
           avatar_url: string | null
           created_at: string | null
           email: string | null
@@ -174,7 +173,6 @@ export interface Database {
           role: Database["public"]["Enums"]["role_enum"]
         }
         Insert: {
-          approved?: boolean
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
@@ -182,10 +180,9 @@ export interface Database {
           id?: number
           last_name?: string | null
           phone?: string | null
-          role: Database["public"]["Enums"]["role_enum"]
+          role?: Database["public"]["Enums"]["role_enum"]
         }
         Update: {
-          approved?: boolean
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
@@ -196,6 +193,43 @@ export interface Database {
           role?: Database["public"]["Enums"]["role_enum"]
         }
         Relationships: []
+      }
+      warrenties: {
+        Row: {
+          address: string | null
+          contractor: number | null
+          created_at: string
+          id: number
+          name: string | null
+          period: number | null
+          start_date: string | null
+        }
+        Insert: {
+          address?: string | null
+          contractor?: number | null
+          created_at?: string
+          id?: number
+          name?: string | null
+          period?: number | null
+          start_date?: string | null
+        }
+        Update: {
+          address?: string | null
+          contractor?: number | null
+          created_at?: string
+          id?: number
+          name?: string | null
+          period?: number | null
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warrenties_contractor_fkey"
+            columns: ["contractor"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

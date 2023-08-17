@@ -33,40 +33,19 @@ export default function Calenda() {
   return (
     <>
       <section className="p-5">
-        <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Upcoming Events</h5>
-
+        <h2 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">Upcoming events</h2>
         <div className="flex justify-end mb-5">
           <SetAvailabiltyModal showModal={showModal} setShowModal={setShowModal} />
         </div>
         <div className="flex flex-col gap-4">
-          {/* <Card className="overflow-x-auto">
-            <Table>
-              <Table.Head>
-                <Table.HeadCell>Product name</Table.HeadCell>
-                <Table.HeadCell>Description</Table.HeadCell>
-                <Table.HeadCell>Date</Table.HeadCell>
-                <Table.HeadCell>Time</Table.HeadCell>
-              </Table.Head>
-              {events.map((event: any) => (
-                <Table.Body className="divide-y" key={event.id}>
-                  <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                    <Table.Cell className="font-medium text-gray-900 dark:text-white">{event.name}</Table.Cell>
-                    <Table.Cell>{event.description}</Table.Cell>
-                    <Table.Cell>{moment(event.date_time).format("MMMM DD, YYYY")}</Table.Cell>
-                    <Table.Cell>{moment(event.date_time).format("HH:mm a")}</Table.Cell>
-                  </Table.Row>
-                </Table.Body>
-              ))}
-            </Table>
-          </Card> */}
           {events.map((item) => (
             <>
               <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{moment(item.date_time).format("MMMM")}</h5>
               <Card>
                 <div className="flex flex-row gap-8" key={item.id}>
-                  <div className="flex-col items-center w-28 border-r-gray-500 border-r-2">
-                    <h5 className="mb-2 text-2xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("ddd")}</h5>
-                    <h5 className="mb-2 text-5xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("DD")}</h5>
+                  <div className="flex-col items-center pr-5 border-r-gray-500 border-r-2">
+                    <h5 className="mb-2 text-xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("ddd")}</h5>
+                    <h5 className="mb-2 text-3xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("DD")}</h5>
                   </div>
 
                   <div className="flex flex-1 justify-between items-center text-gray-900 dark:text-white">

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
 import Valorem from "../../public/valorem.svg";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function NavbarWithDropdown() {
   const supabase = createClientComponentClient<Database>();
@@ -55,10 +56,10 @@ export default function NavbarWithDropdown() {
       <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-900 dark:border-gray-800 order-1 border-b">
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
-            <a href="/" className="flex mr-6">
+            <Link href="/" className="flex mr-6">
               <Image alt="Valorem logo" height="40" src={Valorem} width="40" className="invert dark:filter-none" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
-            </a>
+            </Link>
           </div>
           {user && (
             <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex">
@@ -68,19 +69,19 @@ export default function NavbarWithDropdown() {
                 </a>
               </li> */}
               <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <a href="/order" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                <Link href={"/order"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
                   Orders
-                </a>
+                </Link>
               </li>
               <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <a href="/calendar" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                <Link href={"/calendar"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
                   Calendar
-                </a>
+                </Link>
               </li>
               <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <a href="/warrenties" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                <Link href={"/warrenties"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
                   Warrenties
-                </a>
+                </Link>
               </li>
             </ul>
           )}

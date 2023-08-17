@@ -20,8 +20,7 @@ export default function AuthForm() {
     if (data) {
       router.refresh();
     }
-    if (error) {
-      console.log(email, password);
+    if (error?.message === "Email not confirmed") {
       alert(error.message);
       setError(true);
     }

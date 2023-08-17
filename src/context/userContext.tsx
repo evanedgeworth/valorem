@@ -11,6 +11,7 @@ export const UserContext = createContext<any | null>(null);
 export default function UserProvider({ children }: any) {
   const supabase = createClientComponentClient<Database>();
   const [user, setUser] = useState<any>();
+  const [session, setSession] = useState<any>(null);
   const router = useRouter();
 
   async function handleGetUser() {
@@ -19,7 +20,7 @@ export default function UserProvider({ children }: any) {
     } = await supabase.auth.getUser();
     if (user) {
       setUser(user);
-      console.log(user);
+      console.log("GO USER", user);
     }
   }
 
@@ -34,7 +35,13 @@ export default function UserProvider({ children }: any) {
   }
 
   useEffect(() => {
-    handleGetUser();
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event == "SIGNED_IN") handleGetUser();
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
+
   return <UserContext.Provider value={{ user, SignOut }}>{children}</UserContext.Provider>;
 }
