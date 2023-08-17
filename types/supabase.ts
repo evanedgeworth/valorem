@@ -194,7 +194,7 @@ export interface Database {
         }
         Relationships: []
       }
-      warrenties: {
+      warranties: {
         Row: {
           address: string | null
           contractor: number | null
@@ -224,7 +224,7 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "warrenties_contractor_fkey"
+            foreignKeyName: "warranties_contractor_fkey"
             columns: ["contractor"]
             referencedRelation: "profiles"
             referencedColumns: ["id"]

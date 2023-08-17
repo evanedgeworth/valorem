@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import moment from "moment";
-type Warrenty = Database["public"]["Tables"]["warrenties"]["Row"];
+type Warranty = Database["public"]["Tables"]["warranties"]["Row"];
 import NewOrderModal from "./newOrder.modal";
 import Link from "next/link";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
@@ -21,7 +21,7 @@ const DownloadPDF = dynamic(() => import("./downloadPDF"), {
 
 export default function Page() {
   const supabase = createClientComponentClient<Database>();
-  const [warrenties, setWarrenties] = useState<Warrenty[]>([]);
+  const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
 
@@ -30,9 +30,9 @@ export default function Page() {
   }, []);
 
   async function getWarrenties() {
-    let { data: warrenties, error } = await supabase.from("warrenties").select("*").order("created_at");
-    if (warrenties) {
-      setWarrenties(warrenties);
+    let { data: warranties, error } = await supabase.from("warranties").select("*").order("created_at");
+    if (warranties) {
+      setWarranties(warranties);
     }
   }
 
@@ -42,7 +42,7 @@ export default function Page() {
 
   return (
     <section className="p-5">
-      <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warrenties</h2>
+      <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warranties</h2>
       <Table striped>
         <Table.Head>
           <Table.HeadCell>Order ID</Table.HeadCell>
@@ -55,7 +55,7 @@ export default function Page() {
           </Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
-          {warrenties.map((item) => (
+          {warranties.map((item) => (
             <>
               <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.id}</Table.Cell>

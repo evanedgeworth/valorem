@@ -79,8 +79,8 @@ export default function NavbarWithDropdown() {
                 </Link>
               </li>
               <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <Link href={"/warrenties"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                  Warrenties
+                <Link href={"/warranties"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                  Warranties
                 </Link>
               </li>
             </ul>
