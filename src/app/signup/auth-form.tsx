@@ -16,14 +16,56 @@ export default function AuthForm() {
   const supabase = createClientComponentClient<Database>();
 
   const handleSignUp = async () => {
-    await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
+    if (!error) {
+      console.log("USER", data);
+      // updateProfile();
+    }
     // router.refresh();
+  };
+
+  // const signUp = async () => {
+  //   const { data, error } = await supabase.auth.signUp({
+  //     email: email,
+  //     password: password,
+  //   });
+  //   if (!error && !user) {
+  //     const { data, error } = await supabase.auth.getSession();
+  //     updateProfile(data);
+  //     console.log("UPDATING");
+  //   }
+  //   if (error) {
+  //     setLoading(false);
+  //     alert(error.message);
+  //   }
+  // };
+
+  const updateProfile = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    console.log("DATA FOUND HERE", data);
+    //   try {
+    //     // const { user } = data.session;
+
+    //     const updates = {
+    //       id: user.id,
+    //       first_name: "Johnny",
+    //       last_name: "Test",
+    //       email: email,
+    //       phone: phoneNumber
+    //     };
+
+    //     let { error } = await supabase.from("profiles").upsert(updates);
+
+    //     if (error) {
+    //       throw error;
+    //     }
+    // }
   };
 
   return (
@@ -49,28 +91,28 @@ export default function AuthForm() {
               />
             </div>
             <div>
-              <div className="mb-2 block">
-                <Label htmlFor="countries" value="Select your country" />
-              </div>
-              <Select id="countries" required>
-                <option>United States</option>
-                <option>Canada</option>
-                <option>France</option>
-                <option>Germany</option>
-              </Select>
+              <Label>Phone Number</Label>
+              <TextInput id="phone" required value={phoneNumber} type="phone" onChange={(e) => setPhoneNumber(e.target.value)} />
             </div>
             <div>
+              <div className="mb-2 block">
+                <Label htmlFor="company" value="Select your company" />
+              </div>
+              <Select id="company" required>
+                <option>Test Company 1</option>
+                <option>Test Company 2</option>
+                <option>Test Company 3</option>
+                <option>Test Company 4</option>
+              </Select>
+            </div>
+            {/* <div>
               <Label>Company Name</Label>
               <TextInput id="company" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
             </div>
             <div>
               <Label>Company Address</Label>
               <TextInput id="address" required value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
-            </div>
-            <div>
-              <Label>Phone Number</Label>
-              <TextInput id="phone" required value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center justify-between">

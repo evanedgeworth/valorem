@@ -56,7 +56,7 @@ export default function NavbarWithDropdown() {
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
             <a href="/" className="flex mr-6">
-              <Image alt="Valorem logo" height="40" src={Valorem} width="40" />
+              <Image alt="Valorem logo" height="40" src={Valorem} width="40" className="invert dark:filter-none" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </a>
           </div>

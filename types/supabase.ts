@@ -136,7 +136,7 @@ export interface Database {
           id?: number
           name?: string | null
           orderId?: number | null
-          price?: number
+          price: number
           quantity?: number
           size?: number | null
           type?: string | null
@@ -163,25 +163,37 @@ export interface Database {
       }
       profiles: {
         Row: {
+          approved: boolean
+          avatar_url: string | null
           created_at: string | null
+          email: string | null
           first_name: string | null
           id: number
           last_name: string | null
-          user_type: number | null
+          phone: string | null
+          role: Database["public"]["Enums"]["role_enum"]
         }
         Insert: {
+          approved?: boolean
+          avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
           id?: number
           last_name?: string | null
-          user_type?: number | null
+          phone?: string | null
+          role: Database["public"]["Enums"]["role_enum"]
         }
         Update: {
+          approved?: boolean
+          avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
           id?: number
           last_name?: string | null
-          user_type?: number | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["role_enum"]
         }
         Relationships: []
       }
@@ -193,7 +205,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      role_enum: "contractor" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
