@@ -37,20 +37,16 @@ export default function NewProductModal({
   const loading = open && catalog.length === 0;
 
   async function handleAddProduct() {
-    console.log(name, description, quantity, price, "SIZE", size, category, orderId);
     const { data, error } = await supabase
       .from("products")
       .insert([{ name: name, description: description, quantity: quantity, price: price || 0, size: size, type: category, orderId: orderId }])
       .select();
-    if (data) {
-      alert("Order has been created");
-    }
     if (error) {
-      console.log(error);
-      alert(error);
+      alert(error.message);
     }
     reload();
     setName("");
+    setCatalog([]);
     setCategory("");
     setDescription("");
     setShowModal(false);

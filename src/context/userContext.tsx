@@ -14,13 +14,23 @@ export default function UserProvider({ children }: any) {
   const [session, setSession] = useState<any>(null);
   const router = useRouter();
 
+  async function handleGetSession() {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    if (session) {
+      setUser(session.user);
+    }
+  }
+
   async function handleGetUser() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
+      console.log("RUNNING GET USER", user);
       setUser(user);
-      console.log("GO USER", user);
     }
   }
 
@@ -35,6 +45,7 @@ export default function UserProvider({ children }: any) {
   }
 
   useEffect(() => {
+    handleGetSession();
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event == "SIGNED_IN") handleGetUser();
     });

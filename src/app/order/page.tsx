@@ -1,7 +1,7 @@
 "use client";
 
-import { Timeline, Table, Badge, Button } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { Timeline, Table, Badge, Dropdown } from "flowbite-react";
+import { useState, useEffect, useRef } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import moment from "moment";
@@ -11,20 +11,28 @@ import NewOrderModal from "./newOrder.modal";
 import Link from "next/link";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 import { AiOutlineCloudDownload, AiOutlineExclamationCircle } from "react-icons/ai";
-import { BiSolidChevronUp, BiSolidChevronDown } from "react-icons/bi";
-// import DownloadPDF from "./downloadPDF";
+import { BiSolidChevronUp, BiSolidChevronDown, BiDotsVerticalRounded } from "react-icons/bi";
+import DownloadPDF from "./downloadPDF";
 import dynamic from "next/dynamic";
 import { TfiAngleDown, TfiAngleUp } from "react-icons/tfi";
+import { HiCheck, HiClock } from "react-icons/hi";
+import ConfirmationModal from "@/components/confirmation.modal";
+import EditOrderModal from "./editOrder.modal";
+import { useRouter } from "next/navigation";
 
-const DownloadPDF = dynamic(() => import("./downloadPDF"), {
-  ssr: false,
-});
+// const DownloadPDF = dynamic(() => import("./downloadPDF"), {
+//   ssr: false,
+// });
 
 export default function Page() {
   const supabase = createClientComponentClient<Database>();
   const [orders, setOrders] = useState<OrderArray[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showEditOrderModal, setShowEditOrderModal] = useState<boolean>(false);
+  const selectedOrder = useRef<Order | null>(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     getOrders();
@@ -37,23 +45,30 @@ export default function Page() {
     }
   }
 
+  async function handleRemoveOrder() {
+    let order_id = selectedOrder.current?.id;
+    const { error } = await supabase.from("orders").delete().eq("id", order_id);
+    setShowDeleteConfirmModal(false);
+    getOrders();
+  }
+
   function OrderStatus({ status }: { status: string }) {
     switch (status) {
       case "active":
         return (
-          <Badge size="sm" color="success" className="justify-center">
+          <Badge size="xs" color="success" className="justify-center" icon={HiCheck}>
             Active
           </Badge>
         );
       case "co":
         return (
-          <Badge size="sm" color="warning" className="justify-center">
+          <Badge size="xs" color="warning" className="justify-center whitespace-nowrap" icon={HiClock}>
             Change Order
           </Badge>
         );
       default:
         return (
-          <Badge size="sm" color="gray" className="justify-center">
+          <Badge size="xs" color="gray" className="justify-center">
             {status}
           </Badge>
         );
@@ -64,7 +79,7 @@ export default function Page() {
     <section className="p-5">
       <div className="flex justify-between mb-8">
         <h5 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">Ongoing orders</h5>
-        <NewOrderModal showModal={showModal} setShowModal={setShowModal} reload={getOrders} />
+        <NewOrderModal showModal={showModal} setShowModal={setShowModal} />
       </div>
       <Table striped>
         <Table.Head>
@@ -75,7 +90,7 @@ export default function Page() {
           <Table.HeadCell>Address</Table.HeadCell>
           <Table.HeadCell>Status</Table.HeadCell>
           <Table.HeadCell></Table.HeadCell>
-          <Table.HeadCell>
+          <Table.HeadCell className="w-1">
             <span className="sr-only">View Order</span>
           </Table.HeadCell>
         </Table.Head>
@@ -94,11 +109,11 @@ export default function Page() {
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{item[0].order_id}</Table.Cell>
                 <Table.Cell>{item[0].project_name}</Table.Cell>
                 <Table.Cell>{moment(item[0].created_at).format("MMMM DD, YYYY")}</Table.Cell>
-                <Table.Cell>{item[0].address}</Table.Cell>
+                <Table.Cell className="truncate">{item[0].address}</Table.Cell>
                 <Table.Cell>
                   <OrderStatus status={item[0].status || ""} />
                 </Table.Cell>
-                <Table.Cell>
+                <Table.Cell className=" w-32">
                   {item[0].status !== "co" ? (
                     <Link
                       className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
@@ -115,7 +130,39 @@ export default function Page() {
                     </Link>
                   )}
                 </Table.Cell>
-                <Table.Cell className="p-1">{item[0].status === "co" && <AiOutlineExclamationCircle size={25} color="red" />}</Table.Cell>
+                {/* <Table.Cell className="">{item[0].status === "co" && <AiOutlineExclamationCircle size={25} color="red" />}</Table.Cell> */}
+                <Table.Cell className="">
+                  {/* <BiDotsVerticalRounded size={25} /> */}
+                  <div className="relative cursor-pointer">
+                    <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                      <Dropdown.Item
+                        onClick={() => {
+                          selectedOrder.current = item[0];
+                          setShowEditOrderModal(true);
+                        }}
+                      >
+                        Edit
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => {
+                          item[0].status !== "co"
+                            ? router.push(`/order/${encodeURIComponent(item[item.length - 1].order_id)}`)
+                            : router.push(`/order/co/${encodeURIComponent(item[item.length - 1].id)}?orderId=${item[0].id}`);
+                        }}
+                      >
+                        View
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => {
+                          setShowDeleteConfirmModal(true);
+                          selectedOrder.current = item[0];
+                        }}
+                      >
+                        Delete
+                      </Dropdown.Item>
+                    </Dropdown>
+                  </div>
+                </Table.Cell>
               </Table.Row>
               {viewHistory === item[0].id && (
                 <Table.Cell colSpan={8}>
@@ -132,15 +179,8 @@ export default function Page() {
                                 <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
                                 <Timeline.Title>{co.order_id + "-" + (item.length - index)}</Timeline.Title>
                               </div>
-                              {/* <Button color="light">
-                                <AiOutlineCloudDownload size={20} className="mr-2" />
-                                Download
-                              </Button> */}
                               <DownloadPDF orderId={co.id} id={co.id} />
                             </div>
-                            {/* <Timeline.Body>
-                              <p>{co.description}</p>
-                            </Timeline.Body> */}
                           </Timeline.Content>
                         </Timeline.Item>
                       ))}
@@ -152,6 +192,15 @@ export default function Page() {
           ))}
         </Table.Body>
       </Table>
+      <ConfirmationModal
+        showModal={showDeleteConfirmModal}
+        setShowModal={setShowDeleteConfirmModal}
+        title="Delete Order"
+        description="Are you sure you would like to remove this order? This action is permanent."
+        handleCancel={() => setShowDeleteConfirmModal(false)}
+        handleConfirm={handleRemoveOrder}
+      />
+      <EditOrderModal showModal={showEditOrderModal} setShowModal={setShowEditOrderModal} order={selectedOrder.current} refresh={getOrders} />
     </section>
   );
 }

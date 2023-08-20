@@ -8,7 +8,17 @@ type Order = Database["public"]["Tables"]["orders"]["Row"];
 import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
 import { useRouter } from "next/navigation";
 
-export default function NewOrderModal({ showModal, setShowModal }: { showModal: boolean; setShowModal: (value: boolean) => void }) {
+export default function EditOrderModal({
+  showModal,
+  setShowModal,
+  order,
+  refresh,
+}: {
+  showModal: boolean;
+  setShowModal: (value: boolean) => void;
+  order: Order | null;
+  refresh: () => void;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
   const [name, setName] = useState<string>("");
@@ -18,15 +28,24 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
   const [description, setDescription] = useState<string>("");
   const router = useRouter();
 
+  useEffect(() => {
+    setName(order?.project_name || "");
+    setAddress(order?.address || "");
+    setTrade(order?.trade || "");
+    setSize(order?.size || 0);
+    setDescription(order?.description || "");
+  }, [order]);
+
   async function handleCreateOrder() {
     const { data, error } = await supabase
       .from("orders")
-      .insert([{ project_name: name, start_date: null, address: address, description: description, size: size, trade: trade }])
-      .select()
-      .limit(1)
-      .single();
+      .update({ project_name: name, start_date: null, address: address, description: description, size: size, trade: trade })
+      .eq("id", order?.id)
+      .select();
+
     if (data) {
-      router.push(`/order/${encodeURIComponent(data.order_id)}`);
+      console.log("RETURN", data);
+      refresh();
     }
     if (error) {
       alert(error);
@@ -36,12 +55,11 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add Order</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
           <div className="space-y-6">
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white">New Order</h3>
+            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Edit Order</h3>
             <div>
               <Label htmlFor="countries">Trade</Label>
               <Select id="countries" required value={trade} onChange={(e) => setTrade(e.target.value)}>

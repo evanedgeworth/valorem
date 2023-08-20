@@ -145,8 +145,8 @@ export default function Page({ params }: { params: { id: string } }) {
                         (product.status === "removed" && ` bg-red-200 dark:bg-red-800`))
                     }
                   >
-                    <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.name}</Table.Cell>
-                    <Table.Cell>{product.description}</Table.Cell>
+                    <Table.Cell className="font-medium text-gray-900 dark:text-white max-w-xs">{product.name}</Table.Cell>
+                    <Table.Cell className="max-w-xs">{product.description}</Table.Cell>
                     <Table.Cell>{product.quantity}</Table.Cell>
                     <Table.Cell>{product.price}</Table.Cell>
                     <Table.Cell>{Math.floor(product.price * product.quantity)}</Table.Cell>
