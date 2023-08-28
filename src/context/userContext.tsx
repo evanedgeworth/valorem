@@ -5,13 +5,14 @@ import { Session, createClientComponentClient } from "@supabase/auth-helpers-nex
 
 import { Database } from "../../types/supabase";
 import { useRouter } from "next/navigation";
+type User = Database["public"]["Tables"]["profiles"]["Row"];
 
 export const UserContext = createContext<any | null>(null);
 
 export default function UserProvider({ children }: any) {
   const supabase = createClientComponentClient<Database>();
-  const [user, setUser] = useState<any>();
-  const [session, setSession] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
 
   async function handleGetSession() {
@@ -20,17 +21,17 @@ export default function UserProvider({ children }: any) {
       error,
     } = await supabase.auth.getSession();
     if (session) {
-      setUser(session.user);
+      setSession(session);
     }
   }
 
   async function handleGetUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let { data: user, error } = await supabase.from("profiles").select("*").eq("id", session?.user.id).single();
     if (user) {
-      console.log("RUNNING GET USER", user);
       setUser(user);
+    }
+    if (error) {
+      console.log(error);
     }
   }
 
@@ -43,6 +44,12 @@ export default function UserProvider({ children }: any) {
       router.push("/");
     }
   }
+
+  useEffect(() => {
+    if (session) {
+      handleGetUser();
+    }
+  }, [session]);
 
   useEffect(() => {
     handleGetSession();

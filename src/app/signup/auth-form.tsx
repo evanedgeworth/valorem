@@ -32,6 +32,9 @@ export default function AuthForm() {
     if (error) {
       alert(error.message);
     }
+    if (data) {
+      console.log("DATA", data);
+    }
     router.refresh();
   };
 

@@ -8,6 +8,8 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 type Event = Database["public"]["Tables"]["events"]["Row"];
+import ConfirmationModal from "@/components/confirmation.modal";
+import { useRouter } from "next/navigation";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -17,6 +19,8 @@ export default function Calenda() {
   const supabase = createClientComponentClient<Database>();
   const [events, setEvents] = useState<Event[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     getEvents();
@@ -42,20 +46,29 @@ export default function Calenda() {
             <>
               <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{moment(item.date_time).format("MMMM")}</h5>
               <Card>
-                <div className="flex flex-row gap-8" key={item.id}>
+                <div className="flex flex-row gap-8 items-center" key={item.id}>
                   <div className="flex-col items-center pr-5 border-r-gray-500 border-r-2">
                     <h5 className="mb-2 text-xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("ddd")}</h5>
                     <h5 className="mb-2 text-3xl font-bold text-center text-gray-900 dark:text-white">{moment(item.date_time).format("DD")}</h5>
                   </div>
 
-                  <div className="flex flex-1 justify-between items-center text-gray-900 dark:text-white">
+                  <div className="flex flex-1 flex-col text-left justify-center items-start text-gray-900 dark:text-white">
                     <p>{item.name}</p>
                     <b>{moment(item.date_time).format("HH:mm a")}</b>
                   </div>
+                  <Button onClick={() => setShowConfirmModal(true)}>Confirm</Button>
                 </div>
               </Card>
             </>
           ))}
+          <ConfirmationModal
+            showModal={showConfirmModal}
+            setShowModal={setShowConfirmModal}
+            title="Are you currently at this property?"
+            description=""
+            handleCancel={() => setShowConfirmModal(false)}
+            handleConfirm={() => router}
+          />
         </div>
       </section>
     </>
