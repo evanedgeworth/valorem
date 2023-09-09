@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Button, Table } from "flowbite-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../../types/supabase";
 import moment from "moment";
@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { BiCheck } from "react-icons/bi";
 import { MdClose } from "react-icons/md";
 import ApproveCOModal from "./approve.modal";
+import { UserContext } from "@/context/userContext";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 interface COProduct extends Product {
   status: string;
@@ -26,6 +27,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const { user, SignOut } = useContext(UserContext);
 
   useEffect(() => {
     getProducts();
@@ -60,7 +62,6 @@ export default function Page({ params }: { params: { id: string } }) {
     let { data: products, error } = await supabase.from("products").select("*").eq("orderId", id);
     if (products) {
       previousProducts.current = products;
-      // setPreviousProducts(products);
       getChangeOrder();
     }
   }
@@ -116,13 +117,15 @@ export default function Page({ params }: { params: { id: string } }) {
             {order?.address}
           </p>
         </div>
-        <div className="flex flex-row justify-end gap-4 mt-4">
-          <Button outline color="red">
-            <MdClose size={20} />
-            Deny Changes
-          </Button>
-          <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={() => ""} />
-        </div>
+        {user?.role !== "contractor" && (
+          <div className="flex flex-row justify-end gap-4 mt-4">
+            <Button outline color="red">
+              <MdClose size={20} />
+              Deny Changes
+            </Button>
+            <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={() => ""} />
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-4">
         {products.map((item: any) => (

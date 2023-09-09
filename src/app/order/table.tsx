@@ -7,24 +7,18 @@ import { Database } from "../../../types/supabase";
 import moment from "moment";
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type OrderArray = [Order];
-import NewOrderModal from "./newOrder.modal";
 import Link from "next/link";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
-import { AiOutlineCloudDownload, AiOutlineExclamationCircle } from "react-icons/ai";
-import { BiSolidChevronUp, BiSolidChevronDown, BiDotsVerticalRounded } from "react-icons/bi";
 import DownloadPDF from "./downloadPDF";
-import dynamic from "next/dynamic";
 import { TfiAngleDown, TfiAngleUp } from "react-icons/tfi";
 import { HiCheck, HiClock } from "react-icons/hi";
 import ConfirmationModal from "@/components/confirmation.modal";
 import EditOrderModal from "./editOrder.modal";
 import { useRouter } from "next/navigation";
-import { BsArrowUpShort, BsArrowDownShort } from "react-icons/bs";
 
 export default function ContractorView() {
   const supabase = createClientComponentClient<Database>();
   const [orders, setOrders] = useState<OrderArray[]>([]);
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditOrderModal, setShowEditOrderModal] = useState<boolean>(false);
   const selectedOrder = useRef<Order | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
@@ -47,26 +41,6 @@ export default function ContractorView() {
     const { error } = await supabase.from("orders").delete().eq("id", order_id);
     setShowDeleteConfirmModal(false);
     getOrders();
-  }
-
-  function PriceChangeStatus({ currentItem, previousItem }: { currentItem: number | null; previousItem: number | null }) {
-    let status;
-    status = (currentItem || 0) - (previousItem || 0);
-    if (status > 0) {
-      return (
-        <div className="flex-row flex">
-          <BsArrowUpShort color="rgb(132 204 22 / var(--tw-text-opacity))" />
-          <span className="font-normal text-lime-500 text-sm">{status}</span>
-        </div>
-      );
-    } else if (status < 0) {
-      return (
-        <div className="flex-row flex">
-          <BsArrowDownShort color="rgb(224 36 36 / var(--tw-text-opacity))" />
-          <span className="font-normal text-red-600 text-sm">{status}</span>
-        </div>
-      );
-    } else return null;
   }
 
   function OrderStatus({ status }: { status: string }) {
@@ -93,11 +67,7 @@ export default function ContractorView() {
   }
 
   return (
-    <section className="p-5">
-      <div className="flex justify-between mb-8">
-        <h5 className="mb-2 text-4xl font-bold text-gray-900 dark:text-white">Active Orders</h5>
-        {/* <NewOrderModal showModal={showModal} setShowModal={setShowModal} /> */}
-      </div>
+    <>
       <Table striped>
         <Table.Head>
           <Table.HeadCell></Table.HeadCell>
@@ -153,17 +123,14 @@ export default function ContractorView() {
                     <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
 
                     <Timeline>
-                      {[...item].reverse().map((co, index, array) => (
+                      {[...item].reverse().map((co, index) => (
                         <Timeline.Item key={co.id}>
                           <Timeline.Point />
                           <Timeline.Content>
                             <div className="flex flex-row justify-between">
                               <div>
                                 <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
-                                <Timeline.Title>
-                                  {co.order_id + "-" + (item.length - index)}
-                                  <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
-                                </Timeline.Title>
+                                <Timeline.Title>{co.order_id + "-" + (item.length - index)}</Timeline.Title>
                               </div>
                               <DownloadPDF orderId={co.id} id={co.id} />
                             </div>
@@ -187,6 +154,6 @@ export default function ContractorView() {
         handleConfirm={handleRemoveOrder}
       />
       <EditOrderModal showModal={showEditOrderModal} setShowModal={setShowEditOrderModal} order={selectedOrder.current} refresh={getOrders} />
-    </section>
+    </>
   );
 }

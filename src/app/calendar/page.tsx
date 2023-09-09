@@ -1,14 +1,14 @@
 "use client";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
 import moment from "moment";
 import { Card, Button, Table } from "flowbite-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
-import { MergeProductsbyKey } from "@/utils/commonUtils";
+import { calcCrow } from "@/utils/commonUtils";
 type Event = Database["public"]["Tables"]["events"]["Row"];
-import ConfirmationModal from "@/components/confirmation.modal";
+import ConfirmationModal from "./confirmation.modal";
 import { useRouter } from "next/navigation";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -19,11 +19,28 @@ export default function Calenda() {
   const supabase = createClientComponentClient<Database>();
   const [events, setEvents] = useState<Event[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [location, setLocation] = useState<any>(null);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const selectedEvent = useRef<any>(null);
   const router = useRouter();
 
   useEffect(() => {
     getEvents();
+  }, []);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation(position.coords);
+        },
+        (error) => {
+          console.log(error.message);
+        }
+      );
+    } else {
+      alert("Geolocation is not available in your browser.");
+    }
   }, []);
 
   async function getEvents() {
@@ -32,6 +49,11 @@ export default function Calenda() {
       setEvents(events);
       console.log(events);
     }
+  }
+
+  async function handleConfirmModal(event: Event) {
+    setShowConfirmModal(true);
+    selectedEvent.current = event;
   }
 
   return (
@@ -56,19 +78,12 @@ export default function Calenda() {
                     <p>{item.name}</p>
                     <b>{moment(item.date_time).format("HH:mm a")}</b>
                   </div>
-                  <Button onClick={() => setShowConfirmModal(true)}>Confirm</Button>
+                  <Button onClick={() => handleConfirmModal(item)}>Confirm</Button>
                 </div>
               </Card>
             </>
           ))}
-          <ConfirmationModal
-            showModal={showConfirmModal}
-            setShowModal={setShowConfirmModal}
-            title="Are you currently at this property?"
-            description=""
-            handleCancel={() => setShowConfirmModal(false)}
-            handleConfirm={() => router}
-          />
+          <ConfirmationModal showModal={showConfirmModal} setShowModal={setShowConfirmModal} event={selectedEvent.current} location={location} />
         </div>
       </section>
     </>

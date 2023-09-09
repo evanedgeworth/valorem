@@ -61,7 +61,6 @@ export default function NewProductModal({
   }
 
   function handleSelectCatalogItem(value: Catalog) {
-    console.log("ITEM", value);
     setSelectedCatalog(value);
     setCategory(value.category);
     setDescription(value.description || "");

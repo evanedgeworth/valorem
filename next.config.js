@@ -5,7 +5,7 @@ const nextConfig = {
     serverActions: true,
   },
   images: {
-    domains: ["flowbite.com"],
+    domains: ["flowbite.com", "ffcwqjzgvnejkwdtjozl.supabase.co"],
   },
   reactStrictMode: true,
   swcMinify: true,

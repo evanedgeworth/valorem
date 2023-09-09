@@ -47,45 +47,45 @@ export interface Database {
       }
       events: {
         Row: {
+          address: string | null
           created_at: string | null
           date_time: string | null
           id: number
+          location: unknown | null
           name: string | null
           type: string | null
           user_id: number | null
         }
         Insert: {
+          address?: string | null
           created_at?: string | null
           date_time?: string | null
           id?: number
+          location?: unknown | null
           name?: string | null
           type?: string | null
           user_id?: number | null
         }
         Update: {
+          address?: string | null
           created_at?: string | null
           date_time?: string | null
           id?: number
+          location?: unknown | null
           name?: string | null
           type?: string | null
           user_id?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       orders: {
         Row: {
           address: string | null
+          cost: number | null
           created_at: string | null
           description: string | null
           id: number
-          order_id: number
+          order_id: number | null
           project_name: string | null
           size: number | null
           start_date: string | null
@@ -94,10 +94,11 @@ export interface Database {
         }
         Insert: {
           address?: string | null
+          cost?: number | null
           created_at?: string | null
           description?: string | null
           id?: number
-          order_id?: number
+          order_id?: number | null
           project_name?: string | null
           size?: number | null
           start_date?: string | null
@@ -106,17 +107,59 @@ export interface Database {
         }
         Update: {
           address?: string | null
+          cost?: number | null
           created_at?: string | null
           description?: string | null
           id?: number
-          order_id?: number
+          order_id?: number | null
           project_name?: string | null
           size?: number | null
           start_date?: string | null
           status?: string | null
           trade?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_order_id_fkey"
+            columns: ["order_id"]
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      "product-confirm": {
+        Row: {
+          created_at: string
+          event: number | null
+          id: number
+          name: string | null
+          quantity: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          event?: number | null
+          id?: number
+          name?: string | null
+          quantity?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: number | null
+          id?: number
+          name?: string | null
+          quantity?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product-confirm_event_fkey"
+            columns: ["event"]
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       products: {
         Row: {
@@ -167,7 +210,7 @@ export interface Database {
           created_at: string | null
           email: string | null
           first_name: string | null
-          id: number
+          id: string
           last_name: string | null
           phone: string | null
           role: Database["public"]["Enums"]["role_enum"]
@@ -177,7 +220,7 @@ export interface Database {
           created_at?: string | null
           email?: string | null
           first_name?: string | null
-          id?: number
+          id: string
           last_name?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["role_enum"]
@@ -187,7 +230,7 @@ export interface Database {
           created_at?: string | null
           email?: string | null
           first_name?: string | null
-          id?: number
+          id?: string
           last_name?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["role_enum"]
@@ -222,21 +265,23 @@ export interface Database {
           period?: number | null
           start_date?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "warranties_contractor_fkey"
-            columns: ["contractor"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      distance_from_location: {
+        Args: {
+          lat: number
+          long: number
+          event_id: number
+        }
+        Returns: {
+          dist_meters: number
+        }[]
+      }
     }
     Enums: {
       role_enum: "contractor" | "client"

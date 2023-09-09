@@ -19,6 +19,7 @@ import { HiCheck, HiClock } from "react-icons/hi";
 import ConfirmationModal from "@/components/confirmation.modal";
 import EditOrderModal from "./editOrder.modal";
 import { useRouter } from "next/navigation";
+import { BsArrowUpShort, BsArrowDownShort } from "react-icons/bs";
 
 export default function ClientView() {
   const supabase = createClientComponentClient<Database>();
@@ -39,6 +40,26 @@ export default function ClientView() {
     if (orders) {
       setOrders(MergeProductsbyKey(orders, "order_id"));
     }
+  }
+
+  function PriceChangeStatus({ currentItem, previousItem }: { currentItem: number | null; previousItem: number | null }) {
+    let status;
+    status = (currentItem || 0) - (previousItem || 0);
+    if (status > 0) {
+      return (
+        <div className="flex-row flex">
+          <BsArrowUpShort color="rgb(132 204 22 / var(--tw-text-opacity))" />
+          <span className="font-normal text-lime-500 text-sm">{status}</span>
+        </div>
+      );
+    } else if (status < 0) {
+      return (
+        <div className="flex-row flex">
+          <BsArrowDownShort color="rgb(224 36 36 / var(--tw-text-opacity))" />
+          <span className="font-normal text-red-600 text-sm">{status}</span>
+        </div>
+      );
+    } else return null;
   }
 
   async function handleRemoveOrder() {
@@ -98,7 +119,6 @@ export default function ClientView() {
                   {viewHistory === item[0].id ? (
                     <TfiAngleUp size={18} onClick={() => setViewHistory(null)} />
                   ) : (
-                    // <BiSolidChevronUp size={25} onClick={() => setViewHistory(null)} />
                     <TfiAngleDown size={18} onClick={() => setViewHistory(item[0].id)} />
                   )}
                 </Table.Cell>
@@ -166,14 +186,17 @@ export default function ClientView() {
                     <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
 
                     <Timeline>
-                      {[...item].reverse().map((co, index) => (
+                      {[...item].reverse().map((co, index, array) => (
                         <Timeline.Item key={co.id}>
                           <Timeline.Point />
                           <Timeline.Content>
                             <div className="flex flex-row justify-between">
                               <div>
                                 <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
-                                <Timeline.Title>{co.order_id + "-" + (item.length - index)}</Timeline.Title>
+                                <Timeline.Title>
+                                  {co.order_id + "-" + (item.length - index)}
+                                  <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
+                                </Timeline.Title>
                               </div>
                               <DownloadPDF orderId={co.id} id={co.id} />
                             </div>
