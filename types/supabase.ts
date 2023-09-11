@@ -85,7 +85,7 @@ export interface Database {
           created_at: string | null
           description: string | null
           id: number
-          order_id: number | null
+          order_id: number
           project_name: string | null
           size: number | null
           start_date: string | null
@@ -98,7 +98,7 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
-          order_id?: number | null
+          order_id?: number
           project_name?: string | null
           size?: number | null
           start_date?: string | null
@@ -111,7 +111,7 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
-          order_id?: number | null
+          order_id?: number
           project_name?: string | null
           size?: number | null
           start_date?: string | null

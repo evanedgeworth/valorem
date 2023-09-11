@@ -26,7 +26,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
       .limit(1)
       .single();
     if (data) {
-      router.push(`/order/${encodeURIComponent(data.order_id)}`);
+      router.push(`/order/${encodeURIComponent(data.order_id || 0)}`);
     }
     if (error) {
       alert(error);
