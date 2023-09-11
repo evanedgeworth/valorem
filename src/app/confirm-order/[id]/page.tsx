@@ -200,7 +200,7 @@ export default function Page({ params }: { params: { id: string } }) {
       <div className="flex justify-end mb-5"></div>
       <div className="flex flex-col flex-1 gap-4">
         {products.length >= 1 ? (
-          products.map((item: Product) => <ProductCard item={item} />)
+          products.map((item: Product) => <ProductCard item={item} key={item.id} />)
         ) : (
           <div className="mx-auto my-24">
             <h5 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">No products added</h5>

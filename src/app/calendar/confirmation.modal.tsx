@@ -26,7 +26,7 @@ export default function ConfirmationModal({
 
   useEffect(() => {
     getDistance();
-  }, [showModal]);
+  }, [showModal, getDistance]);
 
   async function getDistance() {
     setIsLoading(location);
@@ -35,7 +35,6 @@ export default function ConfirmationModal({
       long: location.longitude,
       event_id: event.id,
     });
-    console.log("DISTANCE", data);
     if (data) {
       if (data[0].dist_meters < 20) {
         setIsVerified(true);
