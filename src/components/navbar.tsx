@@ -63,9 +63,9 @@ export default function NavbarWithDropdown() {
                   <span className="block text-sm">Blake Cross</span>
                   <span className="block truncate text-sm font-medium">{user?.email}</span>
                 </Dropdown.Header>
-                <Dropdown.Item>Dashboard</Dropdown.Item>
+                {/* <Dropdown.Item>Dashboard</Dropdown.Item> */}
                 <Dropdown.Item href="/settings">Settings</Dropdown.Item>
-                <Dropdown.Item>Earnings</Dropdown.Item>
+                {/* <Dropdown.Item>Earnings</Dropdown.Item> */}
                 <Dropdown.Divider />
                 <Dropdown.Item onClick={SignOut}>Sign out</Dropdown.Item>
               </Dropdown>

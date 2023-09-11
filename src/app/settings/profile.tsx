@@ -9,8 +9,6 @@ import { UserContext } from "@/context/userContext";
 
 export default function Profile() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -25,14 +23,12 @@ export default function Profile() {
     setFirstName(user?.first_name);
     setLastName(user?.last_name);
     setPhone(user?.phone);
-    setPassword("");
   }, [user]);
 
   const handleSubmitChanges = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
+    const { data, error } = await supabase.auth.updateUser({
+      email: email,
+      data: {
         emailRedirectTo: `${location.origin}/auth/callback`,
         data: {
           first_name: firstName,
@@ -69,14 +65,6 @@ export default function Profile() {
           <div>
             <Label htmlFor="email">Email</Label>
             <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <TextInput id="password" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="password">Confirm password</Label>
-            <TextInput id="password" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPasswordConfirm(e.target.value)}/>
           </div>
           <div>
             <Label>Phone Number</Label>

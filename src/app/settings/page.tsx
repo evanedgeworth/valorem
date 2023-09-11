@@ -5,40 +5,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Database } from "../../../types/supabase";
+import Password from "./password";
 import Profile from "./profile";
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [selectedMenu, setSelectedMenu] = useState<"profile" | "settings" | "notifications">("profile");
-  const [companyAddress, setCompanyAddress] = useState("");
-  const [error, setError] = useState<boolean>(false);
+export default function Settings() {
+  const [selectedMenu, setSelectedMenu] = useState<"profile" | "password" | "notifications">("profile");
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
-
-  const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-        },
-      },
-    });
-    if (error) {
-      alert(error.message);
-    }
-    if (data) {
-      console.log("DATA", data);
-    }
-    router.refresh();
-  };
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -49,8 +21,8 @@ export default function Login() {
               <Button onClick={() => setSelectedMenu("profile")} color={selectedMenu === "profile" ? "info" : "gray"}>
                 Profile
               </Button>
-              <Button onClick={() => setSelectedMenu("settings")} color={selectedMenu === "settings" ? "info" : "gray"}>
-                Settings
+              <Button onClick={() => setSelectedMenu("password")} color={selectedMenu === "password" ? "info" : "gray"}>
+                Password
               </Button>
               <Button onClick={() => setSelectedMenu("notifications")} color={selectedMenu === "notifications" ? "info" : "gray"}>
                 Notifications
@@ -58,6 +30,7 @@ export default function Login() {
             </Button.Group>
           </div>
           {selectedMenu === "profile" && <Profile />}
+          {selectedMenu === "password" && <Password />}
         </div>
       </div>
     </section>
