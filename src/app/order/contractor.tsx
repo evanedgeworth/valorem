@@ -162,7 +162,13 @@ export default function ContractorView() {
                                 <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
                                 <Timeline.Title>
                                   {co.order_id + "-" + (item.length - index)}
-                                  <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
+                                  <span className="flex flex-row text-sm">
+                                    <p className="flex gap-1">
+                                      <p>Total:</p>
+                                      {co.cost}
+                                    </p>
+                                    <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
+                                  </span>
                                 </Timeline.Title>
                               </div>
                               <DownloadPDF orderId={co.id} id={co.id} />

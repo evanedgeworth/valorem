@@ -195,6 +195,9 @@ export default function ClientView() {
                                 <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
                                 <Timeline.Title>
                                   {co.order_id + "-" + (item.length - index)}
+                                  <p>
+                                    <b>| Total</b>
+                                  </p>
                                   <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
                                 </Timeline.Title>
                               </div>
