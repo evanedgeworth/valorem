@@ -3,7 +3,7 @@
 import { Card, Button, Table } from "flowbite-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../types/supabase";
+import { Database } from "../../../../types/supabase";
 import moment from "moment";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
@@ -18,7 +18,7 @@ interface COProduct extends Product {
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function ChangeOrder({ params }: { params: { id: string } }) {
   const supabase = createClientComponentClient<Database>();
   const [order, setOrder] = useState<Order>();
   const [products, setProducts] = useState<Product[]>([]);
@@ -123,7 +123,7 @@ export default function Page({ params }: { params: { id: string } }) {
               <MdClose size={20} />
               Deny Changes
             </Button>
-            <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={() => ""} />
+            <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={() => ""} id={params.id} />
           </div>
         )}
       </div>

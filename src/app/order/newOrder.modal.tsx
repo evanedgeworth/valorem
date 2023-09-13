@@ -6,6 +6,8 @@ import { Database } from "../../../types/supabase";
 import moment from "moment";
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
+import { usePlacesWidget } from "react-google-autocomplete";
+import Autocomplete from "react-google-autocomplete";
 import { useRouter } from "next/navigation";
 
 export default function NewOrderModal({ showModal, setShowModal }: { showModal: boolean; setShowModal: (value: boolean) => void }) {
@@ -13,6 +15,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
   const supabase = createClientComponentClient<Database>();
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
+  const [location, setLocation] = useState<any>({ lat: "", long: "" });
   const [trade, setTrade] = useState<string>("");
   const [size, setSize] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
@@ -21,7 +24,17 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
   async function handleCreateOrder() {
     const { data, error } = await supabase
       .from("orders")
-      .insert([{ project_name: name, start_date: null, address: address, description: description, size: size, trade: trade }])
+      .insert([
+        {
+          project_name: name,
+          start_date: null,
+          address: address,
+          location: `POINT(${location.lat} ${location.long})`,
+          description: description,
+          size: size,
+          trade: trade,
+        },
+      ])
       .select()
       .limit(1)
       .single();
@@ -29,7 +42,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
       router.push(`/order/${encodeURIComponent(data.order_id)}`);
     }
     if (error) {
-      alert(error);
+      alert(error.message);
     }
     setShowModal(false);
   }
@@ -45,7 +58,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
             <div>
               <Label htmlFor="countries">Trade</Label>
               <Select id="countries" required value={trade} onChange={(e) => setTrade(e.target.value)}>
-                <option disabled selected></option>
+                <option disabled></option>
                 <option>Exterior / Landscaping</option>
                 <option>MEP / General</option>
                 <option>Living Room</option>
@@ -67,7 +80,19 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
             </div>
             <div>
               <Label htmlFor="email">Address</Label>
-              <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} />
+              {/* <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} ref={inputRef.current} /> */}
+              <Autocomplete
+                apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
+                className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
+                onPlaceSelected={(place) => {
+                  setAddress(place.formatted_address);
+                  setLocation({ lat: place.geometry.location.lat(), long: place.geometry.location.lng() });
+                }}
+                options={{
+                  types: ["address"],
+                  componentRestrictions: { country: "us" },
+                }}
+              />
             </div>
             <div>
               <Label>Main Sqft</Label>

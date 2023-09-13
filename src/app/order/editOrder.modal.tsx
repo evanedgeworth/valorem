@@ -63,7 +63,7 @@ export default function EditOrderModal({
             <div>
               <Label htmlFor="countries">Trade</Label>
               <Select id="countries" required value={trade} onChange={(e) => setTrade(e.target.value)}>
-                <option disabled selected></option>
+                <option disabled></option>
                 <option>Exterior / Landscaping</option>
                 <option>MEP / General</option>
                 <option>Living Room</option>
