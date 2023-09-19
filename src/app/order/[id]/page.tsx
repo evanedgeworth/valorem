@@ -19,12 +19,14 @@ interface COProduct extends Product {
 }
 import { HiCheck } from "react-icons/hi";
 import { useSearchParams } from "next/navigation";
+import CSVSelector from "@/components/csvSelector";
 
 export default function Page({ params }: { params: { id: string } }) {
   const supabase = createClientComponentClient<Database>();
   const [order, setOrder] = useState<Order>();
   const [products, setProducts] = useState<ProductArray[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
   const [showToast, setShowToast] = useState(false);
   const previousProducts = useRef<any[]>([]);
@@ -120,6 +122,12 @@ export default function Page({ params }: { params: { id: string } }) {
           {order?.address}
         </p>
         <div className="flex justify-end mb-5">
+          <CSVSelector
+            showModal={showUploadModal}
+            setShowModal={setShowUploadModal}
+            handleCancel={() => setShowUploadModal(false)}
+            handleConfirm={() => setShowUploadModal(false)}
+          />
           <NewProductModal
             showModal={showModal}
             setShowModal={setShowModal}

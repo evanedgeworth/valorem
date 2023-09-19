@@ -1,19 +1,15 @@
 "use client";
 
 import { Timeline, Table, Badge, Button } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import moment from "moment";
 type Warranty = Database["public"]["Tables"]["warranties"]["Row"];
-import NewOrderModal from "./newOrder.modal";
+import NewWarrantyModal from "./addWarrenty.modal";
 import Link from "next/link";
-import { MergeProductsbyKey } from "@/utils/commonUtils";
-import { AiOutlineCloudDownload, AiOutlineExclamationCircle } from "react-icons/ai";
-import { BiSolidChevronUp, BiSolidChevronDown } from "react-icons/bi";
-// import DownloadPDF from "./downloadPDF";
 import dynamic from "next/dynamic";
-import { TfiAngleDown, TfiAngleUp } from "react-icons/tfi";
+import { UserContext } from "@/context/userContext";
 
 const DownloadPDF = dynamic(() => import("./downloadPDF"), {
   ssr: false,
@@ -24,6 +20,7 @@ export default function Page() {
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
+  const { user, SignOut } = useContext(UserContext);
 
   useEffect(() => {
     getWarrenties();
@@ -42,7 +39,10 @@ export default function Page() {
 
   return (
     <section className="p-5">
-      <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warranties</h2>
+      <div className="flex justify-between mb-8">
+        <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warranties</h2>
+        {user?.role === "client" && <NewWarrantyModal showModal={showModal} setShowModal={setShowModal} />}
+      </div>
       <Table striped>
         <Table.Head>
           <Table.HeadCell>Order ID</Table.HeadCell>
@@ -68,9 +68,9 @@ export default function Page() {
                 <Table.Cell>
                   <Link
                     className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                    href={`/order/${encodeURIComponent(item.id)}`}
+                    href={`/warranty/${encodeURIComponent(item.id)}`}
                   >
-                    <p>View Product</p>
+                    <p>View Warranty</p>
                   </Link>
                 </Table.Cell>
               </Table.Row>

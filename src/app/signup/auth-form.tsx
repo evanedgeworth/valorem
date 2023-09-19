@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Database } from "../../../types/supabase";
 import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
+import ConfirmationModal from "@/components/confirmation.modal";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function AuthForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [companyAddress, setCompanyAddress] = useState("");
   const [error, setError] = useState<boolean>(false);
   const router = useRouter();
@@ -34,6 +36,7 @@ export default function AuthForm() {
     }
     if (data) {
       console.log("DATA", data);
+      setShowConfirmationModal(true);
     }
     router.refresh();
   };
@@ -85,14 +88,6 @@ export default function AuthForm() {
                 <option>Test Company 4</option>
               </Select>
             </div>
-            {/* <div>
-              <Label>Company Name</Label>
-              <TextInput id="company" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-            </div>
-            <div>
-              <Label>Company Address</Label>
-              <TextInput id="address" required value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
-            </div> */}
           </div>
 
           <div className="flex items-center justify-between">
@@ -110,6 +105,14 @@ export default function AuthForm() {
           </Button>
         </div>
       </div>
+      <ConfirmationModal
+        showModal={showConfirmationModal}
+        setShowModal={setShowConfirmationModal}
+        title="Confirm your email"
+        description="We have sent an email to the email provided. Please confirm the email to login."
+        handleCancel={() => router.push("/")}
+        handleConfirm={() => router.push("/")}
+      />
     </div>
   );
 }
