@@ -42,8 +42,8 @@ const CSVSelector = ({
           </Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
-          {documentData.map((item: any) => (
-            <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+          {documentData.map((item: any, index: number) => (
+            <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={index}>
               <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.item_type_name_}</Table.Cell>
               <Table.Cell>{item.description_}</Table.Cell>
               <Table.Cell>{item.qty_}</Table.Cell>
