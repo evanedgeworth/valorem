@@ -85,6 +85,7 @@ export interface Database {
           created_at: string | null
           description: string | null
           id: number
+          location: unknown | null
           order_id: number
           project_name: string | null
           size: number | null
@@ -98,6 +99,7 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
+          location?: unknown | null
           order_id?: number
           project_name?: string | null
           size?: number | null
@@ -111,6 +113,7 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
+          location?: unknown | null
           order_id?: number
           project_name?: string | null
           size?: number | null
@@ -239,33 +242,49 @@ export interface Database {
       }
       warranties: {
         Row: {
-          address: string | null
-          contractor: number | null
+          contractor_id: string | null
           created_at: string
           id: number
+          link: string | null
           name: string | null
+          order_id: number | null
           period: number | null
           start_date: string | null
         }
         Insert: {
-          address?: string | null
-          contractor?: number | null
+          contractor_id?: string | null
           created_at?: string
           id?: number
+          link?: string | null
           name?: string | null
+          order_id?: number | null
           period?: number | null
           start_date?: string | null
         }
         Update: {
-          address?: string | null
-          contractor?: number | null
+          contractor_id?: string | null
           created_at?: string
           id?: number
+          link?: string | null
           name?: string | null
+          order_id?: number | null
           period?: number | null
           start_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "warranties_contractor_id_fkey"
+            columns: ["contractor_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warranties_order_id_fkey"
+            columns: ["order_id"]
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

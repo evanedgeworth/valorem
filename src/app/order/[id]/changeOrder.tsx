@@ -26,7 +26,7 @@ export default function ChangeOrder({ params }: { params: { id: string } }) {
   const previousProducts = useRef<any[]>([]);
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
+  const orderId = searchParams.get("orderId") || "";
   const { user, SignOut } = useContext(UserContext);
 
   useEffect(() => {

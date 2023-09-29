@@ -8,30 +8,23 @@ import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
-  const handleSignIn = async () => {
-    setIsloading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  const resetPassword = async () => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:3000/auth/callback?next=/update-password",
     });
     if (data) {
-      router.refresh();
-    }
-    if (error?.message === "Email not confirmed") {
-      alert(error.message);
-      setError(true);
+      console.log(data);
     }
     if (error) {
-      alert(error.message);
+      console.log(error);
     }
-    setIsloading(false);
   };
-
   return (
     <div className="w-full place-self-center lg:col-span-6">
       <div className="mx-auto rounded-lg bg-white p-6 shadow dark:bg-gray-800 sm:max-w-xl sm:p-8">
@@ -47,36 +40,19 @@ export default function AuthForm() {
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <Label htmlFor="email">Email</Label>
-              <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
               <TextInput
-                id="password"
+                id="email"
                 //placeholder="••••••••"
                 //required
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            {/* <div className="flex items-start">
-              <div className="flex h-5 items-center">
-                <Checkbox id="remember" required />
-              </div>
-              <div className="ml-3 text-sm">
-                <Label htmlFor="remember">Remember me</Label>
-              </div>
-            </div> */}
-            <a href="/forgot" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
-              Forgot password?
-            </a>
-          </div>
-          <Button className="w-full" onClick={handleSignIn} isProcessing={isLoading}>
-            {!isLoading && "Sign in to your account"}
+          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading}>
+            {!isLoading && "Send Reset Password Email"}
           </Button>
         </form>
       </div>

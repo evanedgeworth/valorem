@@ -60,7 +60,7 @@ export default function NavbarWithDropdown() {
             {user ? (
               <Dropdown inline label={<Avatar alt="User settings" img="https://flowbite.com/docs/images/people/profile-picture-5.jpg" rounded />}>
                 <Dropdown.Header>
-                  <span className="block text-sm">Blake Cross</span>
+                  <span className="block text-sm">{user.first_name + " " + user.last_name}</span>
                   <span className="block truncate text-sm font-medium">{user?.email}</span>
                 </Dropdown.Header>
                 {/* <Dropdown.Item>Dashboard</Dropdown.Item> */}

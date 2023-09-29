@@ -8,30 +8,22 @@ import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
 
-  const handleSignIn = async () => {
-    setIsloading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const resetPassword = async () => {
+    const { data, error } = await supabase.auth.updateUser({ password: passwordConfirmation });
     if (data) {
-      router.refresh();
-    }
-    if (error?.message === "Email not confirmed") {
-      alert(error.message);
-      setError(true);
+      console.log(data);
     }
     if (error) {
+      console.log(error);
       alert(error.message);
     }
-    setIsloading(false);
   };
-
   return (
     <div className="w-full place-self-center lg:col-span-6">
       <div className="mx-auto rounded-lg bg-white p-6 shadow dark:bg-gray-800 sm:max-w-xl sm:p-8">
@@ -46,11 +38,7 @@ export default function AuthForm() {
         <form className="mt-4 space-y-6 sm:mt-6" action="#">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <Label htmlFor="email">Email</Label>
-              <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="email">Password</Label>
               <TextInput
                 id="password"
                 //placeholder="••••••••"
@@ -58,6 +46,17 @@ export default function AuthForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password Confirmation</Label>
+              <TextInput
+                id="password confirmation"
+                //placeholder="••••••••"
+                //required
+                type="password"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
               />
             </div>
           </div>
@@ -71,11 +70,11 @@ export default function AuthForm() {
                 <Label htmlFor="remember">Remember me</Label>
               </div>
             </div> */}
-            <a href="/forgot" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+            <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
               Forgot password?
             </a>
           </div>
-          <Button className="w-full" onClick={handleSignIn} isProcessing={isLoading}>
+          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading}>
             {!isLoading && "Sign in to your account"}
           </Button>
         </form>

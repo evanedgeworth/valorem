@@ -5,15 +5,11 @@ import { useState, useEffect, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import moment from "moment";
-type Warranty = Database["public"]["Tables"]["warranties"]["Row"];
+type Warranty = Database["public"]["Tables"]["warranties"]["Row"] & { order_id: { address?: string } };
 import NewWarrantyModal from "./addWarrenty.modal";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { UserContext } from "@/context/userContext";
-
-const DownloadPDF = dynamic(() => import("./downloadPDF"), {
-  ssr: false,
-});
 
 export default function Page() {
   const supabase = createClientComponentClient<Database>();
@@ -27,7 +23,7 @@ export default function Page() {
   }, []);
 
   async function getWarrenties() {
-    let { data: warranties, error } = await supabase.from("warranties").select("*").order("created_at");
+    let { data: warranties, error } = await supabase.from("warranties").select("*, order_id(address)").order("created_at");
     if (warranties) {
       setWarranties(warranties);
     }
@@ -41,7 +37,7 @@ export default function Page() {
     <section className="p-5">
       <div className="flex justify-between mb-8">
         <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warranties</h2>
-        {user?.role === "client" && <NewWarrantyModal showModal={showModal} setShowModal={setShowModal} />}
+        {user?.role === "client" && <NewWarrantyModal showModal={showModal} setShowModal={setShowModal} reload={getWarrenties} />}
       </div>
       <Table striped>
         <Table.Head>
@@ -60,18 +56,22 @@ export default function Page() {
               <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.id}>
                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{item.id}</Table.Cell>
                 <Table.Cell>{item.name}</Table.Cell>
-                <Table.Cell>{item.address}</Table.Cell>
+                <Table.Cell>{item.order_id?.address}</Table.Cell>
                 <Table.Cell>
                   <TimeLeft start_date={item.start_date} period={item.period} />
                 </Table.Cell>
                 <Table.Cell>{item.period + " days"}</Table.Cell>
                 <Table.Cell>
-                  <Link
-                    className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                    href={`/warranty/${encodeURIComponent(item.id)}`}
-                  >
-                    <p>View Warranty</p>
-                  </Link>
+                  {item.link && (
+                    <a
+                      target="_blank"
+                      href={item.link || ""}
+                      rel="noopener noreferrer"
+                      className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
+                    >
+                      <p>View Warranty</p>
+                    </a>
+                  )}
                 </Table.Cell>
               </Table.Row>
             </>

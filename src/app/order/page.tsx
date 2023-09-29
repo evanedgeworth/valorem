@@ -65,7 +65,7 @@ export default function ClientView() {
   }
 
   async function handleRemoveOrder() {
-    let order_id = selectedOrder.current?.id;
+    let order_id = selectedOrder.current?.id || "";
     const { error } = await supabase.from("orders").delete().eq("id", order_id);
     setShowDeleteConfirmModal(false);
     getOrders();

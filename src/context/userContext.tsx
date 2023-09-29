@@ -26,7 +26,11 @@ export default function UserProvider({ children }: any) {
   }
 
   async function handleGetUser() {
-    let { data: user, error } = await supabase.from("profiles").select("*").eq("id", session?.user.id).single();
+    let { data: user, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", session?.user.id || "")
+      .single();
     if (user) {
       setUser(user);
     }
@@ -54,7 +58,7 @@ export default function UserProvider({ children }: any) {
   useEffect(() => {
     handleGetSession();
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event == "SIGNED_IN") handleGetUser();
+      if (event == "SIGNED_IN") setSession(session);
     });
     return () => {
       listener.subscription.unsubscribe();

@@ -1,8 +1,9 @@
 // components/CSVSelector.tsx
 import React, { useRef, useState } from "react";
 import CSVReader from "react-csv-reader";
-import { Button, Checkbox, Label, Modal, Table, Select, Textarea } from "flowbite-react";
+import { Button, Checkbox, Label, Modal, Table, Select, Dropdown } from "flowbite-react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
+import { BiDotsVerticalRounded } from "react-icons/bi";
 
 type Props = {
   onChange(data: string[][]): void;
@@ -25,9 +26,10 @@ const CSVSelector = ({
   const papaparseOptions = {
     header: true,
     dynamicTyping: true,
-    skipEmptyLines: true,
+    skipEmptyLines: "greedy",
     transformHeader: (header: string) => header.toLowerCase().replace(/\W/g, "_"),
   };
+  const selectedOrder = useRef<any>(null);
 
   function DocumentTable() {
     return (
@@ -48,10 +50,25 @@ const CSVSelector = ({
               <Table.Cell>{item.description_}</Table.Cell>
               <Table.Cell>{item.qty_}</Table.Cell>
               <Table.Cell>{item.amount}</Table.Cell>
-              <Table.Cell>
-                <a className="font-medium text-cyan-600 hover:underline dark:text-cyan-500" href="/tables">
-                  <p>Edit</p>
-                </a>
+              <Table.Cell className="">
+                <div className="relative cursor-pointer">
+                  <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                    <Dropdown.Item
+                      onClick={() => {
+                        selectedOrder.current = item[0];
+                      }}
+                    >
+                      Edit
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        selectedOrder.current = item[0];
+                      }}
+                    >
+                      Delete
+                    </Dropdown.Item>
+                  </Dropdown>
+                </div>
               </Table.Cell>
             </Table.Row>
           ))}
@@ -68,6 +85,7 @@ const CSVSelector = ({
       <Modal show={showModal} size="3xl" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body className=" overflow-scroll">
+          <h3 className="text-xl font-medium text-gray-900 dark:text-white">Upload CSV</h3>
           {documentData.length === 0 ? (
             <div>
               <label className="flex justify-center w-full h-32 px-4 transition border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none">
@@ -85,12 +103,14 @@ const CSVSelector = ({
                   parserOptions={papaparseOptions}
                   //label="Select CSV with secret Death Star statistics"
                 />
-                {/* <input type="file" name="file_upload" multiple className="hidden" onChange={(e) => selectImages(e)} /> */}
               </label>
             </div>
           ) : (
             <div className="space-y-6">
               <DocumentTable />
+              <div className="flex justify-end">
+                <Button onClick={() => ""}>Submit</Button>
+              </div>
             </div>
           )}
         </Modal.Body>

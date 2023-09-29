@@ -32,7 +32,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const previousProducts = useRef<any[]>([]);
   const coProducts = useRef<any[]>([]);
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId");
+  const orderId = searchParams.get("orderId") || "";
   const { user, SignOut } = useContext(UserContext);
   const router = useRouter();
 
@@ -121,7 +121,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <b>Address: </b>
           {order?.address}
         </p>
-        <div className="flex justify-end mb-5">
+        <div className="flex justify-end mb-5 gap-4">
           <CSVSelector
             showModal={showUploadModal}
             setShowModal={setShowUploadModal}

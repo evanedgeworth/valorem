@@ -40,7 +40,7 @@ export default function EditOrderModal({
     const { data, error } = await supabase
       .from("orders")
       .update({ project_name: name, start_date: null, address: address, description: description, size: size, trade: trade })
-      .eq("id", order?.id)
+      .eq("id", order?.id || "")
       .select();
 
     if (data) {

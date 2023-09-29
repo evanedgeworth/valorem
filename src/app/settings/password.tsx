@@ -37,16 +37,16 @@ export default function Password() {
         <div className="grid gap-6 sm:grid-rows-2">
           <div>
             <Label htmlFor="password">Password</Label>
-            <TextInput id="password" placeholder="••••••••" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <TextInput id="password" type="password" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <div>
-            <Label htmlFor="password">Confirm password</Label>
+            <Label htmlFor="confirm password">Confirm password</Label>
             <TextInput
-              id="password"
+              id="confirm password"
               placeholder="••••••••"
               required
               type="password"
-              value={password}
+              value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
             />
           </div>
