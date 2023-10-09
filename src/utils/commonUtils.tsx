@@ -50,3 +50,8 @@ export function calcCrow(latitude_1: number, longitude_1: number, latitude_2: nu
 function toRad(Value: number) {
   return (Value * Math.PI) / 180;
 }
+
+// Adds commas to numbers
+export function numberWithCommas(x: number) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

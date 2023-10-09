@@ -81,12 +81,17 @@ export interface Database {
       orders: {
         Row: {
           address: string | null
+          closed: string | null
           cost: number | null
           created_at: string | null
+          delivered: string | null
           description: string | null
+          fulfilled: string | null
           id: number
+          installed: string | null
           location: unknown | null
           order_id: number
+          processed: string | null
           project_name: string | null
           size: number | null
           start_date: string | null
@@ -95,12 +100,17 @@ export interface Database {
         }
         Insert: {
           address?: string | null
+          closed?: string | null
           cost?: number | null
           created_at?: string | null
+          delivered?: string | null
           description?: string | null
+          fulfilled?: string | null
           id?: number
+          installed?: string | null
           location?: unknown | null
           order_id?: number
+          processed?: string | null
           project_name?: string | null
           size?: number | null
           start_date?: string | null
@@ -109,12 +119,17 @@ export interface Database {
         }
         Update: {
           address?: string | null
+          closed?: string | null
           cost?: number | null
           created_at?: string | null
+          delivered?: string | null
           description?: string | null
+          fulfilled?: string | null
           id?: number
+          installed?: string | null
           location?: unknown | null
           order_id?: number
+          processed?: string | null
           project_name?: string | null
           size?: number | null
           start_date?: string | null

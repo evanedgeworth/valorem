@@ -6,11 +6,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../types/supabase";
 import moment from "moment";
 import NewProductModal from "./newProduct.modal";
-import { MergeProductsbyKey } from "@/utils/commonUtils";
+import { MergeProductsbyKey, numberWithCommas } from "@/utils/commonUtils";
 import ApproveCOModal from "./approve.modal";
 import { UserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import { MdClose } from "react-icons/md";
+import OrderTimeLine from "./timeLine";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
@@ -121,12 +122,17 @@ export default function Page({ params }: { params: { id: string } }) {
           <b>Address: </b>
           {order?.address}
         </p>
+        {order && <OrderTimeLine order={order} />}
         <div className="flex justify-end mb-5 gap-4">
           <CSVSelector
             showModal={showUploadModal}
             setShowModal={setShowUploadModal}
+            orderId={Number(params.id)}
             handleCancel={() => setShowUploadModal(false)}
-            handleConfirm={() => setShowUploadModal(false)}
+            handleConfirm={() => {
+              setShowUploadModal(false);
+              getProducts();
+            }}
           />
           <NewProductModal
             showModal={showModal}
@@ -144,8 +150,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <h5 className="mb-2 text-2xl text-center font-bold text-gray-900 dark:text-white">{item[0].type}</h5>
                 <Table>
                   <Table.Head>
-                    <Table.HeadCell>Product name</Table.HeadCell>
-                    <Table.HeadCell>Description</Table.HeadCell>
+                    <Table.HeadCell>Product Description</Table.HeadCell>
                     <Table.HeadCell>Qty</Table.HeadCell>
                     <Table.HeadCell>Price</Table.HeadCell>
                     <Table.HeadCell>Total Price</Table.HeadCell>
@@ -153,11 +158,10 @@ export default function Page({ params }: { params: { id: string } }) {
                   {item.map((product: Product) => (
                     <Table.Body className="divide-y" key={product.id}>
                       <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.name}</Table.Cell>
-                        <Table.Cell>{product.description}</Table.Cell>
+                        <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.description}</Table.Cell>
                         <Table.Cell>{product.quantity}</Table.Cell>
                         <Table.Cell>{product.price}</Table.Cell>
-                        <Table.Cell>{Math.floor(product.price * product.quantity)}</Table.Cell>
+                        <Table.Cell>{"$ " + numberWithCommas(Math.floor(product.price * product.quantity))}</Table.Cell>
                       </Table.Row>
                     </Table.Body>
                   ))}
