@@ -23,7 +23,6 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
             pr.map((item) => (
               <View style={styles.section} key={item.id}>
                 <Text>{item.type}</Text>
-                <Text>{item.name}</Text>
                 <Text>{item.description}</Text>
                 <Text>{item.quantity}</Text>
                 <Text>{item.price}</Text>

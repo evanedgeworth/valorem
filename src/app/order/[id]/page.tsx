@@ -170,11 +170,11 @@ export default function Page({ params }: { params: { id: string } }) {
           </Tabs.Item>
 
           <Tabs.Item icon={HiAdjustments} title="Settings" active={false}>
-            <p>
+            {/* <p>
               This is
               <span className="font-medium text-gray-800 dark:text-white">Settings tab's associated content</span>. Clicking another tab will toggle
               the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.
-            </p>
+            </p> */}
           </Tabs.Item>
         </Tabs.Group>
       </section>

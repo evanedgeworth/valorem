@@ -56,7 +56,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <h5 className="mb-2 text-2xl text-center font-bold text-gray-900 dark:text-white">{item[0].type}</h5>
             <Table>
               <Table.Head>
-                <Table.HeadCell>Product name</Table.HeadCell>
+                {/* <Table.HeadCell>Product name</Table.HeadCell> */}
                 <Table.HeadCell>Description</Table.HeadCell>
                 <Table.HeadCell>Qty</Table.HeadCell>
                 <Table.HeadCell>Price</Table.HeadCell>
@@ -65,7 +65,7 @@ export default function Page({ params }: { params: { id: string } }) {
               {item.map((product: Product) => (
                 <Table.Body className="divide-y" key={product.id}>
                   <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                    <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.name}</Table.Cell>
+                    {/* <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.name}</Table.Cell> */}
                     <Table.Cell>{product.description}</Table.Cell>
                     <Table.Cell>{product.quantity}</Table.Cell>
                     <Table.Cell>{product.price}</Table.Cell>
