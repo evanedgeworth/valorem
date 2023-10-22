@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../types/supabase";
+import { Database } from "../../../../../types/supabase";
 import moment from "moment";
 import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
 import { BiCheck } from "react-icons/bi";
@@ -16,13 +16,13 @@ export default function ApproveCOModal({
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   reload: () => void;
-  id: string;
+  id: number;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
 
   async function handleApproveCO() {
-    const { data, error } = await supabase.from("orders").update({ status: "active" }).eq("id", id).select();
+    const { data, error } = await supabase.from("orders").update({ changeOrder: false }).eq("id", id).select();
     if (data) {
       reload();
     }

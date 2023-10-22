@@ -1,17 +1,21 @@
 "use client";
 
-import { Button, Card, Toast, Table } from "flowbite-react";
+import { Button, Card, Toast, Table, Tabs } from "flowbite-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../types/supabase";
 import moment from "moment";
-import NewProductModal from "./newProduct.modal";
+import NewProductModal from "./components/newProduct.modal";
 import { MergeProductsbyKey, numberWithCommas } from "@/utils/commonUtils";
-import ApproveCOModal from "./approve.modal";
+import ApproveCOModal from "./components/approve.modal";
 import { UserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
-import { MdClose } from "react-icons/md";
-import OrderTimeLine from "./timeLine";
+import { MdClose, MdDashboard } from "react-icons/md";
+import { HiAdjustments, HiClipboardList, HiUserCircle } from "react-icons/hi";
+import OrderTimeLine from "./components/timeLine";
+import ChangeOrder from "./components/changeOrder";
+import ActiveOrder from "./components/activeOrder";
+import Warranties from "./components/warranties";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
@@ -46,7 +50,7 @@ export default function Page({ params }: { params: { id: string } }) {
     let { data: order, error } = await supabase.from("orders").select("*").eq("id", params.id).single();
     if (order) {
       setOrder(order);
-      if (order.status === "co") {
+      if (order.changeOrder) {
         getPreviousOrder();
       }
     }
@@ -90,8 +94,8 @@ export default function Page({ params }: { params: { id: string } }) {
     let ProductArray2 = previousProducts.current;
 
     ProductArray1.forEach((obj1) => {
-      const noChange = ProductArray2.find((obj2) => obj2.name === obj1.name && obj2.price === obj1.price);
-      const updatedPrice = ProductArray2.find((obj2) => obj2.name === obj1.name && obj2.price !== obj1.price);
+      const noChange = ProductArray2.find((obj2) => obj2.description === obj1.description && obj2.price === obj1.price);
+      const updatedPrice = ProductArray2.find((obj2) => obj2.description === obj1.description && obj2.price !== obj1.price);
       if (noChange) {
         resultArray.push({ ...noChange, status: "same" });
       } else if (updatedPrice) {
@@ -102,162 +106,77 @@ export default function Page({ params }: { params: { id: string } }) {
     });
 
     ProductArray2.forEach((obj2) => {
-      const foundInResult = resultArray.find((obj) => obj.name === obj2.name);
+      const foundInResult = resultArray.find((obj) => obj.description === obj2.description);
       if (!foundInResult) {
         resultArray.push({ ...obj2, status: "removed" });
       }
     });
+
     setProducts(MergeProductsbyKey(resultArray, "type"));
   }
 
-  function ActiveOrder() {
-    return (
-      <div>
-        <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order?.project_name}</h5>
-        <p className="mb-2 text-sm text-gray-900 dark:text-white">
-          <b>Date Created: </b>
-          {moment(order?.created_at).format("MMMM DD, YYYY HH:mm a")}
-        </p>
-        <p className="mb-2 text-sm text-gray-900 dark:text-white">
-          <b>Address: </b>
-          {order?.address}
-        </p>
-        {order && <OrderTimeLine order={order} />}
-        <div className="flex justify-end mb-5 gap-4">
-          <CSVSelector
-            showModal={showUploadModal}
-            setShowModal={setShowUploadModal}
-            orderId={Number(params.id)}
-            handleCancel={() => setShowUploadModal(false)}
-            handleConfirm={() => {
-              setShowUploadModal(false);
-              getProducts();
-            }}
-          />
-          <NewProductModal
-            showModal={showModal}
-            setShowModal={setShowModal}
-            reload={() => {
-              getProducts(), setShowToast(true);
-            }}
-            orderId={Number(params.id)}
-          />
-        </div>
-        <div className="flex flex-col flex-1 gap-4">
-          {products.length >= 1 ? (
-            products.map((item: ProductArray) => (
-              <Card key={item[0].id} className="overflow-x-auto">
-                <h5 className="mb-2 text-2xl text-center font-bold text-gray-900 dark:text-white">{item[0].type}</h5>
-                <Table>
-                  <Table.Head>
-                    <Table.HeadCell>Product Description</Table.HeadCell>
-                    <Table.HeadCell>Qty</Table.HeadCell>
-                    <Table.HeadCell>Price</Table.HeadCell>
-                    <Table.HeadCell>Total Price</Table.HeadCell>
-                  </Table.Head>
-                  {item.map((product: Product) => (
-                    <Table.Body className="divide-y" key={product.id}>
-                      <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <Table.Cell className="font-medium text-gray-900 dark:text-white">{product.description}</Table.Cell>
-                        <Table.Cell>{product.quantity}</Table.Cell>
-                        <Table.Cell>{product.price}</Table.Cell>
-                        <Table.Cell>{"$ " + numberWithCommas(Math.floor(product.price * product.quantity))}</Table.Cell>
-                      </Table.Row>
-                    </Table.Body>
-                  ))}
-                </Table>
-              </Card>
-            ))
-          ) : (
-            <div className="mx-auto my-24">
-              <h5 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">No products added</h5>
-              <p className="mb-2 text-sm text-gray-400 dark:text-white">{`Select 'Add Product' to get started.`}</p>
-            </div>
-          )}
-        </div>
-        {showToast && (
-          <Toast className="fixed bottom-10 right-10" duration={100}>
-            <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
-              <HiCheck className="h-5 w-5" />
-            </div>
-            <div className="ml-3 text-sm font-normal">Product added successfully.</div>
-            <Toast.Toggle />
-          </Toast>
-        )}
-      </div>
-    );
-  }
-
-  function ChangeOrder() {
+  if (order && user)
     return (
       <section className="p-5">
-        <div className="flex justify-between">
-          <div>
-            <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Change Order</h5>
-            <p className="mb-2 text-sm text-gray-900 dark:text-white">
-              <b>Order: </b>
-              {order?.project_name}
-            </p>
+        <Tabs.Group style="fullWidth">
+          <Tabs.Item icon={MdDashboard} title="Details" active>
+            <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.project_name}</h5>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
-              {moment(order?.created_at).format("MMMM DD, YYYY HH:mm a")}
+              {moment(order.created_at).format("MMMM DD, YYYY HH:mm a")}
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
-              {order?.address}
+              {order.address}
             </p>
-          </div>
-          {user?.role !== "contractor" && (
-            <div className="flex flex-row justify-end gap-4 mt-4">
-              <Button outline color="red">
-                <MdClose size={20} />
-                Deny Changes
-              </Button>
-              <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={params.id} />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-4">
-          {products.map((item: any) => (
-            <Card key={item[0].id} className="overflow-x-auto">
-              <h5 className="mb-2 text-2xl text-center font-bold text-gray-900 dark:text-white">{item[0].type}</h5>
-              <Table>
-                <Table.Head>
-                  <Table.HeadCell>Product name</Table.HeadCell>
-                  <Table.HeadCell>Description</Table.HeadCell>
-                  <Table.HeadCell>Qty</Table.HeadCell>
-                  <Table.HeadCell>Price</Table.HeadCell>
-                  <Table.HeadCell>Total Price</Table.HeadCell>
-                </Table.Head>
-                {item.map((product: COProduct) => (
-                  <Table.Body className="divide-y" key={product.id}>
-                    <Table.Row
-                      className={
-                        `dark:border-gray-700 dark:bg-gray-800 ` +
-                        ((product.status === "updated" && ` bg-amber-200 dark:bg-amber-800`) ||
-                          (product.status === "removed" && ` bg-red-200 dark:bg-red-800`))
-                      }
-                    >
-                      <Table.Cell className="font-medium text-gray-900 dark:text-white max-w-xs">{product.name}</Table.Cell>
-                      <Table.Cell className="max-w-xs">{product.description}</Table.Cell>
-                      <Table.Cell>{product.quantity}</Table.Cell>
-                      <Table.Cell>{product.price}</Table.Cell>
-                      <Table.Cell>{Math.floor(product.price * product.quantity)}</Table.Cell>
-                    </Table.Row>
-                  </Table.Body>
-                ))}
-              </Table>
-            </Card>
-          ))}
-        </div>
+            {user.role !== "contractor" && order?.changeOrder && (
+              <div className="flex flex-row justify-end gap-4 mt-4">
+                <Button outline color="red" className="h-fit">
+                  <MdClose size={20} />
+                  Deny Changes
+                </Button>
+                <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(params.id)} />
+              </div>
+            )}
+            {order && <OrderTimeLine order={order} />}
+
+            {!order.changeOrder && (
+              <div className="flex justify-end mb-5 gap-4">
+                <CSVSelector
+                  showModal={showUploadModal}
+                  setShowModal={setShowUploadModal}
+                  orderId={Number(params.id)}
+                  handleCancel={() => setShowUploadModal(false)}
+                  handleConfirm={() => {
+                    setShowUploadModal(false);
+                    getProducts();
+                  }}
+                />
+                <NewProductModal
+                  showModal={showModal}
+                  setShowModal={setShowModal}
+                  reload={() => {
+                    getProducts(), setShowToast(true);
+                  }}
+                  orderId={Number(params.id)}
+                />
+              </div>
+            )}
+            {order.changeOrder ? <ChangeOrder products={products} /> : <ActiveOrder products={products} />}
+          </Tabs.Item>
+
+          <Tabs.Item icon={HiClipboardList} title="Warranties" active={false}>
+            <Warranties products={products} />
+          </Tabs.Item>
+
+          <Tabs.Item icon={HiAdjustments} title="Settings" active={false}>
+            <p>
+              This is
+              <span className="font-medium text-gray-800 dark:text-white">Settings tab's associated content</span>. Clicking another tab will toggle
+              the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.
+            </p>
+          </Tabs.Item>
+        </Tabs.Group>
       </section>
     );
-  }
-
-  return (
-    <section className="p-5">
-      {order?.status === "active" && <ActiveOrder />}
-      {order?.status === "co" && <ChangeOrder />}
-    </section>
-  );
 }

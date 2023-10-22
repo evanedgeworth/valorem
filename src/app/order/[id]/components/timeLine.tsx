@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { Timeline } from "flowbite-react";
 import { BsCheck } from "react-icons/bs";
-import { Database } from "../../../../types/supabase";
+import { Database } from "../../../../../types/supabase";
 import moment from "moment";
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 
@@ -17,7 +17,7 @@ export default function OrderTimeLine({ order }: { order: Order }) {
   ];
 
   return (
-    <div className="my-10">
+    <div className="my-16 ml-5">
       <Timeline horizontal>
         {orderTimeline.map((item) => (
           <Timeline.Item className="flex-1" key={item.name}>

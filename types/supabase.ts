@@ -81,6 +81,7 @@ export interface Database {
       orders: {
         Row: {
           address: string | null
+          changeOrder: boolean
           closed: string | null
           cost: number | null
           created_at: string | null
@@ -100,6 +101,7 @@ export interface Database {
         }
         Insert: {
           address?: string | null
+          changeOrder?: boolean
           closed?: string | null
           cost?: number | null
           created_at?: string | null
@@ -119,6 +121,7 @@ export interface Database {
         }
         Update: {
           address?: string | null
+          changeOrder?: boolean
           closed?: string | null
           cost?: number | null
           created_at?: string | null
@@ -184,7 +187,6 @@ export interface Database {
           created_at: string | null
           description: string | null
           id: number
-          name: string | null
           orderId: number | null
           price: number
           quantity: number
@@ -195,7 +197,6 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
-          name?: string | null
           orderId?: number | null
           price: number
           quantity?: number
@@ -206,7 +207,6 @@ export interface Database {
           created_at?: string | null
           description?: string | null
           id?: number
-          name?: string | null
           orderId?: number | null
           price?: number
           quantity?: number

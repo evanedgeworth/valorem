@@ -25,6 +25,7 @@ import { UserContext } from "@/context/userContext";
 export default function ClientView() {
   const supabase = createClientComponentClient<Database>();
   const [orders, setOrders] = useState<OrderArray[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditOrderModal, setShowEditOrderModal] = useState<boolean>(false);
   const selectedOrder = useRef<Order | null>(null);
@@ -37,10 +38,28 @@ export default function ClientView() {
     getOrders();
   }, []);
 
+  useEffect(() => {
+    if (orders.length !== 0) {
+      getProducts();
+    }
+  }, [orders]);
+
   async function getOrders() {
     let { data: orders, error } = await supabase.from("orders").select("*").order("created_at");
     if (orders) {
       setOrders(MergeProductsbyKey(orders, "order_id"));
+    }
+  }
+
+  async function getProducts() {
+    const orderIds = orders.flatMap((innerArray) => innerArray.map((item) => item.id)).join(",");
+    let { data, count } = await supabase
+      .from("products")
+      .select("*")
+      .filter("orderId", "in", "(" + orderIds + ")")
+      .order("created_at");
+    if (data) {
+      setProducts(data);
     }
   }
 
@@ -73,16 +92,28 @@ export default function ClientView() {
 
   function OrderStatus({ status }: { status: string }) {
     switch (status) {
-      case "active":
+      case "fulfilled":
         return (
           <Badge size="xs" color="success" className="justify-center" icon={HiCheck}>
-            Active
+            Fulfilled
           </Badge>
         );
-      case "co":
+      case "approved":
         return (
-          <Badge size="xs" color="warning" className="justify-center whitespace-nowrap" icon={HiClock}>
-            Change Order
+          <Badge size="xs" color="cyan" className="justify-center whitespace-nowrap" icon={HiClock}>
+            Approved
+          </Badge>
+        );
+      case "closed":
+        return (
+          <Badge size="xs" color="yellow" className="justify-center whitespace-nowrap" icon={HiClock}>
+            Closed
+          </Badge>
+        );
+      case "ordered":
+        return (
+          <Badge size="xs" color="cyan" className="justify-center whitespace-nowrap" icon={HiClock}>
+            Ordered
           </Badge>
         );
       default:
@@ -136,7 +167,7 @@ export default function ClientView() {
                     className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
                     href={{ pathname: `/order/${encodeURIComponent(item[item.length - 1].id)}`, query: { orderId: item[0].id } }}
                   >
-                    <p>{item[item.length - 1].status !== "co" ? "View Order" : "View CO"}</p>
+                    <p>{!item[item.length - 1].changeOrder ? "View Order" : "View CO"}</p>
                   </Link>
                 </Table.Cell>
                 {user?.role === "client" && (
@@ -195,6 +226,15 @@ export default function ClientView() {
                                     </p>
                                     <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
                                   </span>
+                                  <p className="text-sm">
+                                    {"Items: "}
+                                    {products.reduce((count, product) => {
+                                      if (product.orderId === co.id) {
+                                        return count + 1;
+                                      }
+                                      return count;
+                                    }, 0)}
+                                  </p>
                                 </Timeline.Title>
                               </div>
                               <DownloadPDF orderId={co.id} id={co.id} />

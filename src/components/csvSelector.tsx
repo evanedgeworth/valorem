@@ -1,7 +1,7 @@
 // components/CSVSelector.tsx
 import React, { useRef, useState } from "react";
 import CSVReader from "react-csv-reader";
-import { Button, Checkbox, Label, Modal, Table, Select, Dropdown } from "flowbite-react";
+import { Button, Checkbox, Label, Modal, Table, Select, Dropdown, TextInput } from "flowbite-react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -59,6 +59,16 @@ const CSVSelector = ({
   }
 
   function DocumentTable() {
+    function handleInputChange(description: string, field: string, value: string) {
+      // Update the state with the edited value
+      let updatedArray = documentData.map((item: any) => (item.description === description ? { ...item, [field]: value } : item));
+      setDocumentData(updatedArray);
+    }
+
+    function handleDeleteItem(description: string) {
+      let filteredArray = documentData.filter((item: any) => item.description !== description);
+      setDocumentData(filteredArray);
+    }
     return (
       <Table>
         <Table.Head>
@@ -71,27 +81,27 @@ const CSVSelector = ({
         </Table.Head>
         <Table.Body className="divide-y">
           {documentData.map((item: any, index: number) => (
-            <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={index}>
+            <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.description}>
               <Table.Cell className="font-medium text-gray-900 dark:text-white">{item.description}</Table.Cell>
-              <Table.Cell>{item.qty}</Table.Cell>
-              <Table.Cell>{"$ " + numberWithCommas(Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0)}</Table.Cell>
+              <Table.Cell>
+                <TextInput value={item.qty} type="number" onChange={(e) => handleInputChange(item.description, "qty", e.target.value)} />
+              </Table.Cell>
+              <Table.Cell>
+                <div className="flex items-center gap-3">
+                  $
+                  <TextInput
+                    value={Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0}
+                    type="number"
+                    key={item.description}
+                    onChange={(e) => handleInputChange(item.description, "amount", e.target.value)}
+                    className=" w-20"
+                  />
+                </div>
+              </Table.Cell>
               <Table.Cell className="">
                 <div className="relative cursor-pointer">
                   <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
-                    <Dropdown.Item
-                      onClick={() => {
-                        selectedOrder.current = item[0];
-                      }}
-                    >
-                      Edit
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        selectedOrder.current = item[0];
-                      }}
-                    >
-                      Delete
-                    </Dropdown.Item>
+                    <Dropdown.Item onClick={() => handleDeleteItem(item.description)}>Delete</Dropdown.Item>
                   </Dropdown>
                 </div>
               </Table.Cell>
@@ -124,11 +134,8 @@ const CSVSelector = ({
                   onFileLoaded={(data, fileInfo, originalFile) => {
                     let filteredData = data.filter((row) => row.qty !== 0 && row.qty !== null && typeof row.qty !== "string");
                     setDocumentData(filteredData);
-                    setDocumentName(fileInfo.name);
-                    console.log(filteredData);
                   }}
                   parserOptions={papaparseOptions}
-                  //label="Select CSV with secret Death Star statistics"
                 />
               </label>
             </div>

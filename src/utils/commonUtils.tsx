@@ -14,6 +14,7 @@ export function MergeProductsbyKey(array: any, key: string) {
       arrays.push([obj]);
     }
   });
+
   return arrays;
 }
 
