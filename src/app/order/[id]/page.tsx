@@ -16,6 +16,7 @@ import OrderTimeLine from "./components/timeLine";
 import ChangeOrder from "./components/changeOrder";
 import ActiveOrder from "./components/activeOrder";
 import Warranties from "./components/warranties";
+import Settings from "./components/settings";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
@@ -33,6 +34,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<"details" | "warranties" | "settings">("details");
   const [showToast, setShowToast] = useState(false);
   const previousProducts = useRef<any[]>([]);
   const coProducts = useRef<any[]>([]);
@@ -118,8 +120,44 @@ export default function Page({ params }: { params: { id: string } }) {
   if (order && user)
     return (
       <section className="p-5">
-        <Tabs.Group style="fullWidth">
-          <Tabs.Item icon={MdDashboard} title="Details" active>
+        <ul className="hidden text-sm font-medium text-center text-gray-500 divide-x divide-gray-200 rounded-lg shadow sm:flex dark:divide-gray-700 dark:text-gray-400">
+          <li className="w-full cursor-pointer">
+            <div
+              onClick={() => setSelectedTab("details")}
+              className={`flex items-center justify-center gap-3 w-full p-4 ${
+                selectedTab === "details" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
+              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+              aria-current="page"
+            >
+              <MdDashboard size={20} />
+              Details
+            </div>
+          </li>
+          <li className="w-full cursor-pointer">
+            <div
+              onClick={() => setSelectedTab("warranties")}
+              className={`flex items-center justify-center gap-3 w-full p-4 ${
+                selectedTab === "warranties" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
+              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+            >
+              <HiClipboardList size={20} />
+              Warranties
+            </div>
+          </li>
+          <li className="w-full cursor-pointer">
+            <div
+              onClick={() => setSelectedTab("settings")}
+              className={`flex items-center justify-center gap-3 w-full p-4 ${
+                selectedTab === "settings" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
+              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+            >
+              <HiAdjustments size={20} />
+              Settings
+            </div>
+          </li>
+        </ul>
+        {selectedTab === "details" && (
+          <section className="p-5">
             <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.project_name}</h5>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
@@ -163,20 +201,15 @@ export default function Page({ params }: { params: { id: string } }) {
               </div>
             )}
             {order.changeOrder ? <ChangeOrder products={products} /> : <ActiveOrder products={products} />}
-          </Tabs.Item>
+          </section>
+        )}
 
-          <Tabs.Item icon={HiClipboardList} title="Warranties" active={false}>
-            <Warranties products={products} />
+        {selectedTab === "warranties" && <Warranties products={products} />}
+        {selectedTab === "settings" && (
+          <Tabs.Item icon={HiAdjustments} title="Settings">
+            <Settings order={order} />
           </Tabs.Item>
-
-          <Tabs.Item icon={HiAdjustments} title="Settings" active={false}>
-            {/* <p>
-              This is
-              <span className="font-medium text-gray-800 dark:text-white">Settings tab's associated content</span>. Clicking another tab will toggle
-              the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.
-            </p> */}
-          </Tabs.Item>
-        </Tabs.Group>
+        )}
       </section>
     );
 }

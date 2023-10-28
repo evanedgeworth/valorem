@@ -8,19 +8,13 @@ import { UserContext } from "@/context/userContext";
 import Valorem from "../../public/valorem.svg";
 import Image from "next/image";
 import Link from "next/link";
+import { BsCalendar } from "react-icons/bs";
+import { PiHammer } from "react-icons/pi";
 
 export default function NavbarWithDropdown() {
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
   const { user, SignOut } = useContext(UserContext);
-
-  // async function SignOut() {
-  //   let { error } = await supabase.auth.signOut();
-  //   if (error) {
-  //     alert(error.message);
-  //   }
-  //   router.push("/");
-  // }
 
   return (
     <header className="flex flex-col">
@@ -32,57 +26,36 @@ export default function NavbarWithDropdown() {
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </Link>
           </div>
-          {user && (
-            <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex">
-              {/* <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <a href="/" className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                  Home
-                </a>
-              </li> */}
-              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <Link href={"/order"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                  Orders
-                </Link>
-              </li>
-              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <Link href={"/calendar"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                  Calendar
-                </Link>
-              </li>
-              <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
-                <Link href={"/warranty"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
-                  Warranties
-                </Link>
-              </li>
-            </ul>
-          )}
           <div className="flex flex-shrink-0 justify-between items-center ml-4 lg:order-2">
             {user ? (
-              <Dropdown inline label={<Avatar alt="User settings" img="https://flowbite.com/docs/images/people/profile-picture-5.jpg" rounded />}>
-                <Dropdown.Header>
-                  <span className="block text-sm">{user.first_name + " " + user.last_name}</span>
-                  <span className="block truncate text-sm font-medium">{user?.email}</span>
-                </Dropdown.Header>
-                {/* <Dropdown.Item>Dashboard</Dropdown.Item> */}
-                <Dropdown.Item href="/settings">Settings</Dropdown.Item>
-                {/* <Dropdown.Item>Earnings</Dropdown.Item> */}
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={SignOut}>Sign out</Dropdown.Item>
-              </Dropdown>
+              <>
+                <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex">
+                  <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                    <Link href={"/order"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                      <PiHammer size={25} />
+                    </Link>
+                  </li>
+                  <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                    <Link href={"/calendar"} className="block py-3 px-4 rounded-lg hover:text-gray-900 dark:hover:text-white">
+                      <BsCalendar size={25} />
+                    </Link>
+                  </li>
+                </ul>
+                <div className="pl-4">
+                  <Dropdown inline label={<Avatar alt="User settings" rounded size="md" />}>
+                    <Dropdown.Header>
+                      <span className="block text-sm">{user.first_name + " " + user.last_name}</span>
+                      <span className="block truncate text-sm font-medium">{user?.email}</span>
+                    </Dropdown.Header>
+                    <Dropdown.Item href="/settings">Settings</Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={SignOut}>Sign out</Dropdown.Item>
+                  </Dropdown>
+                </div>
+              </>
             ) : (
               <Button href="/login">Login</Button>
             )}
-            {/* <button
-              type="button"
-              className="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-              id="user-menu-button"
-              aria-expanded="false"
-              data-dropdown-toggle="dropdown"
-            >
-              <span className="sr-only">Open user menu</span>
-              <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" />
-            </button> */}
-            {/* <!-- Dropdown menu --> */}
 
             <button
               type="button"

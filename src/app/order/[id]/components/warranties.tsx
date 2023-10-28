@@ -1,6 +1,6 @@
 "use client";
 
-import { Timeline, Table, Badge, Button } from "flowbite-react";
+import { Timeline, Table, Badge, Button, Dropdown } from "flowbite-react";
 import { useState, useEffect, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../../types/supabase";
@@ -9,6 +9,7 @@ import NewWarrantyModal from "@/app/warranty/addWarrenty.modal";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { UserContext } from "@/context/userContext";
+import { BiDotsVerticalRounded } from "react-icons/bi";
 type Warranty = Database["public"]["Tables"]["warranties"]["Row"];
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type ProductArray = [Product];
@@ -43,8 +44,8 @@ export default function Warranties({ products }: { products: ProductArray[] }) {
 
   return (
     <section className="p-5">
-      <div className="flex justify-between mb-8">
-        <h2 className="mb-8 text-4xl font-bold text-gray-900 dark:text-white">Warranties</h2>
+      <h3 className="text-xl font-medium text-gray-900 dark:text-white">Warranties</h3>
+      <div className="flex justify-end mb-8">
         {user?.role === "client" && <NewWarrantyModal showModal={showModal} setShowModal={setShowModal} reload={getWarrenties} />}
       </div>
       <Table striped>
@@ -56,6 +57,7 @@ export default function Warranties({ products }: { products: ProductArray[] }) {
           <Table.HeadCell>
             <span className="sr-only">View Order</span>
           </Table.HeadCell>
+          <Table.HeadCell></Table.HeadCell>
         </Table.Head>
         <Table.Body className="divide-y">
           {warranties.map((item) => (
@@ -78,6 +80,15 @@ export default function Warranties({ products }: { products: ProductArray[] }) {
                       <p>View Warranty</p>
                     </a>
                   )}
+                </Table.Cell>
+                <Table.Cell className="">
+                  {/* <BiDotsVerticalRounded size={25} /> */}
+                  <div className="relative cursor-pointer">
+                    <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                      <Dropdown.Item>View Warranty</Dropdown.Item>
+                      <Dropdown.Item>Request Service</Dropdown.Item>
+                    </Dropdown>
+                  </div>
                 </Table.Cell>
               </Table.Row>
             </>
