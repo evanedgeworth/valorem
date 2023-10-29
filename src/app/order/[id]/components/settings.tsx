@@ -60,7 +60,7 @@ export default function Settings({ order }: { order: Order }) {
 
   return (
     <section className="p-5">
-      <h3 className="text-xl font-medium text-gray-900 dark:text-white">Order Settings</h3>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Order Settings</h1>
       <div>
         <Label htmlFor="countries">Trade</Label>
         <Select id="countries" required value={trade} onChange={(e) => setTrade(e.target.value)}>

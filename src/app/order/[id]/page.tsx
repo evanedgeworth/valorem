@@ -183,7 +183,7 @@ export default function Page({ params }: { params: { id: string } }) {
         </ul>
         {selectedTab === "details" && (
           <section className="p-5">
-            <h5 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.project_name}</h5>
+            <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.project_name}</h1>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
               {moment(order.created_at).format("MMMM DD, YYYY HH:mm a")}

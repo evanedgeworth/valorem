@@ -27,7 +27,7 @@ export default function Warranties({ products }: { products: ProductArray[] }) {
 
   async function getWarrenties() {
     let productIds = products.map((productGroup) => productGroup.map((item) => item.id)).join(",");
-    console.log(productIds);
+
     let { data: warranties, error } = await supabase
       .from("warranties")
       .select("*")
@@ -44,7 +44,7 @@ export default function Warranties({ products }: { products: ProductArray[] }) {
 
   return (
     <section className="p-5">
-      <h3 className="text-xl font-medium text-gray-900 dark:text-white">Warranties</h3>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Warranties</h1>
       <div className="flex justify-end mb-8">
         {user?.role === "client" && <NewWarrantyModal showModal={showModal} setShowModal={setShowModal} reload={getWarrenties} />}
       </div>

@@ -69,43 +69,41 @@ export default function History({ order }: { order: Order }) {
 
   return (
     <section className="p-5">
-      <div className="p-4">
-        <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Order History</h1>
 
-        <Timeline>
-          {orders.reverse().map((co, index, array) => (
-            <Timeline.Item key={co.id}>
-              <Timeline.Point />
-              <Timeline.Content>
-                <div className="flex flex-row justify-between">
-                  <div>
-                    <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
-                    <Timeline.Title>
-                      {co.order_id + "-" + (orders.length - index)}
-                      <span className="flex flex-row text-sm">
-                        <p className="flex gap-1">
-                          <p>Total:</p>${co.cost}
-                        </p>
-                        <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
-                      </span>
-                      <p className="text-sm">
-                        {"Items: "}
-                        {products.reduce((count, product) => {
-                          if (product.orderId === co.id) {
-                            return count + 1;
-                          }
-                          return count;
-                        }, 0)}
+      <Timeline>
+        {[...orders].reverse().map((co, index, array) => (
+          <Timeline.Item key={co.id}>
+            <Timeline.Point />
+            <Timeline.Content>
+              <div className="flex flex-row justify-between">
+                <div>
+                  <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
+                  <Timeline.Title>
+                    {co.order_id + "-" + (orders.length - index)}
+                    <span className="flex flex-row text-sm">
+                      <p className="flex gap-1">
+                        <p>Total:</p>${co.cost}
                       </p>
-                    </Timeline.Title>
-                  </div>
-                  <DownloadPDF orderId={co.id} id={co.id} />
+                      <PriceChangeStatus currentItem={co?.cost} previousItem={array[array.length - 1]?.cost} />
+                    </span>
+                    <p className="text-sm">
+                      {"Items: "}
+                      {products.reduce((count, product) => {
+                        if (product.orderId === co.id) {
+                          return count + 1;
+                        }
+                        return count;
+                      }, 0)}
+                    </p>
+                  </Timeline.Title>
                 </div>
-              </Timeline.Content>
-            </Timeline.Item>
-          ))}
-        </Timeline>
-      </div>
+                <DownloadPDF orderId={co.id} id={co.id} />
+              </div>
+            </Timeline.Content>
+          </Timeline.Item>
+        ))}
+      </Timeline>
     </section>
   );
 }

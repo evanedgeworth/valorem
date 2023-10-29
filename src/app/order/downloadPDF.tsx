@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, usePDF, pdf } from "@react-pdf/renderer";
+import { Button, Card, Toast, Table, Tabs } from "flowbite-react";
 import * as FileSaver from "file-saver";
-import { Button } from "flowbite-react";
 import { AiOutlineCloudDownload } from "react-icons/ai";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../types/supabase";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 import moment from "moment";
+import { numberWithCommas } from "@/utils/commonUtils";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
@@ -19,13 +20,16 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
     return (
       <Document>
         <Page size="A4" style={styles.page}>
-          {products.map((pr: ProductArray) =>
-            pr.map((item) => (
-              <View style={styles.section} key={item.id}>
-                <Text>{item.type}</Text>
-                <Text>{item.description}</Text>
-                <Text>{item.quantity}</Text>
-                <Text>{item.price}</Text>
+          {products.map((item: ProductArray) =>
+            item.map((product) => (
+              <View key={item[0].id} style={styles.card}>
+                <Text style={styles.header}>{item[0].type}</Text>
+                <View style={styles.section} key={product.id}>
+                  <Text>{product.type}</Text>
+                  <Text>{product.description}</Text>
+                  <Text>{product.quantity}</Text>
+                  <Text>{product.price}</Text>
+                </View>
               </View>
             ))
           )}
@@ -54,6 +58,7 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
   async function getProducts() {
     let { data: products, error } = await supabase.from("products").select("*").eq("orderId", id);
     if (products) {
+      console.log("PROD", products);
       return MergeProductsbyKey(products, "type");
     }
   }
@@ -69,8 +74,26 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    flexDirection: "row",
+    // flexDirection: "column",
     backgroundColor: "#E4E4E4",
+    // margin: 20,
+  },
+  // max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700
+  card: {
+    padding: 24,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "rgb(229 231 235)",
+    borderRadius: 8,
+    boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+  },
+  header: {
+    // marginBottom: 8,
+    fontSize: 24,
+    // lineHeight: 32,
+    // fontWeight: "semibold",
+    // textAlign: "center",
+    // color: "#111827",
   },
   section: {
     margin: 10,
