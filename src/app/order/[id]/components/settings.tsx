@@ -9,7 +9,6 @@ import Autocomplete from "react-google-autocomplete";
 import { useRouter } from "next/navigation";
 
 export default function Settings({ order }: { order: Order }) {
-  const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
@@ -21,11 +20,18 @@ export default function Settings({ order }: { order: Order }) {
 
   useEffect(() => {
     if (order) {
-      console.log(order);
       setName(order.project_name || "");
       setAddress(order.address || "");
+      setLocation({ lat: order.location, long: order.location });
     }
   }, [order]);
+
+  const { ref } = usePlacesWidget({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+    onPlaceSelected: (place) => console.log(place),
+  });
+
+  const inputRef = ref as RefObject<HTMLInputElement>;
 
   async function handleCreateOrder() {
     const { data, error } = await supabase
@@ -81,6 +87,13 @@ export default function Settings({ order }: { order: Order }) {
       <div>
         <Label htmlFor="email">Address</Label>
         {/* <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} ref={inputRef.current} /> */}
+        {/* <input
+          id="name"
+          ref={ref}
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
+        /> */}
         <Autocomplete
           apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
           className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
@@ -92,6 +105,7 @@ export default function Settings({ order }: { order: Order }) {
             types: ["address"],
             componentRestrictions: { country: "us" },
           }}
+          defaultValue={address}
         />
       </div>
       <div>

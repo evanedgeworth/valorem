@@ -12,11 +12,13 @@ import { UserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import { MdClose, MdDashboard } from "react-icons/md";
 import { HiAdjustments, HiClipboardList, HiUserCircle } from "react-icons/hi";
+import { BiHistory } from "react-icons/bi";
 import OrderTimeLine from "./components/timeLine";
 import ChangeOrder from "./components/changeOrder";
 import ActiveOrder from "./components/activeOrder";
 import Warranties from "./components/warranties";
 import Settings from "./components/settings";
+import History from "./components/history";
 type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
@@ -34,12 +36,12 @@ export default function Page({ params }: { params: { id: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<"details" | "warranties" | "settings">("details");
   const [showToast, setShowToast] = useState(false);
   const previousProducts = useRef<any[]>([]);
   const coProducts = useRef<any[]>([]);
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "";
+  const selectedTab = searchParams.get("view") || "details";
   const { user, SignOut } = useContext(UserContext);
   const router = useRouter();
 
@@ -90,6 +92,10 @@ export default function Page({ params }: { params: { id: string } }) {
     }
   }
 
+  function handleTabChange(selectedTab: string) {
+    router.push(`/order/9?orderId=1&view=${selectedTab}`);
+  }
+
   function getChangeOrder() {
     let resultArray: COProduct[] = [];
     let ProductArray1 = coProducts.current;
@@ -123,10 +129,12 @@ export default function Page({ params }: { params: { id: string } }) {
         <ul className="hidden text-sm font-medium text-center text-gray-500 divide-x divide-gray-200 rounded-lg shadow sm:flex dark:divide-gray-700 dark:text-gray-400">
           <li className="w-full cursor-pointer">
             <div
-              onClick={() => setSelectedTab("details")}
-              className={`flex items-center justify-center gap-3 w-full p-4 ${
-                selectedTab === "details" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
-              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+              onClick={() => handleTabChange("details")}
+              className={`flex items-center justify-center gap-3 w-full p-4 rounded-l-lg hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
+                selectedTab === "details"
+                  ? "text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none bg-gray-100"
+                  : "dark:bg-gray-800 bg-white"
+              }`}
               aria-current="page"
             >
               <MdDashboard size={20} />
@@ -135,10 +143,12 @@ export default function Page({ params }: { params: { id: string } }) {
           </li>
           <li className="w-full cursor-pointer">
             <div
-              onClick={() => setSelectedTab("warranties")}
-              className={`flex items-center justify-center gap-3 w-full p-4 ${
-                selectedTab === "warranties" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
-              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+              onClick={() => handleTabChange("warranties")}
+              className={`flex items-center justify-center gap-3 w-full p-4 hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
+                selectedTab === "warranties"
+                  ? "text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none bg-gray-100"
+                  : "dark:bg-gray-800 bg-white"
+              }`}
             >
               <HiClipboardList size={20} />
               Warranties
@@ -146,10 +156,25 @@ export default function Page({ params }: { params: { id: string } }) {
           </li>
           <li className="w-full cursor-pointer">
             <div
-              onClick={() => setSelectedTab("settings")}
-              className={`flex items-center justify-center gap-3 w-full p-4 ${
-                selectedTab === "settings" ? "text-gray-900 bg-gray-100" : "bg-white hover:text-gray-700 hover:bg-gray-50"
-              } rounded-l-lg focus:ring-4 focus:ring-blue-300 active focus:outline-none dark:bg-gray-700 dark:text-white`}
+              onClick={() => handleTabChange("history")}
+              className={`flex items-center justify-center gap-3 w-full p-4 hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
+                selectedTab === "history"
+                  ? "text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none bg-gray-100"
+                  : "dark:bg-gray-800 bg-white"
+              }`}
+            >
+              <BiHistory size={20} />
+              History
+            </div>
+          </li>
+          <li className="w-full cursor-pointer">
+            <div
+              onClick={() => handleTabChange("settings")}
+              className={`flex items-center justify-center gap-3 w-full p-4 rounded-r-lg hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
+                selectedTab === "settings"
+                  ? "text-gray-700 dark:text-white dark:bg-gray-700 focus:outline-none bg-gray-100"
+                  : "dark:bg-gray-800 bg-white"
+              }`}
             >
               <HiAdjustments size={20} />
               Settings
@@ -205,11 +230,8 @@ export default function Page({ params }: { params: { id: string } }) {
         )}
 
         {selectedTab === "warranties" && <Warranties products={products} />}
-        {selectedTab === "settings" && (
-          <Tabs.Item icon={HiAdjustments} title="Settings">
-            <Settings order={order} />
-          </Tabs.Item>
-        )}
+        {selectedTab === "history" && <History order={order} />}
+        {selectedTab === "settings" && <Settings order={order} />}
       </section>
     );
 }
