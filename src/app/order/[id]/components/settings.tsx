@@ -7,6 +7,7 @@ import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flo
 import { usePlacesWidget } from "react-google-autocomplete";
 import Autocomplete from "react-google-autocomplete";
 import { useRouter } from "next/navigation";
+import wkx from "wkx";
 
 export default function Settings({ order }: { order: Order }) {
   const supabase = createClientComponentClient<Database>();
@@ -22,36 +23,35 @@ export default function Settings({ order }: { order: Order }) {
     if (order) {
       setName(order.project_name || "");
       setAddress(order.address || "");
-      setLocation({ lat: order.location, long: order.location });
+      setDescription(order.description || "");
+      setTrade(order.trade || "");
+
+      const geometry = wkx.Geometry.parse(Buffer.from(String(order.location), "hex"));
+      if (geometry instanceof wkx.Point) {
+        setLocation({ lat: geometry.x, long: geometry.y });
+      } else {
+        console.log("The provided WKB does not represent a point geometry.");
+      }
     }
   }, [order]);
-
-  const { ref } = usePlacesWidget({
-    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-    onPlaceSelected: (place) => console.log(place),
-  });
-
-  const inputRef = ref as RefObject<HTMLInputElement>;
 
   async function handleCreateOrder() {
     const { data, error } = await supabase
       .from("orders")
-      .insert([
-        {
-          project_name: name,
-          start_date: null,
-          address: address,
-          location: `POINT(${location.lat} ${location.long})`,
-          description: description,
-          size: size,
-          trade: trade,
-        },
-      ])
-      .select()
-      .limit(1)
-      .single();
+      .update({
+        project_name: name,
+        start_date: null,
+        address: address,
+        location: `POINT(${location.lat} ${location.long})`,
+        description: description,
+        size: size,
+        trade: trade,
+      })
+      .eq("id", order.id)
+      .select();
     if (data) {
-      router.push(`/order/${encodeURIComponent(data.order_id)}`);
+      console.log(data);
+      // router.push(`/order/${encodeURIComponent(data.order_id)}`);
     }
     if (error) {
       alert(error.message);
@@ -86,14 +86,6 @@ export default function Settings({ order }: { order: Order }) {
       </div>
       <div>
         <Label htmlFor="email">Address</Label>
-        {/* <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} ref={inputRef.current} /> */}
-        {/* <input
-          id="name"
-          ref={ref}
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
-        /> */}
         <Autocomplete
           apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
           className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
