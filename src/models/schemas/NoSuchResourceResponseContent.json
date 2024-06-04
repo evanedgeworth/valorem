@@ -1,0 +1,1 @@
+{"type":"object","properties":{"resourceType":{"type":"string"}},"required":["resourceType"],"x-readme-ref-name":"NoSuchResourceResponseContent"}

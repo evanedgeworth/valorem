@@ -15,15 +15,13 @@ type Props = {
 const CSVSelector = ({
   showModal,
   setShowModal,
-  handleCancel,
-  handleConfirm,
   orderId,
+  addProduct,
 }: {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
-  handleCancel: () => void;
-  handleConfirm: () => void;
   orderId: number;
+  addProduct: (product: any) => void;
 }) => {
   const [documentName, setDocumentName] = useState<string>("");
   const [documentData, setDocumentData] = useState<any>([]);
@@ -37,25 +35,30 @@ const CSVSelector = ({
   const selectedOrder = useRef<any>(null);
   const supabase = createClientComponentClient<Database>();
 
-  async function uploadProducts() {
-    let formattedData: any = [];
-    documentData.forEach((item: any) =>
-      formattedData.push({
-        description: item.description,
-        quantity: item.qty,
-        price: Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0,
-        type: item.roomname,
-        orderId: orderId,
-      })
-    );
+  // async function uploadProducts() {
+  //   let formattedData: any = [];
+  //   documentData.forEach((item: any) =>
+  //     formattedData.push({
+  //       description: item.description,
+  //       quantity: item.qty,
+  //       price: Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0,
+  //       type: item.roomname,
+  //       orderId: orderId,
+  //     })
+  //   );
 
-    let { error } = await supabase.from("products").insert(formattedData);
+  //   let { error } = await supabase.from("products").insert(formattedData);
 
-    if (error) {
-      alert(error.message);
-    } else {
-      handleConfirm();
-    }
+  //   if (error) {
+  //     alert(error.message);
+  //   } else {
+  //     handleConfirm();
+  //   }
+  // }
+
+  function handleAddProduct() {
+    addProduct(documentData);
+    setShowModal(false);
   }
 
   function DocumentTable() {
@@ -69,6 +72,7 @@ const CSVSelector = ({
       let filteredArray = documentData.filter((item: any) => item.description !== description);
       setDocumentData(filteredArray);
     }
+
     return (
       <Table>
         <Table.Head>
@@ -84,19 +88,10 @@ const CSVSelector = ({
             <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={item.description}>
               <Table.Cell className="font-medium text-gray-900 dark:text-white">{item.description}</Table.Cell>
               <Table.Cell>
-                <TextInput value={item.qty} type="number" onChange={(e) => handleInputChange(item.description, "qty", e.target.value)} />
+                <TextInput value={item.quantity} type="number" onChange={(e) => handleInputChange(item.description, "qty", e.target.value)} />
               </Table.Cell>
               <Table.Cell>
-                <div className="flex items-center gap-3">
-                  $
-                  <TextInput
-                    value={Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0}
-                    type="number"
-                    key={item.description}
-                    onChange={(e) => handleInputChange(item.description, "amount", e.target.value)}
-                    className=" w-20"
-                  />
-                </div>
+                <div className="flex items-center gap-3">${item.price}</div>
               </Table.Cell>
               <Table.Cell className="">
                 <div className="relative cursor-pointer">
@@ -110,6 +105,21 @@ const CSVSelector = ({
         </Table.Body>
       </Table>
     );
+  }
+
+  function formatCSVData(data: any) {
+    console.log(data);
+    let filterEmpty = data.filter((row: any) => row.qty !== 0 && row.qty !== null && typeof row.qty !== "string");
+    let filteredData = filterEmpty.map((item: any) => ({
+      description: item.description,
+      quantity: item.qty,
+      price: Number(item.amount.replace(/\s+/g, "").replace(/[^0-9.-]+/g, "")) || 0,
+      size: item.size || 0,
+      type: item.roomname || "",
+      orderId: orderId,
+      status: "updated",
+    }));
+    setDocumentData(filteredData);
   }
 
   return (
@@ -129,21 +139,14 @@ const CSVSelector = ({
                   <AiOutlineCloudUpload size={25} color="rgb(75 85 99)" />
                   <span className="font-medium text-gray-600">Drop files to Attach, or browse</span>
                 </span>
-                <CSVReader
-                  cssClass="hidden"
-                  onFileLoaded={(data, fileInfo, originalFile) => {
-                    let filteredData = data.filter((row) => row.qty !== 0 && row.qty !== null && typeof row.qty !== "string");
-                    setDocumentData(filteredData);
-                  }}
-                  parserOptions={papaparseOptions}
-                />
+                <CSVReader cssClass="hidden" onFileLoaded={(data, fileInfo, originalFile) => formatCSVData(data)} parserOptions={papaparseOptions} />
               </label>
             </div>
           ) : (
             <div className="space-y-6">
               <DocumentTable />
               <div className="flex justify-end">
-                <Button onClick={uploadProducts}>Submit</Button>
+                <Button onClick={handleAddProduct}>Add Products</Button>
               </div>
             </div>
           )}

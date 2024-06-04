@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get("next");
 
   if (code) {
-    const supabase = createRouteHandlerClient<Database>({ cookies });
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
     await supabase.auth.exchangeCodeForSession(code);
   }
-  console.log("NEXT", next);
   // const next = requestUrl.searchParams.get("next");
 
   // URL to redirect to after sign in process completes

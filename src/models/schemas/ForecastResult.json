@@ -1,0 +1,1 @@
+{"oneOf":[{"type":"object","title":"rain","properties":{"rain":{"type":"number","format":"float"}},"required":["rain"]},{"type":"object","title":"sun","properties":{"sun":{"type":"number","maximum":15,"minimum":1}},"required":["sun"]}],"x-readme-ref-name":"ForecastResult"}

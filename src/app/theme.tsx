@@ -1,7 +1,10 @@
-import { CustomFlowbiteTheme } from "flowbite-react/lib/esm/components/Flowbite/FlowbiteTheme";
+import { type CustomFlowbiteTheme } from "flowbite-react";
 
 export const flowbiteTheme: CustomFlowbiteTheme = {
   footer: {
+    root: {
+      base: "flex flex-col",
+    },
     brand: {
       base: "m-6 flex items-center",
     },
@@ -20,6 +23,11 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
       base: "space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8",
     },
   },
+  button: {
+    color: {
+      primary: "bg-blue-500 hover:bg-red-600",
+    },
+  },
   sidebar: {
     root: {
       base: "h-full bg-gray-50",
@@ -31,12 +39,8 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     item: {
       base: "no-underline flex items-center rounded-lg p-2 text-lg font-normal text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700",
     },
-    itemGroup: "list-none border-t border-gray-200 pt-3 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700",
-  },
-  button: {
-    color: {
-      primary:
-        "text-white bg-red-700 border border-transparent enabled:hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:enabled:hover:bg-red-700 dark:focus:ring-red-900",
+    itemGroup: {
+      base: "list-none border-t border-gray-200 pt-3 first:mt-0 first:border-t-0 first:pt-0 dark:border-gray-700",
     },
   },
 };
