@@ -48,7 +48,7 @@ export default function MissingProductModal({
   }
 
   async function searchCatalog() {
-    const { data, error } = await supabase.from("catalog").select().textSearch("description", name);
+    const { data, error } = await supabase.from("materials").select().textSearch("description", name);
     if (data) {
       setCatalog(data);
       console.log("DATA", data);

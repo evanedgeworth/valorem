@@ -1,1 +1,0 @@
-{"type":"object","properties":{"time":{"type":"number","format":"double"}},"required":["time"],"x-readme-ref-name":"GetCurrentTimeResponseContent"}

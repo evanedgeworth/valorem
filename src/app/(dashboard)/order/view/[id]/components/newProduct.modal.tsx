@@ -60,7 +60,7 @@ export default function NewProductModal({
   }
 
   async function searchCatalog() {
-    const { data, error } = await supabase.from("catalog").select().textSearch("description", name);
+    const { data, error } = await supabase.from("materials").select().textSearch("description", name);
     if (data) {
       setCatalog(data);
     }

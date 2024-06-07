@@ -1,1 +1,0 @@
-{"type":"object","properties":{"name":{"type":"string"},"coordinates":{"type":"object","properties":{"latitude":{"type":"number","format":"float"},"longitude":{"type":"number","format":"float"}},"required":["latitude","longitude"],"x-readme-ref-name":"CityCoordinates"}},"required":["coordinates","name"],"x-readme-ref-name":"CreateCityRequestContent"}

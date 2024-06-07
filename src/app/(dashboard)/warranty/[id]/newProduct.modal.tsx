@@ -37,7 +37,6 @@ export default function NewProductModal({
   const loading = open && catalog.length === 0;
 
   async function handleAddProduct() {
-    console.log(name, description, quantity, price, "SIZE", size, category, orderId);
     const { data, error } = await supabase
       .from("products")
       .insert([{ name: name, description: description, quantity: quantity, price: price || 0, size: size, type: category, orderId: orderId }])
@@ -57,10 +56,9 @@ export default function NewProductModal({
   }
 
   async function searchCatalog() {
-    const { data, error } = await supabase.from("catalog").select().textSearch("description", name);
+    const { data, error } = await supabase.from("materials").select().textSearch("description", name);
     if (data) {
       setCatalog(data);
-      console.log("DATA", data);
     }
   }
 
