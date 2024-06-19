@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import { HiArrowSmRight, HiChartPie, HiInbox, HiOutlineClipboardList, HiBell, HiTable, HiUser, HiViewBoards, HiCalendar } from "react-icons/hi";
-import { HiBolt } from "react-icons/hi2";
+import { HiBolt, HiOutlineHomeModern } from "react-icons/hi2";
 import { RiMoneyDollarBoxLine, RiSettings3Fill } from "react-icons/ri";
 import { TbDeviceIpadDollar } from "react-icons/tb";
 
@@ -39,6 +39,9 @@ export default function SidebarNav() {
         <Sidebar.ItemGroup>
           <Sidebar.Item as={Link} href="/dashboard" icon={HiChartPie} active={pathname === "/dashboard"} prefetch={false}>
             Dashboard
+          </Sidebar.Item>
+          <Sidebar.Item as={Link} href="/properties" icon={HiOutlineHomeModern} active={pathname === "/properties"} prefetch={false}>
+            Properties
           </Sidebar.Item>
           <Sidebar.Item as={Link} href="/order" icon={HiBolt} active={pathname === "/order"} prefetch={false}>
             Orders
