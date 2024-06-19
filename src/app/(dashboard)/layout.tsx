@@ -7,6 +7,9 @@ import UserProvider from "@/context/userContext";
 import { Flowbite, ThemeModeScript } from "flowbite-react";
 import { flowbiteTheme } from "@/app/theme";
 import SidebarProvider from "@/context/sidebarContext";
+import React from "react";
+import { HydrationBoundary, QueryClient, QueryClientProvider, dehydrate } from "@tanstack/react-query";
+import QueryProvider from "@/utils/get-query-client";
 
 const RootLayout: FC<PropsWithChildren> = function ({ children }) {
   return (
@@ -20,12 +23,14 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
             <NavbarWithDropdown />
           </div>
           <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
-            <Flowbite theme={{ theme: flowbiteTheme }}>
-              <SidebarProvider>
-                <SidebarNav />
-                <div className="ml-[64px] md:ml-64 w-full flex flex-1 h-auto">{children}</div>
-              </SidebarProvider>
-            </Flowbite>
+            <QueryProvider>
+              <Flowbite theme={{ theme: flowbiteTheme }}>
+                <SidebarProvider>
+                  <SidebarNav />
+                  <div className="ml-[64px] md:ml-64 w-full flex flex-1 h-auto">{children}</div>
+                </SidebarProvider>
+              </Flowbite>
+            </QueryProvider>
           </main>
         </UserProvider>
       </body>

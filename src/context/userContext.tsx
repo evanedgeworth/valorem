@@ -84,16 +84,12 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
   }
 
-  // useEffect(() => {
-  //   handleGetSession();
-  // }, []);
-
   useEffect(() => {
     if (session) {
       handleGetUser();
       handleGetOrganizations();
     }
-  }, [session]);
+  }, [session?.access_token]);
 
   useEffect(() => {
     handleGetSession();

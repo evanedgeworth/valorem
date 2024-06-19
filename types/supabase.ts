@@ -166,7 +166,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "events_order_id_fkey"
+            foreignKeyName: "public_events_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -429,6 +429,7 @@ export type Database = {
           notes: string | null
           order_id: number
           price: number | null
+          properties: number[] | null
           quantity: number
           room: string | null
         }
@@ -439,6 +440,7 @@ export type Database = {
           notes?: string | null
           order_id: number
           price?: number | null
+          properties?: number[] | null
           quantity: number
           room?: string | null
         }
@@ -449,6 +451,7 @@ export type Database = {
           notes?: string | null
           order_id?: number
           price?: number | null
+          properties?: number[] | null
           quantity?: number
           room?: string | null
         }
@@ -461,7 +464,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_itemorders_OrderId_fkey"
+            foreignKeyName: "public_order_items_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -487,6 +490,7 @@ export type Database = {
           organization: string | null
           processed: string | null
           project_name: string | null
+          properties: number[] | null
           size: number | null
           start_date: string | null
           status: string | null
@@ -509,6 +513,7 @@ export type Database = {
           organization?: string | null
           processed?: string | null
           project_name?: string | null
+          properties?: number[] | null
           size?: number | null
           start_date?: string | null
           status?: string | null
@@ -531,6 +536,7 @@ export type Database = {
           organization?: string | null
           processed?: string | null
           project_name?: string | null
+          properties?: number[] | null
           size?: number | null
           start_date?: string | null
           status?: string | null
@@ -645,7 +651,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "products_orderId_fkey"
+            foreignKeyName: "public_products_orderId_fkey"
             columns: ["orderId"]
             isOneToOne: false
             referencedRelation: "orders"
@@ -685,6 +691,56 @@ export type Database = {
           phone?: string | null
         }
         Relationships: []
+      }
+      properties: {
+        Row: {
+          access_instructions: string | null
+          address_line_1: string | null
+          address_line_2: string | null
+          city: string | null
+          created_at: string
+          id: number
+          location: unknown | null
+          organization: string | null
+          state: string | null
+          type: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          access_instructions?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          created_at?: string
+          id?: number
+          location?: unknown | null
+          organization?: string | null
+          state?: string | null
+          type?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          access_instructions?: string | null
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          created_at?: string
+          id?: number
+          location?: unknown | null
+          organization?: string | null
+          state?: string | null
+          type?: string | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_organization_fkey"
+            columns: ["organization"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       "skill-trades": {
         Row: {

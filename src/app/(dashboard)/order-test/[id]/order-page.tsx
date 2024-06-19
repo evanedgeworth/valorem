@@ -1,5 +1,4 @@
 "use client";
-
 import { Accordion, Button, Spinner, Dropdown } from "flowbite-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -8,7 +7,7 @@ import moment from "moment";
 import NewProductModal from "./components/newProduct.modal";
 import ApproveCOModal from "./components/approve.modal";
 import { UserContext } from "@/context/userContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { MdClose, MdDashboard, MdCheck, MdOutlineModeEdit } from "react-icons/md";
 import { HiAdjustments, HiClipboardList, HiUserCircle } from "react-icons/hi";
 import { IoEye, IoEyeOff } from "react-icons/io5";
@@ -34,11 +33,10 @@ import { calculateTotalPrice } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
 import CSVSelector from "@/components/csvSelector";
 
-// https://5hch5ftc93.execute-api.us-west-2.amazonaws.com/prod/orders/97
-
-export default function Page({ params }: { params: { id: string } }) {
+export default function OrderPage({ order }: { order: Order }) {
+  const pathname = usePathname();
   const supabase = createClientComponentClient<Database>();
-  const [order, setOrder] = useState<Order>();
+  //   const [order, setOrder] = useState<Order>();
   const [products, setProducts] = useState<Product[]>([]);
   const [addedProducts, setAddedProducts] = useState<Product[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -60,23 +58,24 @@ export default function Page({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     getProducts();
-    getOrders();
+    if (order.change_order) getPreviousOrder();
+    // getOrders();
   }, []);
 
-  async function getOrders() {
-    let { data: order, error } = await supabase.from("orders").select("*").eq("id", params.id).single();
-    if (order) {
-      setOrder(order);
-      if (order.change_order) {
-        getPreviousOrder();
-      }
-    }
-    if (error) alert(error.message);
-  }
+  //   async function getOrders() {
+  //     let { data: order, error } = await supabase.from("orders").select("*").eq("id", params.id).single();
+  //     if (order) {
+  //       setOrder(order);
+  //       if (order.change_order) {
+  //         getPreviousOrder();
+  //       }
+  //     }
+  //     if (error) alert(error.message);
+  //   }
 
   async function getProducts() {
     setProductsLoading(true);
-    let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", params.id).returns<Product[]>();
+    let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", order.id).returns<Product[]>();
     if (products) {
       setProducts(products);
       coProducts.current = products;
@@ -85,11 +84,11 @@ export default function Page({ params }: { params: { id: string } }) {
   }
 
   async function getPreviousOrder() {
-    let { data: order, error } = await supabase
+    let { data: orderPrev, error } = await supabase
       .from("orders")
       .select("id")
       .eq("order_id", orderId)
-      .neq("id", params.id)
+      .neq("id", order.id)
       .order("id", { ascending: false })
       .limit(1)
       .single();
@@ -109,7 +108,7 @@ export default function Page({ params }: { params: { id: string } }) {
   }
 
   function handleTabChange(selectedTab: string) {
-    router.push(`/order/${params.id}?orderId=${order?.order_id}&view=${selectedTab}`);
+    router.push(`${pathname}/?orderId=${order?.order_id}&view=${selectedTab}`);
   }
 
   function getChangeOrder() {
@@ -148,7 +147,7 @@ export default function Page({ params }: { params: { id: string } }) {
         alert(error.message);
       }
     } else {
-      orderId = +params.id;
+      orderId = +order.id;
     }
 
     let allProductsUpdatedId = allProducts
@@ -163,7 +162,7 @@ export default function Page({ params }: { params: { id: string } }) {
       alert(error.message);
     }
     if (data) {
-      router.push(`/order/${orderId}?orderId=${params.id}`);
+      router.push(`/order/${orderId}?orderId=${order.id}`);
     }
   }
 
@@ -282,7 +281,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   <MdClose size={20} />
                   Deny Changes
                 </Button>
-                <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(params.id)} />
+                {/* <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(params.id)} /> */}
               </div>
             )}
             {order && <OrderTimeLine order={order} />}
@@ -292,7 +291,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <CSVSelector
                   showModal={showUploadModal}
                   setShowModal={setShowUploadModal}
-                  orderId={Number(params.id)}
+                  orderId={Number(order.id)}
                   addProduct={(newProduct) => {
                     setAddedProducts([...addedProducts, ...newProduct]), setShowSubmitButton(true);
                   }}
@@ -304,7 +303,7 @@ export default function Page({ params }: { params: { id: string } }) {
                   addProduct={(newProduct) => {
                     setAddedProducts([...addedProducts, newProduct]), setShowSubmitButton(true);
                   }}
-                  orderId={Number(params.id)}
+                  orderId={Number(order.id)}
                 />
                 {showSubmitButton && (
                   <Button className="h-fit" onClick={() => setShowSubmitConfirmation(true)}>
