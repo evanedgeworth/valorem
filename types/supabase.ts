@@ -702,6 +702,7 @@ export type Database = {
           id: number
           location: unknown | null
           organization: string | null
+          size: number | null
           state: string | null
           type: string | null
           zip_code: string | null
@@ -715,6 +716,7 @@ export type Database = {
           id?: number
           location?: unknown | null
           organization?: string | null
+          size?: number | null
           state?: string | null
           type?: string | null
           zip_code?: string | null
@@ -728,6 +730,7 @@ export type Database = {
           id?: number
           location?: unknown | null
           organization?: string | null
+          size?: number | null
           state?: string | null
           type?: string | null
           zip_code?: string | null

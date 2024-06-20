@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { BiSortDown } from "react-icons/bi";
 import { UserContext } from "@/context/userContext";
 import NewPropertyModal from "./components/newProperty.modal";
+import ConfirmationModal from "@/components/confirmation.modal";
+import EditPropertyModal from "./components/editProperty.modal";
 
 type Property = Database["public"]["Tables"]["properties"]["Row"];
 
@@ -23,10 +25,10 @@ export default function Properties() {
   const supabase = createClientComponentClient<Database>();
   const [properties, setProperties] = useState<Property[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [tableIsLoading, setTableIsLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>("");
-  const [sortBy, setSortBy] = useState<"created_at" | "address">("created_at");
-  const [showEditOrderModal, setShowEditOrderModal] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<"created_at" | "address_line_1">("created_at");
   const selectedProperty = useRef<Property | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
@@ -43,7 +45,7 @@ export default function Properties() {
   async function getProperties() {
     setTableIsLoading(true);
     let searchOrders = supabase.from("properties").select("*").order(sortBy, { ascending: true });
-    // if (searchInput) searchOrders.textSearch("address", searchInput);
+    if (searchInput) searchOrders.textSearch("address_line_1", searchInput);
     searchOrders.eq("organization", organization?.id || 0);
 
     await searchOrders.then(({ data: propertiesRes, error }) => {
@@ -58,8 +60,8 @@ export default function Properties() {
   }
 
   async function handleRemoveOrder() {
-    let order_id = selectedProperty.current?.id || "";
-    const { error } = await supabase.from("orders").delete().eq("id", order_id);
+    let property_id = selectedProperty.current?.id || "";
+    const { error } = await supabase.from("properties").delete().eq("id", property_id);
     setShowDeleteConfirmModal(false);
     getProperties();
   }
@@ -97,8 +99,8 @@ export default function Properties() {
           <Dropdown.Header>
             <strong>Sort By</strong>
           </Dropdown.Header>
-          <Dropdown.Item onClick={() => setSortBy("created_at")}>Project Name</Dropdown.Item>
-          <Dropdown.Item onClick={() => setSortBy("address")}>Starting Date</Dropdown.Item>
+          <Dropdown.Item onClick={() => setSortBy("address_line_1")}>Address</Dropdown.Item>
+          <Dropdown.Item onClick={() => setSortBy("created_at")}>Creation Date</Dropdown.Item>
         </Dropdown>
       </div>
       {tableIsLoading ? (
@@ -120,7 +122,9 @@ export default function Properties() {
                 <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
                   <Table.Cell className="p-4 cursor-pointer">{property.id}</Table.Cell>
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                    {`${property.address_line_1}${property.address_line_2 || ""}, ${property.city} ${property.state} ${property.zip_code}`}
+                    {`${property.address_line_1}${(property.address_line_2 && " " + property.address_line_2) || ""}, ${property.city} ${
+                      property.state
+                    } ${property.zip_code}`}
                   </Table.Cell>
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     {moment(property.created_at).format("MMM DD, YYYY")}
@@ -134,7 +138,7 @@ export default function Properties() {
                           <Dropdown.Item
                             onClick={() => {
                               selectedProperty.current = property;
-                              setShowEditOrderModal(true);
+                              setShowEditModal(true);
                             }}
                           >
                             Edit
@@ -162,6 +166,15 @@ export default function Properties() {
           <p className="mb-2 text-sm text-gray-400 dark:text-white text-center">There are currently no products.</p>
         </div>
       )}
+      <EditPropertyModal showModal={showEditModal} setShowModal={setShowEditModal} property={selectedProperty.current} refresh={getProperties} />
+      <ConfirmationModal
+        showModal={showDeleteConfirmModal}
+        setShowModal={setShowDeleteConfirmModal}
+        title="Delete Order"
+        description="Are you sure you would like to remove this property? This action is permanent."
+        handleCancel={() => setShowDeleteConfirmModal(false)}
+        handleConfirm={handleRemoveOrder}
+      />
     </section>
   );
 }
