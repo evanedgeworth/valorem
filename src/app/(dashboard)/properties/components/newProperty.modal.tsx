@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { states } from "@/utils/defaults";
+import request from "@/utils/request";
 
 type Inputs = {
   address1: string;
@@ -24,7 +25,15 @@ type Inputs = {
 
 const propertyTypes = ["Single-family home", "Townhouses/Row houses", "Condominium", "Apartment", "Multi-family home"];
 
-export default function NewPropertyModal({ showModal, setShowModal }: { showModal: boolean; setShowModal: (value: boolean) => void }) {
+export default function NewPropertyModal({
+  showModal,
+  setShowModal,
+  refresh,
+}: {
+  showModal: boolean;
+  setShowModal: (value: boolean) => void;
+  refresh: () => Promise<void>;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient<Database>();
   const [address, setAddress] = useState<string>("");
@@ -33,7 +42,7 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
   const [zipCode, setZipCode] = useState<string>("");
   const [location, setLocation] = useState<any>({ lat: "", long: "" });
   const router = useRouter();
-  const { user, organization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const {
     register,
     handleSubmit,
@@ -73,33 +82,54 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
   };
 
   async function handleCreateProperty(data: Inputs) {
-    console.log(data);
-    const { data: newProperty, error } = await supabase
-      .from("properties")
-      .insert([
-        {
-          address_line_1: data.address1,
-          address_line_2: data.address2,
-          city: city,
-          state: state,
-          location: `POINT(${location.lat} ${location.long})`,
-          zip_code: data.zip_code,
-          type: data.type,
-          access_instructions: data.access_instructions,
-          organization: organization?.id,
-        },
-      ])
-      .select()
-      .limit(1)
-      .single();
-    if (newProperty) {
-      //router.push(`/order/${encodeURIComponent(newOrder.order_id)}`);
-    }
-    if (error) {
-      alert(error.message);
-    }
+    request({
+      url: `/properties`,
+      method: "POST",
+      data: {
+        address_line1: data.address1,
+        address_line2: data.address2,
+        organization: selectedOrganization?.id,
+        city: city,
+        state: state,
+        zip_code: data.zip_code,
+        //location: `POINT(${location.lat} ${location.long})`,
+        access_instructions: data.access_instructions,
+        type: data.type,
+        // size: 0
+      },
+    });
+    await refresh();
     setShowModal(false);
   }
+
+  // async function handleCreateProperty(data: Inputs) {
+  //   console.log(data);
+  //   const { data: newProperty, error } = await supabase
+  //     .from("properties")
+  //     .insert([
+  //       {
+  //         address_line_1: data.address1,
+  //         address_line_2: data.address2,
+  //         city: city,
+  //         state: state,
+  //         location: `POINT(${location.lat} ${location.long})`,
+  //         zip_code: data.zip_code,
+  //         type: data.type,
+  //         access_instructions: data.access_instructions,
+  //         organization: selectedOrganization?.id,
+  //       },
+  //     ])
+  //     .select()
+  //     .limit(1)
+  //     .single();
+  //   if (newProperty) {
+  //     //router.push(`/order/${encodeURIComponent(newOrder.order_id)}`);
+  //   }
+  //   if (error) {
+  //     alert(error.message);
+  //   }
+  //   setShowModal(false);
+  // }
 
   return (
     <div ref={rootRef}>

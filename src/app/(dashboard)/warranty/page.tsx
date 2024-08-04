@@ -17,8 +17,8 @@ export default function Page() {
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
-  const { user, organization } = useContext(UserContext);
-  const currentOrganization = user?.user_organizations?.find((org) => organization?.id === org.organization);
+  const { user, selectedOrganization } = useContext(UserContext);
+  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
 
   useEffect(() => {
     getWarrenties();

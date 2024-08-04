@@ -15,7 +15,7 @@ type Conversations = Database["public"]["Tables"]["conversation_users"]["Row"] &
 
 export default function Inbox() {
   const supabase = createClientComponentClient<Database>();
-  const { user, organization, allOrganizations } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [conversations, setConversations] = useState<Conversations[]>();
   const [selectedConversation, setSelectedConversation] = useState<number>();
   const [messages, setMessages] = useState<Message[]>();

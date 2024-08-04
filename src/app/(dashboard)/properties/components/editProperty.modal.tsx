@@ -5,12 +5,15 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../../types/supabase";
 import moment from "moment";
 import { Button, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
-import Autocomplete, { usePlacesWidget, type ReactGoogleAutocompleteInputProps } from "react-google-autocomplete";
+import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { states } from "@/utils/defaults";
-type Property = Database["public"]["Tables"]["properties"]["Row"];
+import { Property } from "@/types";
+import request from "@/utils/request";
+import PlaceAutocomplete from "./places-autocomplete";
+// type Property = Database["public"]["Tables"]["properties"]["Row"];
 
 type Inputs = {
   address1: string;
@@ -36,7 +39,7 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
   const [zipCode, setZipCode] = useState<string>("");
   const [location, setLocation] = useState<any>({ lat: "", long: "" });
   const router = useRouter();
-  const { user, organization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const {
     register,
     handleSubmit,
@@ -44,19 +47,11 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
     watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const { ref, autocompleteRef } = usePlacesWidget({
-    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-
-    onPlaceSelected: (place) => {
-      console.log(place);
-    },
-  });
 
   useEffect(() => {
-    console.log(property);
-    setValue("address1", property?.address_line_1 || "");
-    setAddress(property?.address_line_1 || "");
-    setValue("address2", property?.address_line_2 || "");
+    setValue("address1", property?.address_line1 || "");
+    setAddress(property?.address_line1 || "");
+    setValue("address2", property?.address_line2 || "");
     setValue("city", property?.city || "");
     setValue("zip_code", property?.zip_code || "");
     setValue("state", property?.state || "");
@@ -64,60 +59,61 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
     setValue("type", property?.type || "");
     setValue("access_instructions", property?.access_instructions || "");
 
-    setAddress2(property?.address_line_2 || "");
+    setAddress2(property?.address_line2 || "");
     setCity(property?.city || "");
     setState(property?.state || "");
     setZipCode(property?.zip_code || "");
   }, [property?.id]);
 
-  const handlePlaceSelected = (place: any) => {
-    setAddress(place.formatted_address);
-    setLocation({ lat: place.geometry.location.lat(), long: place.geometry.location.lng() });
+  const handlePlaceSelected = (place: google.maps.places.AutocompletePrediction) => {
+    console.log(place);
+    setAddress(`${place.terms[0].value} ${place.terms[1].value}`);
+    setCity(place.terms[2].value);
+    setState(place.terms[3].value);
+    // setZipCode(place.terms[4].value);
+    // setAddress(place.formatted_address);
+    // setLocation({ lat: place.geometry.location.lat(), long: place.geometry.location.lng() });
 
-    const addressComponents = place.address_components;
-    const cityComponent = addressComponents.find((component: any) => component.types.includes("locality"));
-    const stateComponent = addressComponents.find((component: any) => component.types.includes("administrative_area_level_1"));
-    const zipCodeComponent = addressComponents.find((component: any) => component.types.includes("postal_code"));
+    // const addressComponents = place.address_components;
+    // const cityComponent = addressComponents.find((component: any) => component.types.includes("locality"));
+    // const stateComponent = addressComponents.find((component: any) => component.types.includes("administrative_area_level_1"));
+    // const zipCodeComponent = addressComponents.find((component: any) => component.types.includes("postal_code"));
 
-    if (cityComponent) {
-      setCity(cityComponent.long_name);
-      setValue("city", cityComponent.long_name);
-    }
-    if (stateComponent) {
-      setState(stateComponent.short_name);
-      setValue("state", stateComponent.short_name);
-    }
-    if (zipCodeComponent) {
-      setZipCode(zipCodeComponent.long_name);
-      setValue("zip_code", zipCodeComponent.long_name);
-    }
+    // if (cityComponent) {
+    //   setCity(cityComponent.long_name);
+    //   setValue("city", cityComponent.long_name);
+    // }
+    // if (stateComponent) {
+    //   setState(stateComponent.short_name);
+    //   setValue("state", stateComponent.short_name);
+    // }
+    // if (zipCodeComponent) {
+    //   setZipCode(zipCodeComponent.long_name);
+    //   setValue("zip_code", zipCodeComponent.long_name);
+    // }
   };
 
   async function handleSaveProperty(data: Inputs) {
-    console.log(data);
-    const { data: editedProperty, error } = await supabase
-      .from("properties")
-      .update({
-        address_line_1: data.address1,
-        address_line_2: data.address2,
+    request({
+      url: `/properties/${property?.id}`,
+      method: "PUT",
+      data: {
+        address_line1: address,
+        address_line2: data.address2,
+        organization: selectedOrganization?.id,
         city: city,
         state: state,
-        // location: `POINT(${location.lat} ${location.long})`,
         zip_code: data.zip_code,
         type: data.type,
+        size: Number(data.size),
         access_instructions: data.access_instructions,
-        organization: organization?.id,
+      },
+    })
+      .then(() => {
+        refresh();
+        setShowModal(false);
       })
-      .eq("id", property?.id || "")
-      .select();
-    if (editedProperty) {
-      refresh();
-      //router.push(`/order/${encodeURIComponent(newOrder.order_id)}`);
-    }
-    if (error) {
-      alert(error.message);
-    }
-    setShowModal(false);
+      .catch((e) => console.log(e));
   }
 
   return (
@@ -131,20 +127,7 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
             <div className="space-y-2">
               <div>
                 <Label htmlFor="address">Address Line 1</Label>
-                {address === "" ? (
-                  <Autocomplete
-                    {...register("address1")}
-                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
-                    className="block w-full border disabled:cursor-not-allowed disabled:opacity-50 bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-2.5 text-sm rounded-lg"
-                    onPlaceSelected={handlePlaceSelected}
-                    options={{
-                      types: ["address"],
-                      componentRestrictions: { country: "us" },
-                    }}
-                  />
-                ) : (
-                  <TextInput type="string" {...register("address1")} value={address} onChange={(e) => setAddress(e.target.value)} required />
-                )}
+                <PlaceAutocomplete value={address} onChange={handlePlaceSelected} />
               </div>
               <div>
                 <Label>Addres Line 2</Label>

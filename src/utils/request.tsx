@@ -1,24 +1,32 @@
-// request.js
-import { getSession } from "@/app/supabase-server";
+// request.ts
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import axios from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Database } from "../../types/supabase";
 
-// optionaly add base url
+// optionally add base url
 const client = axios.create({ baseURL: "https://5lkrv160l1.execute-api.us-west-2.amazonaws.com/prod" });
 
-const request = async ({ ...options }) => {
-  const supabase = createClientComponentClient<Database>();
-  // const {
-  //   data: { session },
-  // } = await supabase.auth.getSession();
+export async function getSession() {
+  const supabase = createClientComponentClient();
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+}
+
+const request = async (options: AxiosRequestConfig): Promise<AxiosResponse> => {
   const session = await getSession();
 
   client.defaults.headers.common.Authorization = `${session?.access_token}`;
 
-  const onSuccess = (response: any) => response;
+  const onSuccess = (response: AxiosResponse) => response;
   const onError = (error: any) => {
-    // optionaly catch errors and add some additional logging here
+    // optionally catch errors and add some additional logging here
     return error;
   };
 
@@ -26,3 +34,5 @@ const request = async ({ ...options }) => {
 };
 
 export default request;
+
+// export default client;

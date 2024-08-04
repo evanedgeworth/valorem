@@ -421,6 +421,42 @@ export type Database = {
           },
         ]
       }
+      order_item_assignments: {
+        Row: {
+          created_at: string
+          id: number
+          order_item: number | null
+          user: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          order_item?: number | null
+          user?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          order_item?: number | null
+          user?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assigned_order_items_order_item_fkey"
+            columns: ["order_item"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assigned_order_items_user_fkey"
+            columns: ["user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -474,7 +510,6 @@ export type Database = {
       }
       orders: {
         Row: {
-          access_instructions: string | null
           address: string | null
           change_order: boolean
           closed: string | null
@@ -490,14 +525,13 @@ export type Database = {
           organization: string | null
           processed: string | null
           project_name: string | null
-          properties: number[] | null
+          property: number | null
           size: number | null
           start_date: string | null
           status: string | null
           trade: string | null
         }
         Insert: {
-          access_instructions?: string | null
           address?: string | null
           change_order?: boolean
           closed?: string | null
@@ -513,14 +547,13 @@ export type Database = {
           organization?: string | null
           processed?: string | null
           project_name?: string | null
-          properties?: number[] | null
+          property?: number | null
           size?: number | null
           start_date?: string | null
           status?: string | null
           trade?: string | null
         }
         Update: {
-          access_instructions?: string | null
           address?: string | null
           change_order?: boolean
           closed?: string | null
@@ -536,7 +569,7 @@ export type Database = {
           organization?: string | null
           processed?: string | null
           project_name?: string | null
-          properties?: number[] | null
+          property?: number | null
           size?: number | null
           start_date?: string | null
           status?: string | null
@@ -555,6 +588,13 @@ export type Database = {
             columns: ["organization"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_property_fkey"
+            columns: ["property"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]

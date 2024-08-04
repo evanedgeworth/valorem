@@ -23,7 +23,7 @@ export default function AddUserModal({ reloadTable }: { reloadTable: () => Promi
   const [type, setType] = useState<"client" | "supplier" | "vendor">("client");
   const [role, setRole] = useState<"admin" | "billing" | "viewer">("admin");
   const router = useRouter();
-  const { user, organization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const {
     register,
     handleSubmit,
@@ -46,7 +46,7 @@ export default function AddUserModal({ reloadTable }: { reloadTable: () => Promi
       let resendResponse = await response.json();
       await supabase
         .from("user_organizations")
-        .insert([{ user: resendResponse.id, organization: organization?.id, type: type, role: type === "client" ? role : "viewer" }])
+        .insert([{ user: resendResponse.id, organization: selectedOrganization?.id, type: type, role: type === "client" ? role : "viewer" }])
         .select();
       await reloadTable();
       setShowModal(false);

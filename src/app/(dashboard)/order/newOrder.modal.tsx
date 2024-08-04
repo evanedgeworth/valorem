@@ -32,7 +32,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
   // const [size, setSize] = useState<number>(0);
   // const [description, setDescription] = useState<string>("");
   const router = useRouter();
-  const { user, organization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const {
     register,
     handleSubmit,
@@ -47,13 +47,13 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
         {
           project_name: data.name,
           start_date: startDate.toDateString(),
-          address: address,
-          location: `POINT(${location.lat} ${location.long})`,
+          // address: address,
+          // location: `POINT(${location.lat} ${location.long})`,
           description: data.description,
           size: data.size,
           trade: data.trade,
-          access_instructions: data.access,
-          organization: organization?.id,
+          // access_instructions: data.access,
+          organization: selectedOrganization?.id,
         },
       ])
       .select()
@@ -100,9 +100,8 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
                 <Label>Project Name</Label>
                 <TextInput placeholder="Enter a name" {...register("name")} required />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="email">Address</Label>
-                {/* <TextInput required value={address} onChange={(e) => setAddress(e.target.value)} ref={inputRef.current} /> */}
                 <Autocomplete
                   {...register("address")}
                   apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
@@ -116,7 +115,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
                     componentRestrictions: { country: "us" },
                   }}
                 />
-              </div>
+              </div> */}
               <div>
                 <Label>Start Date</Label>
                 <Datepicker
@@ -128,14 +127,14 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
                 />
                 {/* <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} /> */}
               </div>
-              <div>
+              {/* <div>
                 <Label>Main Sqft</Label>
                 <TextInput type="number" {...register("size")} required />
-              </div>
-              <div className="max-w-md" id="textarea">
+              </div> */}
+              {/* <div className="max-w-md" id="textarea">
                 <Label htmlFor="comment">Access Instructions</Label>
                 <Textarea placeholder="Please give detailed instructions..." rows={4} {...register("description")} required />
-              </div>
+              </div> */}
               <div className="max-w-md" id="textarea">
                 <Label htmlFor="comment">Description</Label>
                 <Textarea placeholder="Please give a detailed description..." rows={4} {...register("access")} required />

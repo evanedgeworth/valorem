@@ -1,19 +1,18 @@
 "use client";
 
 import { SidebarContext } from "@/context/sidebarContext";
-import { Badge, Sidebar } from "flowbite-react";
+import { Sidebar } from "flowbite-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useContext, useEffect } from "react";
-import { HiArrowSmRight, HiChartPie, HiInbox, HiOutlineClipboardList, HiBell, HiTable, HiUser, HiViewBoards, HiCalendar } from "react-icons/hi";
+import { HiChartPie, HiInbox, HiBell, HiUser, HiCalendar } from "react-icons/hi";
 import { HiBolt, HiOutlineHomeModern } from "react-icons/hi2";
-import { RiMoneyDollarBoxLine, RiSettings3Fill } from "react-icons/ri";
+import { RiSettings3Fill } from "react-icons/ri";
 import { TbDeviceIpadDollar } from "react-icons/tb";
 
 export default function SidebarNav() {
   const { collapseSidebar, setCollapseSidebar } = useContext(SidebarContext);
   const pathname = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     // Function to check window size and update state

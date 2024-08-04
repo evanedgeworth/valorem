@@ -19,9 +19,9 @@ export default function Settings({ order }: { order: Order }) {
   const [size, setSize] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [accessInstructions, setAccessInstructions] = useState<string>("");
-  const { user, organization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const router = useRouter();
-  const currentOrganization = user?.user_organizations?.find((org) => organization?.id === org.organization);
+  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
 
   useEffect(() => {
     if (order) {
@@ -29,7 +29,7 @@ export default function Settings({ order }: { order: Order }) {
       setAddress(order.address || "");
       setDescription(order.description || "");
       setTrade(order.trade || "");
-      setAccessInstructions(order.access_instructions || "");
+      //setAccessInstructions(order.access_instructions || "");
       let geometry: any;
       try {
         geometry = wkx.Geometry.parse(Buffer.from(String(order.location), "hex"));
@@ -106,7 +106,7 @@ export default function Settings({ order }: { order: Order }) {
             // disabled={user.type === "vendor" || user.type === "supplier"}
           />
         </div>
-        <div>
+        {/* <div>
           <Label htmlFor="email">Address</Label>
           <Autocomplete
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
@@ -121,7 +121,7 @@ export default function Settings({ order }: { order: Order }) {
             }}
             defaultValue={address}
           />
-        </div>
+        </div> */}
         <div>
           <Label>Main Sqft</Label>
           <TextInput
@@ -132,7 +132,7 @@ export default function Settings({ order }: { order: Order }) {
             disabled={currentOrganization?.type === "vendor" || currentOrganization?.type === "supplier"}
           />
         </div>
-        <div>
+        {/* <div>
           <Label htmlFor="comment">Access Instructions</Label>
           <Textarea
             id="instructions"
@@ -142,7 +142,7 @@ export default function Settings({ order }: { order: Order }) {
             value={accessInstructions}
             onChange={(e) => setAccessInstructions(e.target.value)}
           />
-        </div>
+        </div> */}
         <div>
           <Label htmlFor="comment">Description</Label>
           <Textarea

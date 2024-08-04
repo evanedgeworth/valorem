@@ -18,12 +18,15 @@ import { useRouter } from "next/navigation";
 import { BsArrowUpShort, BsArrowDownShort, BsPlus } from "react-icons/bs";
 import { BiSortDown } from "react-icons/bi";
 import { UserContext } from "@/context/userContext";
-import Loading from "../../(main)/loading";
-type Order = Database["public"]["Tables"]["orders"]["Row"];
+import request from "@/utils/request";
+import type { Property } from "@/types";
+type Order = Database["public"]["Tables"]["orders"]["Row"] & {
+  properties: Property;
+};
 type OrderArray = [Order];
 type Orginizations = Database["public"]["Tables"]["organizations"]["Row"];
 
-export default function ClientView() {
+export default function OrderList() {
   const supabase = createClientComponentClient<Database>();
   const [orders, setOrders] = useState<OrderArray[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -36,21 +39,33 @@ export default function ClientView() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
   const router = useRouter();
-  const { user, organization, allOrganizations } = useContext(UserContext);
+  const { user, selectedOrganization, allOrganizations } = useContext(UserContext);
   const [selectedOrginization, setSelectedOrginization] = useState<string>("");
-  const currentOrganization = user?.user_organizations?.find((org) => organization?.id === org.organization);
+  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
+
+  // const orderList = await getOrderList(selectedOrganization?.id)
 
   // useEffect(() => {
-  //   if (allOrganizations.length > 0) {
-  //     setSelectedOrginization(allOrganizations[0].id);
-  //   }
-  // }, [allOrganizations]);
+  //   getOrders();
+  // }, []);
+
+  async function getOrders() {
+    setTableIsLoading(true);
+    const { data }: { data: { orders: Order } } = await request({
+      url: `/orders/list`,
+      method: "GET",
+      params: { organization: selectedOrganization?.id, includeProperty: true },
+    });
+
+    setOrders(MergeOrdersbyKey(data.orders, "order_id"));
+    setTableIsLoading(false);
+  }
 
   useEffect(() => {
-    if (organization) {
+    if (selectedOrganization) {
       getOrders();
     }
-  }, [sortBy, searchInput, organization?.id]);
+  }, [sortBy, searchInput, selectedOrganization?.id]);
 
   useEffect(() => {
     if (orders.length !== 0) {
@@ -58,22 +73,22 @@ export default function ClientView() {
     }
   }, [orders]);
 
-  async function getOrders() {
-    setTableIsLoading(true);
-    let searchOrders = supabase.from("orders").select("*").order(sortBy, { ascending: true });
-    if (searchInput) searchOrders.textSearch("project_name", searchInput);
-    searchOrders.eq("organization", organization?.id || 0);
+  // async function getOrders() {
+  //   setTableIsLoading(true);
+  //   let searchOrders = supabase.from("orders").select("*, properties(*)").order(sortBy, { ascending: true });
+  //   if (searchInput) searchOrders.textSearch("project_name", searchInput);
+  //   searchOrders.eq("organization", selectedOrganization?.id || 0);
 
-    await searchOrders.then(({ data: orders, error }) => {
-      if (error) {
-        console.error(error);
-      }
-      if (orders) {
-        setOrders(MergeOrdersbyKey(orders, "order_id"));
-      }
-    });
-    setTableIsLoading(false);
-  }
+  //   await searchOrders.then(({ data: orders, error }) => {
+  //     if (error) {
+  //       console.error(error);
+  //     }
+  //     if (orders) {
+  //       setOrders(MergeOrdersbyKey(orders, "order_id"));
+  //     }
+  //   });
+  //   setTableIsLoading(false);
+  // }
 
   async function getProducts() {
     const orderIds = orders.flatMap((innerArray) => innerArray.map((item) => item.id)).join(",");
@@ -158,7 +173,7 @@ export default function ClientView() {
   return (
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
-        <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Active Orders</h5>
+        <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Orders</h5>
         {currentOrganization?.type === "client" && <NewOrderModal showModal={showModal} setShowModal={setShowModal} />}
       </div>
 
@@ -224,7 +239,9 @@ export default function ClientView() {
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{order[0].order_id}</Table.Cell>
                   <Table.Cell>{order[0].project_name}</Table.Cell>
                   <Table.Cell>{moment(order[0].start_date).format("MMMM DD, YYYY")}</Table.Cell>
-                  <Table.Cell className="truncate">{order[0].address}</Table.Cell>
+                  <Table.Cell className="truncate">{`${order[0].properties?.address_line1}${
+                    (order[0].properties?.address_line2 && " " + order[0].properties?.address_line2) || ""
+                  }, ${order[0].properties?.city} ${order[0].properties?.state} ${order[0].properties?.zip_code}`}</Table.Cell>
                   <Table.Cell>
                     <OrderStatus status={order[0].status || ""} />
                   </Table.Cell>
@@ -284,7 +301,7 @@ export default function ClientView() {
                                     </a>
                                     <span className="flex flex-row text-sm">
                                       <p className="flex gap-1">
-                                        <p>Total:</p>${co.cost}
+                                        <span>Total:</span>${co.cost}
                                       </p>
                                       <PriceChangeStatus currentItem={co?.cost} previousItem={array[index + 1]?.cost} />
                                     </span>

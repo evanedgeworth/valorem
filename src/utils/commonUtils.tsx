@@ -3,6 +3,10 @@ type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
   item_id: Item;
   status?: string;
+  order_item_assignments?: {
+    id: string; user: {
+    id: any; first_name: string; last_name: string 
+} }[];
 };
 interface COProduct extends Product {
   status: string;
@@ -187,3 +191,9 @@ export function cn(...inputs: ClassValue[]) {
 export function sortOrderTable(a: Product[], b: Product[]) {
   return (a[0].room || "").localeCompare(b[0].room || "");
 }
+
+export const acronym = (str: string) => {
+  let matches = str.match(/\b(\w)/g);
+  let acronym = matches ? matches.join("") : "";
+  return acronym;
+};

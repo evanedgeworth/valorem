@@ -14,6 +14,7 @@ import ConfirmationModal from "@/components/confirmation.modal";
 import { cn, formatToUSD } from "@/utils/commonUtils";
 import { UserContext } from "@/context/userContext";
 import moment from "moment";
+import Link from "next/link";
 type User = Database["public"]["Tables"]["profiles"]["Row"] & { user_organizations: User_Organizations[] };
 type User_Organizations = Database["public"]["Tables"]["user_organizations"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
@@ -22,7 +23,7 @@ const status = ["paid", "unpaid", "overdue", "pending"];
 
 export default function InvoiceTable({ user }: { user: User }) {
   const supabase = createClientComponentClient<Database>();
-  const [invoices, setInvoices] = useState<any[]>();
+  const [invoices, setInvoices] = useState<Invoice[]>();
   const [tableIsLoading, setTableIsLoading] = useState<boolean>(false);
   const [filterCardValue, setFilterCardValue] = useState("");
   const [showRemoveUserModal, setShowRemoveUserModal] = useState<boolean>(false);
@@ -30,19 +31,19 @@ export default function InvoiceTable({ user }: { user: User }) {
   const [searchInput, setSearchInput] = useState<string>("");
   const [market, setMarket] = useState<string>("");
   const selectedUser = useRef<User>();
-  const { organization } = useContext(UserContext);
+  const { selectedOrganization } = useContext(UserContext);
 
   useEffect(() => {
-    if (organization) {
+    if (selectedOrganization) {
       getUserTable();
     }
-  }, [searchInput, market, organization?.id, filterCardValue]);
+  }, [searchInput, market, selectedOrganization?.id, filterCardValue]);
 
   async function getUserTable() {
     setTableIsLoading(true);
     let searchInvoices = supabase.from("invoices").select("*, order!inner(*)");
     if (searchInput) searchInvoices.textSearch("order.project_name", searchInput);
-    if (filterCardValue) searchInvoices.eq("status", filterCardValue);
+    if (filterCardValue) searchInvoices.eq("status", filterCardValue).returns<Invoice[]>();
     // searchInvoices.returns<Invoice[]>();
     // if (market) searchUsers.or(`markets.cs.{${market}}`);
 
@@ -51,7 +52,7 @@ export default function InvoiceTable({ user }: { user: User }) {
         console.error(error);
       }
       if (invoices) {
-        setInvoices(invoices);
+        setInvoices(invoices as any);
       }
     });
     setTableIsLoading(false);
@@ -61,7 +62,7 @@ export default function InvoiceTable({ user }: { user: User }) {
     let { data, error } = await supabase
       .from("user_organizations")
       .delete()
-      .eq("id", selectedUser.current?.user_organizations.find((value) => value.organization === organization?.id)?.id || "")
+      .eq("id", selectedUser.current?.user_organizations.find((value) => value.organization === selectedOrganization?.id)?.id || "")
       .select();
     if (data) {
       setShowRemoveUserModal(false);
@@ -120,7 +121,7 @@ export default function InvoiceTable({ user }: { user: User }) {
       </div>
       <div className="flex justify-between gap-3 mb-4">
         <Card
-          className={cn("flex flex-1 hover:bg-gray-50 cursor-pointer", filterCardValue === "paid" && " bg-gray-100")}
+          className={cn("flex flex-1 hover:bg-gray-50 hover:dark:bg-slate-800 cursor-pointer", filterCardValue === "paid" && " bg-gray-100")}
           onClick={() => handleSelectFilterCard("paid")}
         >
           <Badge size="xs" color="green" className="justify-center w-fit">
@@ -130,7 +131,7 @@ export default function InvoiceTable({ user }: { user: User }) {
           <p className="font-normal text-gray-700 dark:text-gray-400">5 Invoices</p>
         </Card>
         <Card
-          className={cn("flex flex-1 hover:bg-gray-50 cursor-pointer", filterCardValue === "unpaid" && " bg-gray-100")}
+          className={cn("flex flex-1 hover:bg-gray-50 hover:dark:bg-slate-800 cursor-pointer", filterCardValue === "unpaid" && " bg-gray-100")}
           onClick={() => handleSelectFilterCard("unpaid")}
         >
           <Badge size="xs" color="red" className="justify-center w-fit">
@@ -140,7 +141,7 @@ export default function InvoiceTable({ user }: { user: User }) {
           <p className="font-normal text-gray-700 dark:text-gray-400">1 Invoices</p>
         </Card>
         <Card
-          className={cn("flex flex-1 hover:bg-gray-50 cursor-pointer", filterCardValue === "pending" && " bg-gray-100")}
+          className={cn("flex flex-1 hover:bg-gray-50 hover:dark:bg-slate-800 cursor-pointer", filterCardValue === "pending" && " bg-gray-100")}
           onClick={() => handleSelectFilterCard("pending")}
         >
           <Badge size="xs" color="yellow" className="justify-center w-fit">
@@ -150,7 +151,7 @@ export default function InvoiceTable({ user }: { user: User }) {
           <p className="font-normal text-gray-700 dark:text-gray-400">3 Invoices</p>
         </Card>
         <Card
-          className={cn("flex flex-1 hover:bg-gray-50 cursor-pointer", filterCardValue === "overdue" && " bg-gray-100")}
+          className={cn("flex flex-1 hover:bg-gray-50 hover:dark:bg-slate-800 cursor-pointer", filterCardValue === "overdue" && " bg-gray-100")}
           onClick={() => handleSelectFilterCard("overdue")}
         >
           <Badge size="xs" color="gray" className="justify-center w-fit">
@@ -180,16 +181,7 @@ export default function InvoiceTable({ user }: { user: User }) {
               ))}
             </Select>
           </div>
-
-          {/* <Dropdown label={<BiSortDown size={17} className=" dark:text-white" />} arrowIcon={false} color="white">
-            <Dropdown.Header>
-              <strong>Sort By</strong>
-            </Dropdown.Header>
-            <Dropdown.Item onClick={() => setSortBy("project_name")}>Project Name</Dropdown.Item>
-            <Dropdown.Item onClick={() => setSortBy("start_date")}>Starting Date</Dropdown.Item>
-          </Dropdown> */}
         </div>
-        {/* <AddUserModal reloadTable={getUserTable} /> */}
       </div>
       {tableIsLoading ? (
         <div className=" ml-auto mr-auto mt-72 text-center">
@@ -206,7 +198,7 @@ export default function InvoiceTable({ user }: { user: User }) {
             <Table.HeadCell>Sent Date</Table.HeadCell>
             <Table.HeadCell>Amount</Table.HeadCell>
             <Table.HeadCell>Status</Table.HeadCell>
-            <Table.HeadCell></Table.HeadCell>
+            <Table.HeadCell>Action</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
             {invoices &&
@@ -227,26 +219,9 @@ export default function InvoiceTable({ user }: { user: User }) {
                       <InvoiceStatus invoice={invoice} />
                     </Table.Cell>
                     <Table.Cell className="">
-                      <div className="relative cursor-pointer">
-                        {/* <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
-                          <Dropdown.Item
-                            onClick={() => {
-                              selectedUser.current = invoice;
-                              setShowUserDetailsDrawer(true);
-                            }}
-                          >
-                            View
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() => {
-                              selectedUser.current = invoice;
-                              setShowRemoveUserModal(true);
-                            }}
-                          >
-                            Remove from team
-                          </Dropdown.Item>
-                        </Dropdown> */}
-                      </div>
+                      <Link href={"/invoices/" + invoice.id}>
+                        <Button>Pay Invoice</Button>
+                      </Link>
                     </Table.Cell>
                   </Table.Row>
                 </Fragment>

@@ -25,20 +25,20 @@ export default function UserTable({ user }: { user: User }) {
   const [market, setMarket] = useState<string>("");
   const selectedUser = useRef<User>();
   // const organization = user.user_organizations[0];
-  const { organization } = useContext(UserContext);
+  const { selectedOrganization } = useContext(UserContext);
 
   useEffect(() => {
-    if (organization) {
+    if (selectedOrganization) {
       getUserTable();
     }
-  }, [searchInput, market, organization?.id]);
+  }, [searchInput, market, selectedOrganization?.id]);
 
   async function getUserTable() {
     setTableIsLoading(true);
     let searchUsers = supabase
       .from("profiles")
       .select("*, user_organizations!inner(*)")
-      .eq("user_organizations.organization", organization?.id || 0);
+      .eq("user_organizations.organization", selectedOrganization?.id || 0);
     if (searchInput) searchUsers.textSearch("first_name", searchInput);
     if (market) searchUsers.or(`markets.cs.{${market}}`);
 
@@ -57,7 +57,7 @@ export default function UserTable({ user }: { user: User }) {
     let { data, error } = await supabase
       .from("user_organizations")
       .delete()
-      .eq("id", selectedUser.current?.user_organizations.find((value) => value.organization === organization?.id)?.id || "")
+      .eq("id", selectedUser.current?.user_organizations.find((value) => value.organization === selectedOrganization?.id)?.id || "")
       .select();
     if (data) {
       setShowRemoveUserModal(false);
@@ -66,8 +66,8 @@ export default function UserTable({ user }: { user: User }) {
   }
 
   function AccountType({ user }: { user: User }) {
-    const type = user.user_organizations.find((org) => org.organization === organization?.id)?.type;
-    const role = user.user_organizations.find((org) => org.organization === organization?.id)?.role;
+    const type = user.user_organizations.find((org) => org.organization === selectedOrganization?.id)?.type;
+    const role = user.user_organizations.find((org) => org.organization === selectedOrganization?.id)?.role;
     switch (type) {
       case "client":
         switch (role) {

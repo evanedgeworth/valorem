@@ -1,6 +1,6 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import { Dropdown, Navbar, Avatar, Button, Spinner } from "flowbite-react";
+import { Dropdown, Navbar, Avatar, Button, Spinner, DarkThemeToggle } from "flowbite-react";
 import { Session, createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../types/supabase";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ type User = Database["public"]["Tables"]["profiles"]["Row"];
 export default function NavbarWithDropdown() {
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
-  const { user, organization, setOrganization, allOrganizations } = useContext(UserContext);
+  const { user, selectedOrganization, setSelectedOrganization, allOrganizations } = useContext(UserContext);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -76,7 +76,7 @@ export default function NavbarWithDropdown() {
                           renderTrigger={() => (
                             <span>
                               <Button pill color="gray">
-                                {organization?.name}
+                                {selectedOrganization?.name}
                               </Button>
                             </span>
                           )}
@@ -87,7 +87,7 @@ export default function NavbarWithDropdown() {
                           </Dropdown.Header>
                           {allOrganizations.length > 1 &&
                             allOrganizations.map((org) => (
-                              <Dropdown.Item onClick={() => setOrganization(org)} key={org.id}>
+                              <Dropdown.Item onClick={() => setSelectedOrganization(org)} key={org.id}>
                                 {org.name}
                               </Dropdown.Item>
                             ))}

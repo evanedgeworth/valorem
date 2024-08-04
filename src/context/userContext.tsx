@@ -11,8 +11,8 @@ type User_Organizations = Database["public"]["Tables"]["user_organizations"]["Ro
 type Orginization = Database["public"]["Tables"]["organizations"]["Row"];
 type UserContext = {
   user: User | undefined;
-  organization: Orginization | undefined;
-  setOrganization: (value: Orginization) => void;
+  selectedOrganization: Orginization | undefined;
+  setSelectedOrganization: (value: Orginization) => void;
   allOrganizations: Orginization[];
   SignOut: () => Promise<void>;
 };
@@ -23,8 +23,9 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   const supabase = createClientComponentClient<Database>();
   // const [user, setUser] = useState<User>();
   const [user, setUser] = useLocalStorage("currentUser", {} as User);
+  const [selectedOrganization, setSelectedOrganization] = useLocalStorage("currentOrganization", {} as Orginization);
   // const [organization, setOrganization] = useLocalStorage("currentUserOrganizations", {} as Orginization);
-  const [organization, setOrganization] = useState<Orginization>();
+  // const [organization, setOrganization] = useState<Orginization>();
   const [allOrganizations, setAllOrganizations] = useState<Orginization[]>([]);
   const [session, setSession] = useState<Session>();
   const router = useRouter();
@@ -65,7 +66,12 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
         .flatMap((item) => item.organizations || []) // Flatten and filter out null values
         .filter(Boolean);
 
-      setOrganization(formattedOrganizations[0]);
+      if (!selectedOrganization) {
+        setSelectedOrganization(formattedOrganizations[0]);
+      } else {
+        setSelectedOrganization(selectedOrganization);
+      }
+
       setAllOrganizations(orgs.flatMap((item) => item.organizations || []));
     }
     if (error) {
@@ -104,5 +110,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     };
   }, []);
 
-  return <UserContext.Provider value={{ user, organization, setOrganization, allOrganizations, SignOut }}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={{ user, selectedOrganization, setSelectedOrganization, allOrganizations, SignOut }}>{children}</UserContext.Provider>
+  );
 }

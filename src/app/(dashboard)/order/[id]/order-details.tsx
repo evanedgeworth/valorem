@@ -1,4 +1,5 @@
 "use client";
+
 import { Accordion, Button, Spinner, Dropdown } from "flowbite-react";
 import { useState, useEffect, useRef, useContext } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -7,7 +8,7 @@ import moment from "moment";
 import NewProductModal from "./components/newProduct.modal";
 import ApproveCOModal from "./components/approve.modal";
 import { UserContext } from "@/context/userContext";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { MdClose, MdDashboard, MdCheck, MdOutlineModeEdit } from "react-icons/md";
 import { HiAdjustments, HiClipboardList, HiUserCircle } from "react-icons/hi";
 import { IoEye, IoEyeOff } from "react-icons/io5";
@@ -15,7 +16,6 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { BiHistory } from "react-icons/bi";
 import ConfirmationModal from "@/components/confirmation.modal";
 import OrderTimeLine from "./components/timeLine";
-import ChangeOrder from "./components/changeOrder";
 import ActiveOrder from "./components/activeOrder";
 import Warranties from "./components/warranties";
 import Settings from "./components/settings";
@@ -24,20 +24,23 @@ import { compareArrays, formatToUSD } from "@/utils/commonUtils";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
   item_id: Item;
+  // order_item_assignment: { user: { first_name: string; last_name: string }[] };
 };
-type Order = Database["public"]["Tables"]["orders"]["Row"];
-interface COProduct extends Product {
-  status: string;
-}
+type Property = Database["public"]["Tables"]["properties"]["Row"];
+type Order = Database["public"]["Tables"]["orders"]["Row"] & {
+  properties: Property;
+  line_items: Product[];
+};
+
 import { calculateTotalPrice } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
 import CSVSelector from "@/components/csvSelector";
+import request from "@/utils/request";
 
-export default function OrderPage({ order }: { order: Order }) {
-  const pathname = usePathname();
+export default function OrderDetails({ order }: { order: Order }) {
   const supabase = createClientComponentClient<Database>();
   //   const [order, setOrder] = useState<Order>();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(order.line_items);
   const [addedProducts, setAddedProducts] = useState<Product[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditMenu, setShowEditMenu] = useState<boolean>(false);
@@ -57,58 +60,70 @@ export default function OrderPage({ order }: { order: Order }) {
   const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
 
   useEffect(() => {
-    getProducts();
-    if (order.change_order) getPreviousOrder();
+    // getProducts();
     // getOrders();
   }, []);
 
-  //   async function getOrders() {
-  //     let { data: order, error } = await supabase.from("orders").select("*").eq("id", params.id).single();
+  // async function getOrders() {
+  //   let { data: order, error } = await supabase.from("orders").select("*, properties(*)").eq("id", params.id).returns<Order>();
+  //   if (order) {
+  //     setOrder(order);
+  //     if (order.change_order) {
+  //       getPreviousOrder();
+  //     }
+  //   }
+  //   if (error) alert(error.message);
+  // }
+
+  // async function getProducts() {
+  //   setProductsLoading(true);
+  //   let { data: products, error } = await supabase
+  //     .from("order_items")
+  //     .select("*, item_id!inner(*), order_item_assignments(id,user(id,first_name,last_name))")
+  //     .eq("order_id", params.id)
+  //     .returns<Product[]>();
+  //   if (products) {
+  //     setProducts(products);
+  //     coProducts.current = products;
+  //     setProductsLoading(false);
+  //   }
+  // }
+
+  async function getOrders() {
+    console.log("DO NOTHING");
+  }
+
+  async function getProducts() {
+    console.log("DO NOTHING");
+  }
+
+  //   async function getPreviousOrder() {
+  //     let { data: order, error } = await supabase
+  //       .from("orders")
+  //       .select("id")
+  //       .eq("order_id", orderId)
+  //       .neq("id", params.id)
+  //       .order("id", { ascending: false })
+  //       .limit(1)
+  //       .single();
+
   //     if (order) {
-  //       setOrder(order);
-  //       if (order.change_order) {
-  //         getPreviousOrder();
-  //       }
+  //       getPreviousProducts(order.id);
   //     }
   //     if (error) alert(error.message);
   //   }
-
-  async function getProducts() {
-    setProductsLoading(true);
-    let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", order.id).returns<Product[]>();
-    if (products) {
-      setProducts(products);
-      coProducts.current = products;
-      setProductsLoading(false);
-    }
-  }
-
-  async function getPreviousOrder() {
-    let { data: orderPrev, error } = await supabase
-      .from("orders")
-      .select("id")
-      .eq("order_id", orderId)
-      .neq("id", order.id)
-      .order("id", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (order) {
-      getPreviousProducts(order.id);
-    }
-    if (error) alert(error.message);
-  }
 
   async function getPreviousProducts(id: number) {
     let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", id);
     if (products) {
       previousProducts.current = products;
-      getChangeOrder();
+      //   getChangeOrder();
     }
   }
 
   function handleTabChange(selectedTab: string) {
-    router.push(`${pathname}/?orderId=${order?.order_id}&view=${selectedTab}`);
+    console.log("H");
+    //router.push(`/order/${params.id}?orderId=${order?.order_id}&view=${selectedTab}`);
   }
 
   function getChangeOrder() {
@@ -249,7 +264,9 @@ export default function OrderPage({ order }: { order: Order }) {
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
-              {order.address}
+              {`${order.properties?.address_line_1}${(order.properties?.address_line_2 && " " + order.properties?.address_line_2) || ""}, ${
+                order.properties?.city
+              } ${order.properties?.state} ${order.properties?.zip_code}`}
             </p>
 
             <Accordion className=" border-0">
@@ -261,7 +278,7 @@ export default function OrderPage({ order }: { order: Order }) {
                   <p className="mb-2 text-sm text-gray-900 dark:text-white">
                     <strong>Access Instructions:</strong>
                     <br />
-                    {/* {order.access_instructions} */}
+                    {order.properties?.access_instructions}
                   </p>
                   <p className="mb-2 text-sm text-gray-900 dark:text-white">
                     <strong>Allocated Amount: </strong>
@@ -281,7 +298,7 @@ export default function OrderPage({ order }: { order: Order }) {
                   <MdClose size={20} />
                   Deny Changes
                 </Button>
-                {/* <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(params.id)} /> */}
+                <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(order.id)} />
               </div>
             )}
             {order && <OrderTimeLine order={order} />}
@@ -326,7 +343,6 @@ export default function OrderPage({ order }: { order: Order }) {
                 <Spinner aria-label="Loading" size="xl" />
               </div>
             ) : order.change_order ? (
-              // <ChangeOrder products={products} />
               <ActiveOrder
                 isEditing={showEditMenu}
                 products={[...products, ...addedProducts]}
@@ -336,6 +352,7 @@ export default function OrderPage({ order }: { order: Order }) {
                   setAddedProducts([...addedProducts, newProduct]);
                   setShowSubmitButton(true);
                 }}
+                refresh={getProducts}
               />
             ) : (
               <ActiveOrder
@@ -347,6 +364,7 @@ export default function OrderPage({ order }: { order: Order }) {
                   setAddedProducts([...addedProducts, newProduct]);
                   setShowSubmitButton(true);
                 }}
+                refresh={getProducts}
               />
             )}
           </section>
