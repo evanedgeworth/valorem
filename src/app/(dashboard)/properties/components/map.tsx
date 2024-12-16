@@ -56,16 +56,14 @@ export default function MapPage({ properties }: Props) {
     if (properties.length > 0) {
       const promises = properties.map((property) =>
         fromAddress(
-          `${property.address_line1}${(property.address_line2 && " " + property.address_line2) || ""}, ${property.city} ${property.state} ${
-            property.zip_code
+          `${property.address?.address1}${(property.address?.address2 && " " + property.address?.address2) || ""}, ${property.address?.city} ${property.address?.city} ${property.address?.postalCode
           }`
         )
           .then(({ results }) => {
             const { lat, lng } = results[0].geometry.location;
             return {
-              address: `${property.address_line1}${(property.address_line2 && " " + property.address_line2) || ""}, ${property.city} ${
-                property.state
-              } ${property.zip_code}`,
+              address: `${property.address?.address1}${(property.address?.address2 && " " + property.address?.address2) || ""}, ${property.address?.city} ${property.address?.city} ${property.address?.postalCode
+                }`,
               coordinates: { lat, lng },
             };
           })

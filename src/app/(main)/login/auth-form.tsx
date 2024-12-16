@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Database } from "../../../../types/supabase";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
+import request from "@/utils/request";
+import { localStorageKey } from "@/utils/useLocalStorage";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -15,22 +17,24 @@ export default function AuthForm() {
 
   const handleSignIn = async () => {
     setIsloading(true);
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await request({
+      method: 'POST',
+      url: '/login',
+      data: {
+        email,
+        password,
+        deviceToken: ''
+      }
     });
-    if (user) {
+
+    if (res?.status === 200) {
+      localStorage.setItem(localStorageKey.accessToken, res.data.accessToken);
+      localStorage.setItem(localStorageKey.refreshToken, res.data.refreshToken);
+      localStorage.setItem(localStorageKey.expiresAt, res.data.expiresAt);
+      localStorage.setItem(localStorageKey.user, JSON.stringify(res.data.user));
       router.push("/dashboard");
-    }
-    if (error?.message === "Email not confirmed") {
-      alert(error.message);
-      setError(true);
-    }
-    if (error) {
-      alert(error.message);
+    } else {
+      alert(res.data.message);
       setIsloading(false);
     }
   };

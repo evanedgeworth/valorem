@@ -1,10 +1,9 @@
-// request.ts
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { Database } from "../../types/supabase";
+import { localStorageKey } from "./useLocalStorage";
 
 // optionally add base url
-const client = axios.create({ baseURL: "https://5lkrv160l1.execute-api.us-west-2.amazonaws.com/prod" });
+const client = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
 export async function getSession() {
   const supabase = createClientComponentClient();
@@ -20,14 +19,15 @@ export async function getSession() {
 }
 
 const request = async (options: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const session = await getSession();
-
-  client.defaults.headers.common.Authorization = `${session?.access_token}`;
+  const accessToken = typeof window !== 'undefined' ? localStorage.getItem(localStorageKey.accessToken) : '';
+  if (accessToken) {
+    client.defaults.headers.common.Authorization = `${accessToken}`;
+  }
 
   const onSuccess = (response: AxiosResponse) => response;
   const onError = (error: any) => {
     // optionally catch errors and add some additional logging here
-    return error;
+    return error?.response;
   };
 
   return client(options).then(onSuccess).catch(onError);

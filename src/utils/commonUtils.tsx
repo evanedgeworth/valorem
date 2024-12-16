@@ -1,3 +1,4 @@
+import { Address } from "@/types";
 import { Database } from "../../types/supabase";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
@@ -14,8 +15,8 @@ interface COProduct extends Product {
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export function MergeProductsbyKey(array: Product[], key: keyof Product) {
-  const arrays: Array<Product[]> = [];
+export function MergeProductsbyKey(array: any[], key: string) {
+  const arrays: Array<any[]> = [];
 
   array.forEach((obj: any) => {
     let added = false;
@@ -197,3 +198,32 @@ export const acronym = (str: string) => {
   let acronym = matches ? matches.join("") : "";
   return acronym;
 };
+
+export function parseCurrencyToNumber(currency: string): number {
+  if (currency && typeof currency === 'string') {
+    const numericValue = currency.replace(/[^0-9.]/g, "");
+    return parseFloat(numericValue);
+  } else {
+    return 0;
+  }
+}
+
+export function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number = 500 // Default wait time is 500ms
+): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return (...args: Parameters<T>): void => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
+  };
+}
+
+export function parseAddress(address: Address) {
+  return `${address?.address1}${(address?.address2 && " " + address?.address2) || ""}, ${address?.city || ''} ${address?.state || ''} ${address?.postalCode || ''}`
+}

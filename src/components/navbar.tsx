@@ -1,8 +1,6 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
 import { Dropdown, Navbar, Avatar, Button, Spinner, DarkThemeToggle } from "flowbite-react";
-import { Session, createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../types/supabase";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
 import Valorem from "../../public/valorem.svg";
@@ -13,41 +11,14 @@ import { PiHammer } from "react-icons/pi";
 import { MdOutlineCalendarToday, MdNotificationsNone } from "react-icons/md";
 import { FiBell } from "react-icons/fi";
 import { HiChartPie, HiMiniSquares2X2 } from "react-icons/hi2";
-type User = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default function NavbarWithDropdown() {
-  const supabase = createClientComponentClient<Database>();
   const router = useRouter();
-  const { user, selectedOrganization, setSelectedOrganization, allOrganizations } = useContext(UserContext);
-  const [session, setSession] = useState<Session | null>(null);
+  const { user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    handleGetSession();
-  }, []);
-
-  async function handleGetSession() {
-    setIsLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-    if (session) {
-      setSession(session);
-    }
-    setIsLoading(false);
-  }
-
   async function handleSignOut() {
-    let { error } = await supabase.auth.signOut();
-    if (error) {
-      alert(error.message);
-    } else {
-      setSession(null);
-      // handleGetSession();
-      // console.log("SESSION HERE", session);
-      // router.replace("/");
-    }
+    signOut();
   }
 
   return (
@@ -63,7 +34,7 @@ export default function NavbarWithDropdown() {
           <div className="flex flex-shrink-0 justify-between items-center ml-4 lg:order-2">
             {isLoading ? (
               <Spinner />
-            ) : session ? (
+            ) : user?.id ? (
               <>
                 <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex items-center">
                   {allOrganizations && allOrganizations.length > 0 && (
@@ -211,7 +182,7 @@ export default function NavbarWithDropdown() {
                   <Dropdown inline label={<Avatar alt="User settings" rounded size="sm" />}>
                     <Dropdown.Header>
                       {/* <span className="block text-sm">{user.first_name + " " + user.last_name}</span> */}
-                      <span className="block truncate text-sm font-medium">{session.user.email}</span>
+                      <span className="block truncate text-sm font-medium">{user.email}</span>
                     </Dropdown.Header>
                     <Dropdown.Item href="/settings">Settings</Dropdown.Item>
                     <Dropdown.Divider />

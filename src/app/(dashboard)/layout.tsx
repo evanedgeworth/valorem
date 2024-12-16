@@ -8,7 +8,6 @@ import { Flowbite, ThemeModeScript } from "flowbite-react";
 import { flowbiteTheme } from "@/app/theme";
 import SidebarProvider from "@/context/sidebarContext";
 import React from "react";
-import { HydrationBoundary, QueryClient, QueryClientProvider, dehydrate } from "@tanstack/react-query";
 import QueryProvider from "@/utils/get-query-client";
 
 const RootLayout: FC<PropsWithChildren> = function ({ children }) {

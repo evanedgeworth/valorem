@@ -8,6 +8,7 @@ import { Database } from "../../../../types/supabase";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 import moment from "moment";
 import { numberWithCommas } from "@/utils/commonUtils";
+import request from "@/utils/request";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
   item_id: Item;
@@ -15,7 +16,7 @@ type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type ProductArray = [Product];
 
-export default function DownloadPDF({ orderId, id }: { orderId: number; id: number }) {
+export default function DownloadPDF({ orderId, id }: { orderId: string; id: string }) {
   const supabase = createClientComponentClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -44,18 +45,23 @@ export default function DownloadPDF({ orderId, id }: { orderId: number; id: numb
   const generatePdfDocument = async () => {
     setIsLoading(true);
     let order = await getOrders();
-    let products = await getProducts();
+    console.log('====', order);
+    // let products = await getProducts();
 
-    const blob = await pdf(<MyDocument products={products} />).toBlob();
-    FileSaver.saveAs(blob, `${order?.project_name}-${moment(order?.created_at).format("MMM DD, YYYY")}`);
+    // const blob = await pdf(<MyDocument products={products} />).toBlob();
+    // FileSaver.saveAs(blob, `${order?.project_name}-${moment(order?.created_at).format("MMM DD, YYYY")}`);
     setIsLoading(false);
   };
 
   async function getOrders() {
-    let { data: order, error } = await supabase.from("orders").select("*").eq("id", orderId).single();
-    if (order) {
-      return order;
+    let res = await request({
+      url: `/scope/${orderId}`
+    });
+
+    if (res?.status === 200) {
+      return res.data;
     }
+    throw Error(res?.data?.message);
   }
 
   async function getProducts() {
