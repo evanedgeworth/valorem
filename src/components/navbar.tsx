@@ -1,4 +1,5 @@
 "use client";
+
 import { useContext, useEffect, useState } from "react";
 import { Dropdown, Navbar, Avatar, Button, Spinner, DarkThemeToggle } from "flowbite-react";
 import { useRouter } from "next/navigation";
@@ -15,7 +16,11 @@ import { HiChartPie, HiMiniSquares2X2 } from "react-icons/hi2";
 export default function NavbarWithDropdown() {
   const router = useRouter();
   const { user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut } = useContext(UserContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   async function handleSignOut() {
     signOut();
@@ -58,7 +63,7 @@ export default function NavbarWithDropdown() {
                           </Dropdown.Header>
                           {allOrganizations.length > 1 &&
                             allOrganizations.map((org) => (
-                              <Dropdown.Item onClick={() => setSelectedOrganization(org)} key={org.id}>
+                              <Dropdown.Item onClick={() => setSelectedOrganization(org)} key={org.organizationId}>
                                 {org.name}
                               </Dropdown.Item>
                             ))}

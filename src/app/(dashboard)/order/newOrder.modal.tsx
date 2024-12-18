@@ -53,7 +53,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
           size: data.size,
           trade: data.trade,
           // access_instructions: data.access,
-          organization: selectedOrganization?.id,
+          organization: selectedOrganization?.organizationId,
         },
       ])
       .select()

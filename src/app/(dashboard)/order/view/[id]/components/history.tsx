@@ -98,7 +98,7 @@ export default function History({ order }: { order: Order }) {
                     </p>
                   </Timeline.Title>
                 </div>
-                <DownloadPDF orderId={co.id} id={co.id} />
+                {/* <DownloadPDF order={order} /> */}
               </div>
             </Timeline.Content>
           </Timeline.Item>

@@ -135,3 +135,25 @@ export interface ScopeItemRevision {
     }[];
   }[];
 }
+
+export type User = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  roleId: string;
+  markets: string[];
+  profileImage: {
+    fileId: string;
+    fileUrl: string;
+    fileType: string;
+  };
+}
+
+export type Organization = {
+  organizationId: string;
+  roleId: string;
+  userId: string;
+  name: string;
+}

@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "../../../../types/supabase";
 import moment from "moment";
-type Order = Database["public"]["Tables"]["orders"]["Row"];
 import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
 import { useRouter } from "next/navigation";
+import { Scope } from "@/types";
 
 export default function EditOrderModal({
   showModal,
@@ -16,7 +16,7 @@ export default function EditOrderModal({
 }: {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
-  order: Order | null;
+  order: Scope | null;
   refresh: () => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -29,11 +29,8 @@ export default function EditOrderModal({
   const router = useRouter();
 
   useEffect(() => {
-    setName(order?.project_name || "");
-    setAddress(order?.address || "");
-    setTrade(order?.trade || "");
-    setSize(order?.size || 0);
-    setDescription(order?.description || "");
+    setName(order?.projectName || "");
+    setDescription(order?.additionalDetails || "");
   }, [order]);
 
   async function handleCreateOrder() {

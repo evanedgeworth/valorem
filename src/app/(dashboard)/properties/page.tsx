@@ -17,7 +17,7 @@ import ViewPropertyModal from "./components/view-property.modal";
 import request from "@/utils/request";
 import { Property } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { parseAddress } from "@/utils/commonUtils";
+import { checkPermission, parseAddress } from "@/utils/commonUtils";
 
 
 export default function Properties() {
@@ -30,7 +30,7 @@ export default function Properties() {
   const selectedProperty = useRef<Property | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const router = useRouter();
-  const { selectedOrganization, role, isClientRole } = useContext(UserContext);
+  const { selectedOrganization, role } = useContext(UserContext);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "List";
 
@@ -40,7 +40,11 @@ export default function Properties() {
       const res = await request({
         url: `/properties`,
         method: "GET",
-        params: { organizationId: selectedOrganization?.organizationId, includeOrdersCount: true },
+        params: {
+          // organizationId: selectedOrganization?.organizationId,
+          organizationId: "bc3b44a7-03d1-4120-81bc-c580b30dd989",
+          includeOrdersCount: true
+        },
       })
       if (res?.status === 200) {
         return res.data;
@@ -55,8 +59,8 @@ export default function Properties() {
     return result.filter(item => searchInput ? item.name.toLowerCase().includes(searchInput.toLowerCase()) : true);
   }, [data?.properties, searchInput]);
 
-  const getProperties = () => {
-    refetch();
+  const getProperties = async () => {
+    await refetch();
   }
 
   function handleTabChange(selectedTab: string) {
@@ -82,7 +86,7 @@ export default function Properties() {
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
-        {isClientRole && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} refresh={getProperties} />}
+        {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} refresh={getProperties} />}
       </div>
 
       <div className="flex gap-4 mb-4 items-end">
@@ -99,7 +103,7 @@ export default function Properties() {
           </Dropdown.Header>
           <Dropdown.Item onClick={() => setSortBy("address")}>Address</Dropdown.Item>
           <Dropdown.Item onClick={() => setSortBy("createdAt")}>Creation Date</Dropdown.Item>
-        </Dropdown>
+        </Dropdown> */}
         <Button.Group>
           <Button color="gray" value={"List"} onClick={() => handleTabChange("List")}>
             <FaList className="mr-3 h-4 w-4" />
@@ -109,7 +113,7 @@ export default function Properties() {
             <FaMapMarkedAlt className="mr-3 h-4 w-4" />
             Map
           </Button>
-        </Button.Group> */}
+        </Button.Group>
       </div>
       {selectedTab === "List" ? (
         tableIsLoading ? (
@@ -125,7 +129,7 @@ export default function Properties() {
               <Table.HeadCell>Created Date</Table.HeadCell>
               <Table.HeadCell>Type</Table.HeadCell>
               <Table.HeadCell>Orders</Table.HeadCell>
-              {isClientRole && <Table.HeadCell></Table.HeadCell>}
+              <Table.HeadCell></Table.HeadCell>
             </Table.Head>
             <Table.Body className="divide-y">
               {properties.map((property) => (
@@ -146,10 +150,10 @@ export default function Properties() {
                       {property?.orderCount}
                     </Table.Cell>
 
-                    {isClientRole && (
-                      <Table.Cell className="flex justify-end">
-                        <div className="relative cursor-pointer">
-                          <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                    <Table.Cell className="flex justify-end">
+                      <div className="relative cursor-pointer">
+                        <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                          {checkPermission(role, "properties_view") && (
                             <Dropdown.Item
                               onClick={() => {
                                 selectedProperty.current = property;
@@ -158,6 +162,8 @@ export default function Properties() {
                             >
                               View
                             </Dropdown.Item>
+                          )}
+                          {checkPermission(role, "properties_update") && (
                             <Dropdown.Item
                               onClick={() => {
                                 selectedProperty.current = property;
@@ -166,6 +172,8 @@ export default function Properties() {
                             >
                               Edit
                             </Dropdown.Item>
+                          )}
+                          {checkPermission(role, "properties_delete") && (
                             <Dropdown.Item
                               onClick={() => {
                                 setShowDeleteConfirmModal(true);
@@ -174,10 +182,10 @@ export default function Properties() {
                             >
                               Delete
                             </Dropdown.Item>
-                          </Dropdown>
-                        </div>
-                      </Table.Cell>
-                    )}
+                          )}
+                        </Dropdown>
+                      </div>
+                    </Table.Cell>
                   </Table.Row>
                 </Fragment>
               ))}

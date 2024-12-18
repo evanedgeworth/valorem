@@ -5,6 +5,23 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+  const accessToken = req.cookies.get('accessToken');
+
+  // if user is signed in and the current path is / redirect the user to /account
+  if (accessToken && req.nextUrl.pathname === "/login") {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  if (
+    !accessToken &&
+    req.nextUrl.pathname !== "/" &&
+    req.nextUrl.pathname !== "/login" &&
+    req.nextUrl.pathname !== "/signup" &&
+    req.nextUrl.pathname !== "/forgot" &&
+    req.nextUrl.pathname !== "/update-password"
+  ) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
 
   return res;
 }

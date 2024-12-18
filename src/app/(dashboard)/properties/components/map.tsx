@@ -68,7 +68,7 @@ export default function MapPage({ properties }: Props) {
             };
           })
           .catch((error) => {
-            console.error(`Error geocoding address "${property.address_line1}":`, error);
+            console.error(`Error geocoding address "${property}":`, error);
             return null; // Handle error as needed
           })
       );

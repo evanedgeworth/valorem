@@ -33,20 +33,19 @@ export default function ProductsTable({ products }: { products: Product[] }) {
   const [showToast, setShowToast] = useState(false);
   const [assignableUsers, setAssignableUsers] = useState<User[]>([]);
   const searchParams = useSearchParams();
-  const { user, SignOut, selectedOrganization } = useContext(UserContext);
+  const { user, selectedOrganization } = useContext(UserContext);
   const router = useRouter();
   const productSortedByType = MergeProductsbyKey(products, "room");
-  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
 
   useEffect(() => {
     handleGetUsers();
-  }, [currentOrganization?.organization]);
+  }, [selectedOrganization?.organizationId]);
 
   async function handleGetUsers() {
     let { data: users, error } = await supabase
       .from("user_organizations")
       .select("user(id,first_name,last_name,email)")
-      .eq("organization", currentOrganization?.organization || 0)
+      .eq("organization", selectedOrganization?.organizationId || 0)
       .returns<User[]>();
     if (users) {
       setAssignableUsers(users);

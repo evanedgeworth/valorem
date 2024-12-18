@@ -80,7 +80,7 @@ export default function OrderDetailHistory({ order, seeAll }: OrderHistoryProps)
                         </p>
                       </Timeline.Title>
                     </div>
-                    {/* <DownloadPDF orderId={item.id} id={item.id} /> */}
+                    <DownloadPDF order={order} scopeItemRevision={item} />
                   </div>
                 </Timeline.Content>
               </Timeline.Item>

@@ -20,7 +20,7 @@ import ActiveOrder from "./components/activeOrder";
 import Warranties from "./components/warranties";
 import Settings from "./components/settings";
 import History from "./components/history";
-import { compareArrays, formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
+import { checkPermission, compareArrays, formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
   item_id: Item;
@@ -71,7 +71,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
   const property = (propertyData || {}) as Property;
 
-  const supabase = createClientComponentClient<Database>();
   const [products, setProducts] = useState<Product[]>([]);
   const [addedProducts, setAddedProducts] = useState<Product[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -84,7 +83,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [showToast, setShowToast] = useState(false);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "details";
-  const { user, isClientRole } = useContext(UserContext);
+  const { user, role } = useContext(UserContext);
   const router = useRouter();
 
   async function getOrders() {
@@ -228,7 +227,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               </Accordion.Panel>
             </Accordion>
 
-            {isClientRole && order?.change_order && (
+            {checkPermission(role, "orders_update") && order.scopeStatus !== 'APPROVED' && (
               <div className="flex flex-row justify-end gap-4 mt-4">
                 <Button outline color="red" className="h-fit">
                   <MdClose size={20} />
@@ -238,7 +237,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               </div>
             )}
 
-            {!order.change_order && showEditMenu && (
+            {order.scopeStatus !== 'APPROVED' && showEditMenu && (
               <div className="flex justify-end mb-5 gap-4">
                 <CSVSelector
                   showModal={showUploadModal}
@@ -294,8 +293,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         )}
 
         {/* {selectedTab === "warranties" && <Warranties products={products} />} */}
-        {selectedTab === "history" && <History order={order} orderId={order.id} seeAll />}
-        {selectedTab === "settings" && <Settings order={order} />}
+        {selectedTab === "history" && <History order={order} seeAll />}
+        {/* {selectedTab === "settings" && <Settings order={order} />} */}
       </section>
     );
 }

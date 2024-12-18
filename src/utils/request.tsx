@@ -1,6 +1,7 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { localStorageKey } from "./useLocalStorage";
+import Cookies from "js-cookie";
 
 // optionally add base url
 const client = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
@@ -19,7 +20,7 @@ export async function getSession() {
 }
 
 const request = async (options: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const accessToken = typeof window !== 'undefined' ? localStorage.getItem(localStorageKey.accessToken) : '';
+  const accessToken = typeof window !== 'undefined' ? Cookies.get(localStorageKey.accessToken) : '';
   if (accessToken) {
     client.defaults.headers.common.Authorization = `${accessToken}`;
   }

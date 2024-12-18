@@ -1,4 +1,4 @@
-import { Address } from "@/types";
+import { Address, Role } from "@/types";
 import { Database } from "../../types/supabase";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
@@ -224,6 +224,14 @@ export function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-export function parseAddress(address: Address) {
+export function parseAddress(address: Address | undefined) {
+  if (!address) '';
   return `${address?.address1}${(address?.address2 && " " + address?.address2) || ""}, ${address?.city || ''} ${address?.state || ''} ${address?.postalCode || ''}`
+}
+
+export function checkPermission(role: Role | undefined, key: string): boolean {
+  if (!role?.permissions) {
+    return false;
+  }
+  return role.permissions.includes(key);
 }

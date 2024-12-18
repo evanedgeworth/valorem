@@ -7,7 +7,7 @@ import { Database } from "../../../../types/supabase";
 import moment from "moment";
 import NewOrderModal from "./newOrder.modal";
 import Link from "next/link";
-import { MergeOrdersbyKey, debounce, formatToUSD } from "@/utils/commonUtils";
+import { MergeOrdersbyKey, checkPermission, debounce, formatToUSD } from "@/utils/commonUtils";
 import { BiSolidPackage, BiDotsVerticalRounded } from "react-icons/bi";
 import DownloadPDF from "./downloadPDF";
 import { TfiAngleDown, TfiAngleUp } from "react-icons/tfi";
@@ -25,7 +25,7 @@ import OrderHistory from "./orderHistory";
 
 export default function OrderList() {
   const supabase = createClientComponentClient<Database>();
-  
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>("");
   const [sortBy, setSortBy] = useState<"projectName" | "createdAt">("createdAt");
@@ -35,7 +35,6 @@ export default function OrderList() {
   const [viewHistory, setViewHistory] = useState<string | null>(null);
   const router = useRouter();
   const { user, selectedOrganization, role } = useContext(UserContext);
-  const isClientRole = role?.type === 'CLIENT';
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
     queryKey: ['scopes', searchInput, sortBy],
@@ -121,7 +120,7 @@ export default function OrderList() {
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Orders</h5>
-        {isClientRole && <NewOrderModal showModal={showModal} setShowModal={setShowModal} />}
+        {checkPermission(role, "orders_create") && <NewOrderModal showModal={showModal} setShowModal={setShowModal} />}
       </div>
 
       <div className="flex gap-4 mb-4 items-end">
@@ -167,7 +166,7 @@ export default function OrderList() {
             <Table.HeadCell>Starting Date</Table.HeadCell>
             <Table.HeadCell>Address</Table.HeadCell>
             <Table.HeadCell>Status</Table.HeadCell>
-            {isClientRole && <Table.HeadCell></Table.HeadCell>}
+            <Table.HeadCell></Table.HeadCell>
             <Table.HeadCell className="w-1">
               <span className="sr-only">View Order</span>
             </Table.HeadCell>
@@ -186,24 +185,25 @@ export default function OrderList() {
                   <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{order.id}</Table.Cell>
                   <Table.Cell>{order.projectName}</Table.Cell>
                   <Table.Cell>{moment(order.createdAt).format("MMMM DD, YYYY")}</Table.Cell>
-                  <Table.Cell className="truncate">{`${order.property?.address?.address1}${
-                    (order.property?.address?.address2 && " " + order.property?.address?.address2) || ""
-                  }, ${order.property?.address?.city} ${order.property?.address?.state} ${order.property?.address?.postalCode || ''}`}</Table.Cell>
+                  <Table.Cell className="truncate">{`${order.property?.address?.address1}${(order.property?.address?.address2 && " " + order.property?.address?.address2) || ""
+                    }, ${order.property?.address?.city} ${order.property?.address?.state} ${order.property?.address?.postalCode || ''}`}</Table.Cell>
                   <Table.Cell>
                     <OrderStatus status={order.scopeStatus || ""} />
                   </Table.Cell>
                   <Table.Cell className="w-32">
-                    <Link
-                      className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
-                      href={{ pathname: `/order/${encodeURIComponent(order.id)}`, query: { orderId: order.id } }}
-                    >
-                      <p>View Order</p>
-                    </Link>
+                    {checkPermission(role, "orders_view") && (
+                      <Link
+                        className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
+                        href={{ pathname: `/order/${encodeURIComponent(order.id)}`, query: { orderId: order.id } }}
+                      >
+                        <p>View Order</p>
+                      </Link>
+                    )}
                   </Table.Cell>
-                  {isClientRole && (
-                    <Table.Cell className="">
-                      <div className="relative cursor-pointer">
-                        <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                  <Table.Cell className="">
+                    <div className="relative cursor-pointer">
+                      <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                        {checkPermission(role, "orders_update") && (
                           <Dropdown.Item
                             onClick={() => {
                               selectedOrder.current = order;
@@ -212,7 +212,11 @@ export default function OrderList() {
                           >
                             Edit
                           </Dropdown.Item>
+                        )}
+                        {checkPermission(role, "orders_view") && (
                           <Dropdown.Item onClick={() => router.push(`/order/${order.id}?orderId=${order.id}`)}>View</Dropdown.Item>
+                        )}
+                        {checkPermission(role, "orders_delete") && (
                           <Dropdown.Item
                             onClick={() => {
                               setShowDeleteConfirmModal(true);
@@ -221,10 +225,10 @@ export default function OrderList() {
                           >
                             Delete
                           </Dropdown.Item>
-                        </Dropdown>
-                      </div>
-                    </Table.Cell>
-                  )}
+                        )}
+                      </Dropdown>
+                    </div>
+                  </Table.Cell>
                 </Table.Row>
                 {viewHistory === order.id && (
                   <Table.Cell colSpan={8}>

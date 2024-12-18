@@ -100,7 +100,6 @@ export default function History({ order }: { order: Order }) {
                     </p>
                   </Timeline.Title>
                 </div>
-                <DownloadPDF orderId={co.id} id={co.id} />
               </div>
             </Timeline.Content>
           </Timeline.Item>

@@ -19,8 +19,8 @@ export default function Settings({ order }: { order: Order }) {
   const [size, setSize] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [accessInstructions, setAccessInstructions] = useState<string>("");
-  const { user, selectedOrganization, allOrganizations } = useContext(UserContext);
-  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
+  const { user, selectedOrganization, role } = useContext(UserContext);
+  const currentOrganization = role;
   const router = useRouter();
 
   useEffect(() => {

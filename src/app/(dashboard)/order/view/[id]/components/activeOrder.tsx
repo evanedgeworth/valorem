@@ -10,18 +10,13 @@ type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
   item_id: Item;
 };
-type Order = Database["public"]["Tables"]["orders"]["Row"];
-type ProductArray = [COProduct];
-interface COProduct extends Product {
-  status: string;
-}
+
 import { HiCheck } from "react-icons/hi";
 import { useSearchParams } from "next/navigation";
 
 export default function ActiveOrder({ products }: { products: Product[] }) {
   const [showToast, setShowToast] = useState(false);
   const searchParams = useSearchParams();
-  const { user, SignOut } = useContext(UserContext);
   const router = useRouter();
   const productSortedByType = MergeProductsbyKey(products, "room");
 

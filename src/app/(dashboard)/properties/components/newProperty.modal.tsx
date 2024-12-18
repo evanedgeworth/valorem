@@ -88,7 +88,7 @@ export default function NewPropertyModal({
       data: {
         address_line1: data.address1,
         address_line2: data.address2,
-        organization: selectedOrganization?.id,
+        organization: selectedOrganization?.organizationId,
         city: city,
         state: state,
         zip_code: data.zip_code,

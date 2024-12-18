@@ -6,6 +6,8 @@ import { Database } from "../../../../types/supabase";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
 import request from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
+import Cookies from 'js-cookie';
+import moment from "moment";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -28,10 +30,18 @@ export default function AuthForm() {
     });
 
     if (res?.status === 200) {
-      localStorage.setItem(localStorageKey.accessToken, res.data.accessToken);
-      localStorage.setItem(localStorageKey.refreshToken, res.data.refreshToken);
-      localStorage.setItem(localStorageKey.expiresAt, res.data.expiresAt);
       localStorage.setItem(localStorageKey.user, JSON.stringify(res.data.user));
+      const expiresAt = moment.unix(res.data.expiresAt).toDate();
+      Cookies.set(localStorageKey.accessToken, res.data.accessToken, {
+        expires: expiresAt,
+        secure: true,
+        sameSite: 'Strict',
+      });
+      Cookies.set(localStorageKey.refreshToken, res.data.refreshToken, {
+        expires: expiresAt,
+        secure: true,
+        sameSite: 'Strict',
+      });
       router.push("/dashboard");
     } else {
       alert(res.data.message);

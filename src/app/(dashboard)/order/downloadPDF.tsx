@@ -9,14 +9,10 @@ import { MergeProductsbyKey } from "@/utils/commonUtils";
 import moment from "moment";
 import { numberWithCommas } from "@/utils/commonUtils";
 import request from "@/utils/request";
-type Item = Database["public"]["Tables"]["line_items"]["Row"];
-type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
-  item_id: Item;
-};
-type Order = Database["public"]["Tables"]["orders"]["Row"];
-type ProductArray = [Product];
+import { Scope, ScopeItemRevision } from "@/types";
 
-export default function DownloadPDF({ orderId, id }: { orderId: string; id: string }) {
+
+export default function DownloadPDF({ scopeItemRevision, order }: { scopeItemRevision: ScopeItemRevision, order: Scope }) {
   const supabase = createClientComponentClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -24,15 +20,15 @@ export default function DownloadPDF({ orderId, id }: { orderId: string; id: stri
     return (
       <Document>
         <Page size="A4" style={styles.page}>
-          {products.map((item: ProductArray) =>
-            item.map((product) => (
+          {products.map((item: any) =>
+            item.map((product: any) => (
               <View key={item[0].id} style={styles.card}>
-                <Text style={styles.header}>{item[0].room}</Text>
+                <Text style={styles.header}>{item[0].area}</Text>
                 <View style={styles.section} key={product.id}>
-                  <Text>{product.room}</Text>
-                  <Text>{product.item_id.description}</Text>
+                  <Text>{product.area}</Text>
+                  {/* <Text>{product.item_id.description}</Text> */}
                   <Text>{product.quantity}</Text>
-                  <Text>{product.price}</Text>
+                  <Text>{product.targetClientPrice}</Text>
                 </View>
               </View>
             ))
@@ -44,32 +40,13 @@ export default function DownloadPDF({ orderId, id }: { orderId: string; id: stri
 
   const generatePdfDocument = async () => {
     setIsLoading(true);
-    let order = await getOrders();
-    console.log('====', order);
-    // let products = await getProducts();
+ 
+    const products =  MergeProductsbyKey(scopeItemRevision.scopeItems, "area")
 
-    // const blob = await pdf(<MyDocument products={products} />).toBlob();
-    // FileSaver.saveAs(blob, `${order?.project_name}-${moment(order?.created_at).format("MMM DD, YYYY")}`);
+    const blob = await pdf(<MyDocument products={products} />).toBlob();
+    FileSaver.saveAs(blob, `${order.projectName}-${moment(order.createdAt).format("MMM DD, YYYY")}`);
     setIsLoading(false);
   };
-
-  async function getOrders() {
-    let res = await request({
-      url: `/scope/${orderId}`
-    });
-
-    if (res?.status === 200) {
-      return res.data;
-    }
-    throw Error(res?.data?.message);
-  }
-
-  async function getProducts() {
-    let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", id).returns<Product[]>();
-    if (products) {
-      return MergeProductsbyKey(products, "room");
-    }
-  }
 
   return (
     <Button color="light" onClick={() => generatePdfDocument()} isProcessing={isLoading} className="h-fit">

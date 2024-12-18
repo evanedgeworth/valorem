@@ -52,9 +52,9 @@ export default function OrderPage({ order }: { order: Order }) {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "";
   const selectedTab = searchParams.get("view") || "details";
-  const { user, selectedOrganization } = useContext(UserContext);
+  const { user, role } = useContext(UserContext);
   const router = useRouter();
-  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
+  const currentOrganization = role;
 
   useEffect(() => {
     getProducts();

@@ -29,7 +29,6 @@ export default function ActiveOrder({
 }) {
   const [showToast, setShowToast] = useState(false);
   const searchParams = useSearchParams();
-  const { user, SignOut } = useContext(UserContext);
   const router = useRouter();
   const productSortedByType = MergeProductsbyKey(products, "room");
 

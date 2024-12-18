@@ -1,19 +1,12 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
-import { FC, PropsWithChildren } from "react";
+import { createContext, useState, useEffect } from "react";
 
-import { Database } from "../../types/supabase";
 import { useRouter } from "next/navigation";
 import useLocalStorage, { localStorageKey } from "@/utils/useLocalStorage";
 import request from "@/utils/request";
-import { Role } from "@/types";
-type User = Database["public"]["Tables"]["profiles"]["Row"] & { user_organizations: User_Organizations[] };
-type User_Organizations = Database["public"]["Tables"]["user_organizations"]["Row"];
-type Organization = {
-  organizationId: string;
-  roleId: string;
-  userId: string;
-}
+import { Organization, Role, User } from "@/types";
+import Cookies from "js-cookie";
+
 type UserContext = {
   user: User | undefined;
   selectedOrganization: Organization | undefined;
@@ -21,7 +14,6 @@ type UserContext = {
   allOrganizations: Organization[];
   signOut: () => Promise<void>;
   role: Role | undefined;
-  isClientRole: boolean;
 };
 
 export const UserContext = createContext<UserContext>({} as UserContext);
@@ -39,6 +31,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       url: '/logout'
     });
     localStorage.clear();
+    Cookies.remove(localStorageKey.accessToken);
     router.replace('/login');
   }
 
@@ -67,7 +60,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   }
 
   useEffect(() => {
-    const token = localStorage.getItem(localStorageKey.accessToken);
+    const token = Cookies.get(localStorageKey.accessToken);
     const user = localStorage.getItem(localStorageKey.user);
 
     if (token && user) {
@@ -76,8 +69,8 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
   }, []);
 
-  const isClientRole = role?.type === 'CLIENT';
   return (
-    <UserContext.Provider value={{ user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, isClientRole }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role }}>{children}</UserContext.Provider>
   );
 }
+

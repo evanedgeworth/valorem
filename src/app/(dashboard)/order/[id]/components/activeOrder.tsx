@@ -2,7 +2,7 @@ import { Card, Toast, Table, Avatar, Button, Dropdown, TextInput } from "flowbit
 import { useState, useRef, useContext, useEffect } from "react";
 import { MdDeleteOutline, MdPersonAddAlt } from "react-icons/md";
 import { Database } from "../../../../../../types/supabase";
-import { acronym, numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
+import { acronym, checkPermission, numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
 import { UserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
@@ -27,7 +27,6 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { ScopeItemRevision } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
-
 
 function ProductDescription ({ categoryItemId }: { categoryItemId: string }) {
   const { data } = useQuery({
@@ -62,7 +61,7 @@ export default function ActiveOrder({
 }) {
   const [showToast, setShowToast] = useState(false);
   const [assignableUsers, setAssignableUsers] = useState<User[]>([]);
-  const { isClientRole } = useContext(UserContext);
+  const { role } = useContext(UserContext);
 
   function handleRemoveProduct(product: Product) {
     let removedProduct = { ...product, status: "removed" };
@@ -100,7 +99,7 @@ export default function ActiveOrder({
                   <Table.HeadCell>Qty</Table.HeadCell>
                   <Table.HeadCell>Price</Table.HeadCell>
                   <Table.HeadCell>Total Price</Table.HeadCell>
-                  {isClientRole && <Table.HeadCell>Assignee</Table.HeadCell>}
+                  {checkPermission(role, "orders_update") && <Table.HeadCell>Assignee</Table.HeadCell>}
 
                   {isEditing && <Table.HeadCell></Table.HeadCell>}
                 </Table.Head>
@@ -124,7 +123,7 @@ export default function ActiveOrder({
                         <Table.Cell className="whitespace-nowrap">
                           {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice) || 0) * product.quantity)}
                         </Table.Cell>
-                        {isClientRole && (
+                        {checkPermission(role, "orders_update") && (
                           <Table.Cell>
                             {/* <MdPersonAddAlt size={22} /> */}
 
@@ -137,7 +136,7 @@ export default function ActiveOrder({
                                 product?.order_item_assignments && product?.order_item_assignments?.length > 0 ? (
                                   <span className="cursor-pointer">
                                     <Avatar.Group className="flex -space-x-3">
-                                      {product.order_item_assignments.map((item) => (
+                                      {product.order_item_assignments.map((item: any) => (
                                         <Avatar
                                           placeholderInitials={acronym(`${item.user.first_name} ${item.user.last_name}`)}
                                           rounded
@@ -161,7 +160,7 @@ export default function ActiveOrder({
                                 <TextInput icon={BiSearchAlt} placeholder="Search or enter email..." />
                               </Dropdown.Header>
                               {/* Currently Assigned Users go above available users */}
-                              {product?.order_item_assignments?.map((item) => (
+                              {product?.order_item_assignments?.map((item: any) => (
                                 <Dropdown.Item onClick={() => handleRemoveUserToOrderItem(item.id)} key={item.id}>
                                   <div className="relative">
                                     <IoMdCloseCircle className=" absolute right-0 z-10 hover:text-red-500" />

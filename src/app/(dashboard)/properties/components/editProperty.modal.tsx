@@ -49,20 +49,19 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
   } = useForm<Inputs>();
 
   useEffect(() => {
-    setValue("address1", property?.address_line1 || "");
-    setAddress(property?.address_line1 || "");
-    setValue("address2", property?.address_line2 || "");
-    setValue("city", property?.city || "");
-    setValue("zip_code", property?.zip_code || "");
-    setValue("state", property?.state || "");
-    setValue("size", property?.size || 0);
+    setValue("address1", property?.address.address1 || "");
+    setValue("address2", property?.address.address2 || "");
+    setValue("city", property?.address.city || "");
+    setValue("zip_code", property?.address.postalCode || "");
+    setValue("state", property?.address.state || "");
     setValue("type", property?.type || "");
-    setValue("access_instructions", property?.access_instructions || "");
+    setValue("access_instructions", property?.accessInstructions || "");
 
-    setAddress2(property?.address_line2 || "");
-    setCity(property?.city || "");
-    setState(property?.state || "");
-    setZipCode(property?.zip_code || "");
+    setAddress(property?.address.address1 || "");
+    setAddress2(property?.address.address2 || "");
+    setCity(property?.address.city || "");
+    setState(property?.address.state || "");
+    setZipCode(property?.address.postalCode || "");
   }, [property?.id]);
 
   const handlePlaceSelected = (place: google.maps.places.AutocompletePrediction) => {
@@ -100,7 +99,7 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
       data: {
         address_line1: address,
         address_line2: data.address2,
-        organization: selectedOrganization?.id,
+        organization: selectedOrganization?.organizationId,
         city: city,
         state: state,
         zip_code: data.zip_code,
