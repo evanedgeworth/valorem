@@ -73,4 +73,3 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     <UserContext.Provider value={{ user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role }}>{children}</UserContext.Provider>
   );
 }
-
