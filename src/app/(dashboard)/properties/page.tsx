@@ -1,7 +1,7 @@
 "use client";
 
-import { Timeline, Table, Badge, Dropdown, Select, TextInput, Spinner, Label, Button, Tabs } from "flowbite-react";
-import { useState, useEffect, useRef, Fragment, useContext, useMemo } from "react";
+import { Table, Dropdown, TextInput, Spinner, Label, Button } from "flowbite-react";
+import { useState, useRef, Fragment, useContext, useMemo } from "react";
 import moment from "moment";
 import Map from "./components/map";
 import { BiDotsVerticalRounded } from "react-icons/bi";
@@ -68,13 +68,10 @@ export default function Properties() {
 
 
   async function handleRemoveProperty() {
-    let property_id = selectedProperty.current?.id || "";
+    let propertyId = selectedProperty.current?.id || "";
     await request({
-      url: `/properties`,
+      url: `/properties/${propertyId}`,
       method: "DELETE",
-      params: {
-        id: property_id,
-      },
     });
 
     setShowDeleteConfirmModal(false);

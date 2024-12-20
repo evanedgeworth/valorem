@@ -44,7 +44,7 @@ export default function AuthForm() {
       });
       router.push("/dashboard");
     } else {
-      alert(res.data.message);
+      alert(res.data?.message || 'Failed');
       setIsloading(false);
     }
   };

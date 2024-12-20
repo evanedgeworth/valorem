@@ -1,30 +1,11 @@
-import { Card, Toast, Table, Avatar, Button, Dropdown, TextInput } from "flowbite-react";
-import { useState, useRef, useContext, useEffect } from "react";
-import { MdDeleteOutline, MdPersonAddAlt } from "react-icons/md";
-import { Database } from "../../../../../../types/supabase";
-import { acronym, checkPermission, numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
-import { UserContext } from "@/context/userContext";
-import { useRouter } from "next/navigation";
+import { Card, Toast, Table } from "flowbite-react";
+import { useState } from "react";
+import { MdDeleteOutline } from "react-icons/md";
+import { numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
-type Item = Database["public"]["Tables"]["line_items"]["Row"];
-type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
-  item_id: Item;
-  status?: string;
-  order_item_assignments?: { user: { id: string; first_name: string; last_name: string }; id: string }[];
-};
-type User = {
-  user: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-};
 
 import { HiCheck } from "react-icons/hi";
-import { BiSearchAlt } from "react-icons/bi";
-import { IoMdCloseCircle } from "react-icons/io";
-import { ScopeItemRevision } from "@/types";
+import { ScopeItem } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
 
@@ -52,38 +33,21 @@ export default function ActiveOrder({
   remove,
   isEditing,
   refresh,
-  scopeItemRevision,
+  products,
 }: {
-  remove: (product: Product) => void;
+  remove: (product: ScopeItem) => void;
   isEditing: boolean;
   refresh: () => Promise<void>;
-  scopeItemRevision: ScopeItemRevision | null;
+  products: ScopeItem[] | null;
 }) {
   const [showToast, setShowToast] = useState(false);
-  const [assignableUsers, setAssignableUsers] = useState<User[]>([]);
-  const { role } = useContext(UserContext);
 
-  function handleRemoveProduct(product: Product) {
+  function handleRemoveProduct(product: ScopeItem) {
     let removedProduct = { ...product, status: "removed" };
     remove(removedProduct);
   }
 
-  function filterAssignedUsers(currentAssignedUsers: any, allAvailableUsers: User) {
-    // Filters out users that are already assigned to this task
-    const currentAssignedIds = currentAssignedUsers.map((item: any) => item.user?.id);
-
-    return !currentAssignedIds.includes(allAvailableUsers.user.id);
-  }
-
-  function handleRemoveUserToOrderItem (id: string) {
-
-  }
-
-  function handleAssignUserToOrderItem (userId: string, productId: string) {
-
-  }
-
-  const scopeItems = scopeItemRevision?.scopeItems || [];
+  const scopeItems = products || [];
   const productSortedByType = MergeProductsbyKey(scopeItems, "area");
 
   return (
@@ -99,7 +63,6 @@ export default function ActiveOrder({
                   <Table.HeadCell>Qty</Table.HeadCell>
                   <Table.HeadCell>Price</Table.HeadCell>
                   <Table.HeadCell>Total Price</Table.HeadCell>
-                  {checkPermission(role, "orders_update") && <Table.HeadCell>Assignee</Table.HeadCell>}
 
                   {isEditing && <Table.HeadCell></Table.HeadCell>}
                 </Table.Head>
@@ -123,76 +86,6 @@ export default function ActiveOrder({
                         <Table.Cell className="whitespace-nowrap">
                           {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice) || 0) * product.quantity)}
                         </Table.Cell>
-                        {checkPermission(role, "orders_update") && (
-                          <Table.Cell>
-                            {/* <MdPersonAddAlt size={22} /> */}
-
-                            <Dropdown
-                              // label={<MdPersonAddAlt size={22} />}
-                              // renderTrigger={() => <MdPersonAddAlt size={22} onClick={handleGetUsers} />}
-
-                              label=""
-                              renderTrigger={() =>
-                                product?.order_item_assignments && product?.order_item_assignments?.length > 0 ? (
-                                  <span className="cursor-pointer">
-                                    <Avatar.Group className="flex -space-x-3">
-                                      {product.order_item_assignments.map((item: any) => (
-                                        <Avatar
-                                          placeholderInitials={acronym(`${item.user.first_name} ${item.user.last_name}`)}
-                                          rounded
-                                          stacked
-                                          size={"xs"}
-                                          key={item.id}
-                                        />
-                                      ))}
-                                    </Avatar.Group>
-                                  </span>
-                                ) : (
-                                  <span className="cursor-pointer">
-                                    <MdPersonAddAlt size={22} />
-                                  </span>
-                                )
-                              }
-                              arrowIcon={false}
-                              color="white"
-                            >
-                              <Dropdown.Header>
-                                <TextInput icon={BiSearchAlt} placeholder="Search or enter email..." />
-                              </Dropdown.Header>
-                              {/* Currently Assigned Users go above available users */}
-                              {product?.order_item_assignments?.map((item: any) => (
-                                <Dropdown.Item onClick={() => handleRemoveUserToOrderItem(item.id)} key={item.id}>
-                                  <div className="relative">
-                                    <IoMdCloseCircle className=" absolute right-0 z-10 hover:text-red-500" />
-                                    <Avatar
-                                      placeholderInitials={acronym(`${item.user.first_name} ${item.user.last_name}`)}
-                                      rounded
-                                      size={"sm"}
-                                      className="pr-2"
-                                    />
-                                  </div>
-                                  {`${item.user.first_name} ${item.user.last_name}`}
-                                </Dropdown.Item>
-                              ))}
-                              {/* All possible users they can assign */}
-                              {assignableUsers
-                                .filter((item) => filterAssignedUsers(product?.order_item_assignments, item))
-                                .map((item) => (
-                                  <Dropdown.Item onClick={() => handleAssignUserToOrderItem(item.user.id, product.id)} key={item.user.id}>
-                                    <Avatar
-                                      placeholderInitials={acronym(`${item.user.first_name} ${item.user.last_name}`)}
-                                      rounded
-                                      size={"sm"}
-                                      className="pr-2"
-                                    />
-                                    {`${item.user.first_name} ${item.user.last_name}`}
-                                  </Dropdown.Item>
-                                ))}
-                            </Dropdown>
-
-                            {/* <Avatar.Counter total={99} /> */}
-                          </Table.Cell>
-                        )}
                         {isEditing && (
                           <Table.Cell>
                             {product.status !== "removed" && (

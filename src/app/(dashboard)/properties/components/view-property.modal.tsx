@@ -23,7 +23,10 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
               <Label htmlFor="address">Address</Label>
               <p>{parseAddress(property?.address)}</p>
             </div>
-
+            <div>
+              <Label value="Name" />
+              <p>{property?.name}</p>
+            </div>
             <div>
               <Label htmlFor="type" value="Type" />
               <p>{property?.type}</p>

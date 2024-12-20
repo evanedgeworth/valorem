@@ -2,8 +2,6 @@
 
 import { Accordion, Button, Spinner, Dropdown } from "flowbite-react";
 import { useState, useEffect, useRef, useContext, useMemo } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../types/supabase";
 import moment from "moment";
 import NewProductModal from "./components/newProduct.modal";
 import ApproveCOModal from "./components/approve.modal";
@@ -21,23 +19,18 @@ import Warranties from "./components/warranties";
 import Settings from "./components/settings";
 import History from "./components/history";
 import { checkPermission, compareArrays, formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
-type Item = Database["public"]["Tables"]["line_items"]["Row"];
-type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
-  item_id: Item;
-  // order_item_assignment: { user: { first_name: string; last_name: string }[] };
-};
 
 import { calculateTotalPrice } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
 import CSVSelector from "@/components/csvSelector";
 import request from "@/utils/request";
 import { useQuery } from "@tanstack/react-query";
-import { Order, Property, Scope } from "@/types";
+import { Order, Property, Scope, ScopeItem } from "@/types";
 
 export default function OrderDetails({ orderId }: { orderId: string }) {
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['orders', 'detail', orderId],
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['order', 'detail', orderId],
     enabled: Boolean(orderId),
     queryFn: async () => {
       const res = await request({
@@ -71,8 +64,8 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
   const property = (propertyData || {}) as Property;
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [addedProducts, setAddedProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ScopeItem[]>([]);
+  const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditMenu, setShowEditMenu] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
@@ -87,11 +80,11 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const router = useRouter();
 
   async function getOrders() {
-    console.log("DO NOTHING");
+    refetch();
   }
 
   async function getProducts() {
-    console.log("DO NOTHING");
+    refetch();
   }
 
 
@@ -138,7 +131,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               Details
             </div>
           </li>
-          <li className="w-full cursor-pointer">
+          {/* <li className="w-full cursor-pointer">
             <div
               onClick={() => handleTabChange("warranties")}
               className={`flex items-center justify-center gap-3 w-full p-4 hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
@@ -150,7 +143,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <HiClipboardList size={20} />
               Warranties
             </div>
-          </li>
+          </li> */}
           <li className="w-full cursor-pointer">
             <div
               onClick={() => handleTabChange("history")}
@@ -227,15 +220,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               </Accordion.Panel>
             </Accordion>
 
-            {checkPermission(role, "orders_update") && order.scopeStatus !== 'APPROVED' && (
-              <div className="flex flex-row justify-end gap-4 mt-4">
-                <Button outline color="red" className="h-fit">
-                  <MdClose size={20} />
-                  Deny Changes
-                </Button>
-                <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(order.id)} />
-              </div>
-            )}
 
             {order.scopeStatus !== 'APPROVED' && showEditMenu && (
               <div className="flex justify-end mb-5 gap-4">
@@ -286,15 +270,14 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   setShowSubmitButton(true);
                 }}
                 refresh={getProducts}
-                scopeItemRevision={scopeItemRevision}
+                products={scopeItemRevision?.scopeItems}
               />
             )}
           </section>
         )}
 
-        {/* {selectedTab === "warranties" && <Warranties products={products} />} */}
         {selectedTab === "history" && <History order={order} seeAll />}
-        {/* {selectedTab === "settings" && <Settings order={order} />} */}
+        {selectedTab === "settings" && <Settings order={order} refetch={() => refetch()}  />}
       </section>
     );
 }

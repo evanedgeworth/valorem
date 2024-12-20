@@ -106,34 +106,37 @@ export interface Scope {
   scopeItemRevisions: ScopeItemRevision[];
 }
 
+export interface ScopeItem {
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+  categoryItemId: string;
+  categoryItem: any;
+  area: string;
+  scopeItemImages: {
+    fileId: string;
+    fileUrl: string;
+    fileType: string;
+  }[];
+  quantity: number;
+  targetClientPrice: string;
+  internalComments: {
+    user: string;
+    comment: string;
+  }[];
+  externalComments: {
+    user: string;
+    comment: string;
+  }[];
+}
+
 export interface ScopeItemRevision {
   createdAt: string;
   updatedAt: string;
   revision: number;
   internalRevision: boolean;
   status: string;
-  scopeItems: {
-    createdAt: string;
-    updatedAt: string;
-    id: string;
-    categoryItemId: string;
-    area: string;
-    scopeItemImages: {
-      fileId: string;
-      fileUrl: string;
-      fileType: string;
-    }[];
-    quantity: number;
-    targetClientPrice: string;
-    internalComments: {
-      user: string;
-      comment: string;
-    }[];
-    externalComments: {
-      user: string;
-      comment: string;
-    }[];
-  }[];
+  scopeItems: ScopeItem[];
 }
 
 export type User = {

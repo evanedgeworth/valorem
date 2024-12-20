@@ -3,17 +3,13 @@ import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, usePDF, pdf } 
 import { Button, Card, Toast, Table, Tabs } from "flowbite-react";
 import * as FileSaver from "file-saver";
 import { AiOutlineCloudDownload } from "react-icons/ai";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../types/supabase";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 import moment from "moment";
-import { numberWithCommas } from "@/utils/commonUtils";
 import request from "@/utils/request";
 import { Scope, ScopeItemRevision } from "@/types";
 
 
 export default function DownloadPDF({ scopeItemRevision, order }: { scopeItemRevision: ScopeItemRevision, order: Scope }) {
-  const supabase = createClientComponentClient<Database>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   function MyDocument({ products }: { products: any }) {
@@ -26,7 +22,7 @@ export default function DownloadPDF({ scopeItemRevision, order }: { scopeItemRev
                 <Text style={styles.header}>{item[0].area}</Text>
                 <View style={styles.section} key={product.id}>
                   <Text>{product.area}</Text>
-                  {/* <Text>{product.item_id.description}</Text> */}
+                  <Text>{product.categoryItem?.lineItem || ''}</Text>
                   <Text>{product.quantity}</Text>
                   <Text>{product.targetClientPrice}</Text>
                 </View>
@@ -41,7 +37,17 @@ export default function DownloadPDF({ scopeItemRevision, order }: { scopeItemRev
   const generatePdfDocument = async () => {
     setIsLoading(true);
  
-    const products =  MergeProductsbyKey(scopeItemRevision.scopeItems, "area")
+    for (let index = 0; index < scopeItemRevision.scopeItems.length; index++) {
+      const element = scopeItemRevision.scopeItems[index];
+      const res = await request({
+        url: `/category-items/${element.categoryItemId}`,
+      });
+
+      if (res?.status === 200) {
+        scopeItemRevision.scopeItems[index].categoryItem = res.data;
+      }
+    }
+    const products =  MergeProductsbyKey(scopeItemRevision.scopeItems, "area");
 
     const blob = await pdf(<MyDocument products={products} />).toBlob();
     FileSaver.saveAs(blob, `${order.projectName}-${moment(order.createdAt).format("MMM DD, YYYY")}`);
