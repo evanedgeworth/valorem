@@ -1,4 +1,13 @@
+"use client"
 import { useState, useEffect } from "react";
+
+export const localStorageKey = {
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  expiresAt: 'expiresAt',
+  user: 'currentUser',
+  userOrganization: 'userOrganization'
+}
 
 const useLocalStorage = (key: string, defaultValue: unknown) => {
   const [value, setValue] = useState(() => {

@@ -22,8 +22,8 @@ export default function Warranties({ products }: { products: Product[] }) {
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<number | null>(null);
-  const { user, selectedOrganization } = useContext(UserContext);
-  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
+  const { user, selectedOrganization, role } = useContext(UserContext);
+  const currentOrganization = role;
 
   useEffect(() => {
     getWarrenties();

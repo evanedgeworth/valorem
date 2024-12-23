@@ -12,7 +12,7 @@ export default function Password() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
-  const { user, SignOut } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     setPassword("");

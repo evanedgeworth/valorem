@@ -1,9 +1,7 @@
 "use client";
 
 import { Accordion, Button, Spinner, Dropdown } from "flowbite-react";
-import { useState, useEffect, useRef, useContext } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../types/supabase";
+import { useState, useEffect, useRef, useContext, useMemo } from "react";
 import moment from "moment";
 import NewProductModal from "./components/newProduct.modal";
 import ApproveCOModal from "./components/approve.modal";
@@ -20,28 +18,54 @@ import ActiveOrder from "./components/activeOrder";
 import Warranties from "./components/warranties";
 import Settings from "./components/settings";
 import History from "./components/history";
-import { compareArrays, formatToUSD } from "@/utils/commonUtils";
-type Item = Database["public"]["Tables"]["line_items"]["Row"];
-type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
-  item_id: Item;
-  // order_item_assignment: { user: { first_name: string; last_name: string }[] };
-};
-type Property = Database["public"]["Tables"]["properties"]["Row"];
-type Order = Database["public"]["Tables"]["orders"]["Row"] & {
-  properties: Property;
-  line_items: Product[];
-};
+import { checkPermission, compareArrays, formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
 
 import { calculateTotalPrice } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
 import CSVSelector from "@/components/csvSelector";
 import request from "@/utils/request";
+import { useQuery } from "@tanstack/react-query";
+import { Order, Property, Scope, ScopeItem } from "@/types";
 
-export default function OrderDetails({ order }: { order: Order }) {
-  const supabase = createClientComponentClient<Database>();
-  //   const [order, setOrder] = useState<Order>();
-  const [products, setProducts] = useState<Product[]>(order.line_items);
-  const [addedProducts, setAddedProducts] = useState<Product[]>([]);
+export default function OrderDetails({ orderId }: { orderId: string }) {
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['order', 'detail', orderId],
+    enabled: Boolean(orderId),
+    queryFn: async () => {
+      const res = await request({
+        url: `/scope/${orderId}`,
+      });
+
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    }
+  });
+
+  const order = data as Scope;
+
+  const propertyId = order?.property?.id;
+  const { data: propertyData } = useQuery({
+    queryKey: ['properties', 'detail', propertyId],
+    enabled: Boolean(propertyId),
+    queryFn: async () => {
+      const res = await request({
+        url: `/properties/${propertyId}`,
+      });
+
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    },
+  });
+
+  const property = (propertyData || {}) as Property;
+
+  const [products, setProducts] = useState<ScopeItem[]>([]);
+  const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditMenu, setShowEditMenu] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
@@ -50,137 +74,45 @@ export default function OrderDetails({ order }: { order: Order }) {
   const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
   const [showToast, setShowToast] = useState(false);
-  const previousProducts = useRef<any[]>([]);
-  const coProducts = useRef<any[]>([]);
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId") || "";
   const selectedTab = searchParams.get("view") || "details";
-  const { user, selectedOrganization } = useContext(UserContext);
+  const { user, role } = useContext(UserContext);
   const router = useRouter();
-  const currentOrganization = user?.user_organizations?.find((org) => selectedOrganization?.id === org.organization);
-
-  useEffect(() => {
-    // getProducts();
-    // getOrders();
-  }, []);
-
-  // async function getOrders() {
-  //   let { data: order, error } = await supabase.from("orders").select("*, properties(*)").eq("id", params.id).returns<Order>();
-  //   if (order) {
-  //     setOrder(order);
-  //     if (order.change_order) {
-  //       getPreviousOrder();
-  //     }
-  //   }
-  //   if (error) alert(error.message);
-  // }
-
-  // async function getProducts() {
-  //   setProductsLoading(true);
-  //   let { data: products, error } = await supabase
-  //     .from("order_items")
-  //     .select("*, item_id!inner(*), order_item_assignments(id,user(id,first_name,last_name))")
-  //     .eq("order_id", params.id)
-  //     .returns<Product[]>();
-  //   if (products) {
-  //     setProducts(products);
-  //     coProducts.current = products;
-  //     setProductsLoading(false);
-  //   }
-  // }
 
   async function getOrders() {
-    console.log("DO NOTHING");
+    refetch();
   }
 
   async function getProducts() {
-    console.log("DO NOTHING");
+    refetch();
   }
 
-  //   async function getPreviousOrder() {
-  //     let { data: order, error } = await supabase
-  //       .from("orders")
-  //       .select("id")
-  //       .eq("order_id", orderId)
-  //       .neq("id", params.id)
-  //       .order("id", { ascending: false })
-  //       .limit(1)
-  //       .single();
-
-  //     if (order) {
-  //       getPreviousProducts(order.id);
-  //     }
-  //     if (error) alert(error.message);
-  //   }
-
-  async function getPreviousProducts(id: number) {
-    let { data: products, error } = await supabase.from("order_items").select("*, item_id!inner(*)").eq("order_id", id);
-    if (products) {
-      previousProducts.current = products;
-      //   getChangeOrder();
-    }
-  }
 
   function handleTabChange(selectedTab: string) {
-    console.log("H");
-    //router.push(`/order/${params.id}?orderId=${order?.order_id}&view=${selectedTab}`);
-  }
-
-  function getChangeOrder() {
-    let currentProducts = coProducts.current;
-
-    let resultArray = compareArrays(previousProducts.current, currentProducts);
-    // console.log("RESULTS", resultArray, "PREV", previousProducts.current, "CURRENT", currentProducts);
-    setProducts(resultArray);
+    router.replace(`/order/${orderId}?orderId=${orderId}&view=${selectedTab}`);
   }
 
   async function createChangeOrder() {
     let orderId: number | null = null;
-    let allProducts: any[] = [...products, ...addedProducts];
-
-    let totalCost = calculateTotalPrice(allProducts, "price");
-
-    if (order?.id !== order?.order_id || products.length > 0) {
-      type OrderWithoutId = Omit<Order, "id">;
-      const { id, created_at, ...newOrder }: any = order;
-      const { data: orderSuccess, error } = await supabase
-        .from("orders")
-        .insert([
-          {
-            ...newOrder,
-            change_order: true,
-            cost: totalCost,
-          },
-        ])
-        .select()
-        .limit(1)
-        .single();
-      if (orderSuccess) {
-        orderId = orderSuccess.id;
-      }
-      if (error) {
-        alert(error.message);
-      }
-    } else {
-      orderId = +order.id;
-    }
-
-    let allProductsUpdatedId = allProducts
-      .filter((item) => item.status !== "removed")
-      .map((item) => {
-        const { status, id, created_at, ...updatedProduct } = item;
-        return { ...updatedProduct, order_id: orderId, item_id: item.item_id.id };
-      });
-
-    const { data, error } = await supabase.from("order_items").insert(allProductsUpdatedId).select();
-    if (error) {
-      alert(error.message);
-    }
-    if (data) {
-      router.push(`/order/${orderId}?orderId=${order.id}`);
-    }
   }
 
+  const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
+  const allocatedAmount = useMemo(() => {
+    let total = 0;
+    scopeItemRevision?.scopeItems?.forEach(item => {
+      total += parseCurrencyToNumber(item.targetClientPrice) * item.quantity;
+    });
+    return total;
+  }, [scopeItemRevision]);
+
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto mt-10">
+        <Spinner />
+      </div>
+    )
+  }
   if (order && user)
     return (
       <section className="p-5 w-full">
@@ -199,7 +131,7 @@ export default function OrderDetails({ order }: { order: Order }) {
               Details
             </div>
           </li>
-          <li className="w-full cursor-pointer">
+          {/* <li className="w-full cursor-pointer">
             <div
               onClick={() => handleTabChange("warranties")}
               className={`flex items-center justify-center gap-3 w-full p-4 hover:text-gray-700 hover:bg-gray-50 focus:ring-4 focus:ring-blue-300 dark:hover:text-white dark:hover:bg-gray-700 ${
@@ -211,7 +143,7 @@ export default function OrderDetails({ order }: { order: Order }) {
               <HiClipboardList size={20} />
               Warranties
             </div>
-          </li>
+          </li> */}
           <li className="w-full cursor-pointer">
             <div
               onClick={() => handleTabChange("history")}
@@ -242,7 +174,7 @@ export default function OrderDetails({ order }: { order: Order }) {
         {selectedTab === "details" && (
           <section className="p-5">
             <div className="flex justify-between">
-              <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.project_name}</h1>
+              <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{order.projectName}</h1>
               <Dropdown
                 label=""
                 placement="left-start"
@@ -260,13 +192,13 @@ export default function OrderDetails({ order }: { order: Order }) {
             </div>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
-              {moment(order.created_at).format("MMMM DD, YYYY hh:mm a")}
+              {moment(order.createdAt).format("MMMM DD, YYYY hh:mm a")}
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
-              {`${order.properties?.address_line_1}${(order.properties?.address_line_2 && " " + order.properties?.address_line_2) || ""}, ${
-                order.properties?.city
-              } ${order.properties?.state} ${order.properties?.zip_code}`}
+              {`${property?.address?.address1}${
+                    (property?.address?.address2 && " " + property?.address?.address2) || ""
+                  }, ${property?.address?.city} ${property?.address?.state} ${property?.address?.postalCode || ''}`}
             </p>
 
             <Accordion className=" border-0">
@@ -278,32 +210,18 @@ export default function OrderDetails({ order }: { order: Order }) {
                   <p className="mb-2 text-sm text-gray-900 dark:text-white">
                     <strong>Access Instructions:</strong>
                     <br />
-                    {order.properties?.access_instructions}
+                    {property?.accessInstructions}
                   </p>
                   <p className="mb-2 text-sm text-gray-900 dark:text-white">
                     <strong>Allocated Amount: </strong>
-                    {formatToUSD(calculateTotalPrice(products, "retail_price"))}
-                  </p>
-                  <p className="mb-2 text-sm text-gray-900 dark:text-white">
-                    <strong>Aquired Amount: </strong>
-                    {formatToUSD(calculateTotalPrice(products, "price"))}
+                    {formatToUSD(allocatedAmount)}
                   </p>
                 </Accordion.Content>
               </Accordion.Panel>
             </Accordion>
 
-            {currentOrganization?.type === "client" && order?.change_order && (
-              <div className="flex flex-row justify-end gap-4 mt-4">
-                <Button outline color="red" className="h-fit">
-                  <MdClose size={20} />
-                  Deny Changes
-                </Button>
-                <ApproveCOModal showModal={showApproveModal} setShowModal={setShowApproveModal} reload={getOrders} id={Number(order.id)} />
-              </div>
-            )}
-            {order && <OrderTimeLine order={order} />}
 
-            {!order.change_order && showEditMenu && (
+            {order.scopeStatus !== 'APPROVED' && showEditMenu && (
               <div className="flex justify-end mb-5 gap-4">
                 <CSVSelector
                   showModal={showUploadModal}
@@ -342,22 +260,9 @@ export default function OrderDetails({ order }: { order: Order }) {
               <div className="flex justify-center items-center">
                 <Spinner aria-label="Loading" size="xl" />
               </div>
-            ) : order.change_order ? (
-              <ActiveOrder
-                isEditing={showEditMenu}
-                products={[...products, ...addedProducts]}
-                remove={(newProduct) => {
-                  let filtered = products.filter((item) => item.id !== newProduct.id);
-                  setProducts(filtered);
-                  setAddedProducts([...addedProducts, newProduct]);
-                  setShowSubmitButton(true);
-                }}
-                refresh={getProducts}
-              />
             ) : (
               <ActiveOrder
                 isEditing={showEditMenu}
-                products={[...products, ...addedProducts]}
                 remove={(newProduct) => {
                   let filtered = products.filter((item) => item.id !== newProduct.id);
                   setProducts(filtered);
@@ -365,14 +270,14 @@ export default function OrderDetails({ order }: { order: Order }) {
                   setShowSubmitButton(true);
                 }}
                 refresh={getProducts}
+                products={scopeItemRevision?.scopeItems}
               />
             )}
           </section>
         )}
 
-        {selectedTab === "warranties" && <Warranties products={products} />}
-        {selectedTab === "history" && <History order={order} />}
-        {selectedTab === "settings" && <Settings order={order} />}
+        {selectedTab === "history" && <History order={order} seeAll />}
+        {selectedTab === "settings" && <Settings order={order} refetch={() => refetch()}  />}
       </section>
     );
 }

@@ -15,12 +15,12 @@ export default function Profile() {
   const [isLoading, setIsloading] = useState<boolean>(false);
   const router = useRouter();
   const supabase = createClientComponentClient<Database>();
-  const { user, SignOut } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     setEmail(user?.email || "");
-    setFirstName(user?.first_name || "");
-    setLastName(user?.last_name || "");
+    setFirstName(user?.firstName || "");
+    setLastName(user?.lastName || "");
     setPhone(user?.phone || "");
   }, [user]);
 

@@ -1,39 +1,23 @@
-import { useState, useEffect, useRef } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../../types/supabase";
+import { formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
+import { Spinner, Table, Timeline } from "flowbite-react";
 import moment from "moment";
-type Product = Database["public"]["Tables"]["products"]["Row"];
-type Order = Database["public"]["Tables"]["orders"]["Row"];
-type OrderArray = [Order];
-import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea, Timeline } from "flowbite-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BsArrowUpShort, BsArrowDownShort } from "react-icons/bs";
+import { BsArrowUpShort, BsArrowDownShort, BsPlus } from "react-icons/bs";
 import DownloadPDF from "../../downloadPDF";
+import { useQuery } from "@tanstack/react-query";
+import request from "@/utils/request";
+import { OrderHistory as OrderHistoryType, Scope } from "@/types";
 
-export default function History({ order }: { order: Order }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient<Database>();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+type OrderHistoryProps = {
+  order: Scope;
+  seeAll?: boolean;
+}
+
+export default function OrderDetailHistory({ order, seeAll }: OrderHistoryProps) {
   const router = useRouter();
-
-  useEffect(() => {
-    getOrders();
-  }, []);
-
-  useEffect(() => {
-    if (orders.length !== 0) {
-      getProducts();
-    }
-  }, [orders]);
-
-  async function getOrders() {
-    let { data: orders, error } = await supabase.from("orders").select("*").eq("order_id", order.order_id).order("created_at");
-    if (orders) {
-      setOrders(orders);
-      //   setOrders(MergeProductsbyKey(orders, "order_id"));
-    }
-  }
+  const orderId = order.id;
+  const scopeItemRevisions = order.scopeItemRevisions || [];
 
   function PriceChangeStatus({ currentItem, previousItem }: { currentItem: number | null; previousItem: number | null }) {
     let status;
@@ -42,70 +26,85 @@ export default function History({ order }: { order: Order }) {
       return (
         <div className="flex-row flex">
           <BsArrowUpShort color="rgb(132 204 22 / var(--tw-text-opacity))" />
-          <span className="font-normal text-lime-500 text-sm">{status}</span>
+          <span className="font-normal text-lime-500 text-sm">{formatToUSD(status)}</span>
         </div>
       );
     } else if (status < 0) {
       return (
         <div className="flex-row flex">
           <BsArrowDownShort color="rgb(224 36 36 / var(--tw-text-opacity))" />
-          <span className="font-normal text-red-600 text-sm">{status}</span>
+          <span className="font-normal text-red-600 text-sm">{formatToUSD(status)}</span>
         </div>
       );
     } else return null;
   }
 
-  async function getProducts() {
-    const orderIds = orders.flatMap((item) => item.id).join(",");
-    let { data, count } = await supabase
-      .from("products")
-      .select("*")
-      .filter("orderId", "in", "(" + orderIds + ")")
-      .order("created_at");
-    if (data) {
-      setProducts(data);
-    }
+  function calculateCost(scopeItems: any[]) {
+    let cost = 0;
+
+    scopeItems?.forEach(item => {
+      cost += parseCurrencyToNumber(item.targetClientPrice);
+    });
+
+    return cost;
   }
 
   return (
-    <section className="p-5">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Order History</h1>
-
-      <Timeline>
-        {[...orders].reverse().map((co, index, array) => (
-          <Timeline.Item key={co.id}>
-            <Timeline.Point />
-            <Timeline.Content>
-              <div className="flex flex-row justify-between">
-                <div>
-                  <Timeline.Time>{moment(co.created_at).format("MMMM DD, YYYY")}</Timeline.Time>
-                  <Timeline.Title>
-                    <a className="hover:underline cursor-pointer" onClick={() => router.push(`/order/view/${co.id}?orderId=${co.order_id}`)}>
-                      {co.order_id + "-" + (orders.length - index)}
-                    </a>
-                    <span className="flex flex-row text-sm">
-                      <p className="flex gap-1">
-                        <p>Total:</p>${co.cost}
-                      </p>
-                      <PriceChangeStatus currentItem={co?.cost} previousItem={array[index + 1]?.cost} />
-                    </span>
-                    <p className="text-sm">
-                      {"Items: "}
-                      {products.reduce((count, product) => {
-                        if (product.orderId === co.id) {
-                          return count + 1;
-                        }
-                        return count;
-                      }, 0)}
-                    </p>
-                  </Timeline.Title>
-                </div>
-                <DownloadPDF orderId={co.id} id={co.id} />
-              </div>
-            </Timeline.Content>
-          </Timeline.Item>
-        ))}
-      </Timeline>
-    </section>
-  );
+      <div className="p-4">
+        <h5 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Order history</h5>
+        <Timeline>
+          {(seeAll ? scopeItemRevisions : scopeItemRevisions.slice(0, 3)).map((item, index) => {
+            const cost = calculateCost(item.scopeItems);
+            return (
+              <Timeline.Item key={index}>
+                <Timeline.Point />
+                <Timeline.Content>
+                  <div className="flex flex-row justify-between">
+                    <div>
+                      <Timeline.Time>{moment(item.createdAt).format("MMMM DD, YYYY")}</Timeline.Time>
+                      <Timeline.Title>
+                        <p>{item.revision}</p>
+                        <span className="flex flex-row text-sm">
+                          <p className="flex gap-1">
+                            <span>Total:</span>{formatToUSD(cost)}
+                          </p>
+                          {index !== 0 && <PriceChangeStatus currentItem={cost} previousItem={calculateCost(scopeItemRevisions?.[index - 1]?.scopeItems)} />}
+                        </span>
+                        <p className="text-sm">
+                          {"Items: "}
+                          {item.scopeItems.length}
+                        </p>
+                        <p className="text-sm">
+                          {"Status: "}
+                          {item.status}
+                        </p>
+                      </Timeline.Title>
+                    </div>
+                    <DownloadPDF order={order} scopeItemRevision={item} />
+                  </div>
+                </Timeline.Content>
+              </Timeline.Item>
+            );
+          })}
+        </Timeline>
+        {seeAll ? null : scopeItemRevisions.length > 3 && (
+          <div className="flex justify-center items-center">
+            <Link
+              className="font-medium text-cyan-600 hover:underline dark:text-cyan-500 text-center"
+              href={{
+                pathname: `/order/${encodeURIComponent(orderId)}`,
+                query: { orderId, view: "history" },
+              }}
+            >
+              View More
+            </Link>
+          </div>
+        )}
+        {scopeItemRevisions.length === 0 && (
+          <div>
+            <p>Empty</p>
+          </div>
+        )}
+      </div>
+  )
 }

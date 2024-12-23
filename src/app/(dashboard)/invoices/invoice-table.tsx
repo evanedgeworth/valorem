@@ -37,7 +37,7 @@ export default function InvoiceTable({ user }: { user: User }) {
     if (selectedOrganization) {
       getUserTable();
     }
-  }, [searchInput, market, selectedOrganization?.id, filterCardValue]);
+  }, [searchInput, market, selectedOrganization, filterCardValue]);
 
   async function getUserTable() {
     setTableIsLoading(true);
@@ -62,7 +62,7 @@ export default function InvoiceTable({ user }: { user: User }) {
     let { data, error } = await supabase
       .from("user_organizations")
       .delete()
-      .eq("id", selectedUser.current?.user_organizations.find((value) => value.organization === selectedOrganization?.id)?.id || "")
+      .eq("id", selectedOrganization?.organizationId || "")
       .select();
     if (data) {
       setShowRemoveUserModal(false);

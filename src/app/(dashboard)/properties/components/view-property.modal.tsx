@@ -4,6 +4,7 @@ import { useRef } from "react";
 
 import { Button, Label, Modal } from "flowbite-react";
 import type { Property } from "@/types";
+import { parseAddress } from "@/utils/commonUtils";
 
 type props = { showModal: boolean; setShowModal: (value: boolean) => void; property: Property | null; showEditModal: () => void };
 
@@ -20,22 +21,23 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
           <div className="space-y-2">
             <div>
               <Label htmlFor="address">Address</Label>
-              <p>{`${property?.address_line1}${(property?.address_line2 && " " + property?.address_line2) || ""}, ${property?.city} ${
-                property?.state
-              } ${property?.zip_code}`}</p>
+              <p>{parseAddress(property?.address)}</p>
             </div>
-
+            <div>
+              <Label value="Name" />
+              <p>{property?.name}</p>
+            </div>
             <div>
               <Label htmlFor="type" value="Type" />
               <p>{property?.type}</p>
             </div>
             <div>
-              <Label>Size sq/ft</Label>
-              <p>{property?.size}</p>
+              <Label>Size</Label>
+              <p>{property?.size?.value} {property?.size?.units}</p>
             </div>
             <div id="textarea">
               <Label htmlFor="comment">Access Instructions</Label>
-              <p>{property?.access_instructions}</p>
+              <p>{property?.accessInstructions}</p>
             </div>
             <div className="flex gap-4 pt-10">
               <Button fullSized onClick={showEditModal}>

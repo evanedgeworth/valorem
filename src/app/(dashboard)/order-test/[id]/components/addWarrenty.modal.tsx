@@ -38,7 +38,7 @@ export default function NewWarrantyModal({
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const loading = open && catalog.length === 0;
   const router = useRouter();
-  const { user, SignOut } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [images, setImages] = useState<Image[]>([]);
   const [imageUrls, setImageUrls] = useState<any[]>([]);
 

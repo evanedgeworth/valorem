@@ -48,7 +48,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId") || "";
   const selectedTab = searchParams.get("view") || "details";
-  const { user, SignOut } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const router = useRouter();
 
   useEffect(() => {

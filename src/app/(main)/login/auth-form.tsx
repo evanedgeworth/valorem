@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Database } from "../../../../types/supabase";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
+import request from "@/utils/request";
+import { localStorageKey } from "@/utils/useLocalStorage";
+import Cookies from 'js-cookie';
+import moment from "moment";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -15,22 +19,32 @@ export default function AuthForm() {
 
   const handleSignIn = async () => {
     setIsloading(true);
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await request({
+      method: 'POST',
+      url: '/login',
+      data: {
+        email,
+        password,
+        deviceToken: ''
+      }
     });
-    if (user) {
+
+    if (res?.status === 200) {
+      localStorage.setItem(localStorageKey.user, JSON.stringify(res.data.user));
+      const expiresAt = moment.unix(res.data.expiresAt).toDate();
+      Cookies.set(localStorageKey.accessToken, res.data.accessToken, {
+        expires: expiresAt,
+        secure: true,
+        sameSite: 'Strict',
+      });
+      Cookies.set(localStorageKey.refreshToken, res.data.refreshToken, {
+        expires: expiresAt,
+        secure: true,
+        sameSite: 'Strict',
+      });
       router.push("/dashboard");
-    }
-    if (error?.message === "Email not confirmed") {
-      alert(error.message);
-      setError(true);
-    }
-    if (error) {
-      alert(error.message);
+    } else {
+      alert(res.data?.message || 'Failed');
       setIsloading(false);
     }
   };
