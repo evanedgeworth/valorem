@@ -43,8 +43,7 @@ export default function OrderList() {
         url: `/scope`,
         method: "GET",
         params: {
-          // organizationId: selectedOrganization?.organizationId,
-          organizationId: "bc3b44a7-03d1-4120-81bc-c580b30dd989",
+          organizationId: selectedOrganization?.organizationId,
           includeProperty: true,
           searchInput,
           ascending: true,
@@ -69,8 +68,12 @@ export default function OrderList() {
 
 
   async function handleRemoveOrder() {
-    let order_id = selectedOrder.current?.id || "";
-    const { error } = await supabase.from("orders").delete().eq("id", order_id);
+    let orderId = selectedOrder.current?.id || "";
+    await request({
+      url: `/scope/${orderId}`,
+      method: "DELETE",
+    });
+
     setShowDeleteConfirmModal(false);
     getOrders();
   }

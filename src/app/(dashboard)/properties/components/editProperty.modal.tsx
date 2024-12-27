@@ -25,6 +25,8 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
         name: data.name,
         organizationId: selectedOrganization?.organizationId,
         accessInstructions: data.accessInstructions,
+        accessContact: data.accessContact,
+        noOfRooms: Number(data.noOfRooms),
         type: data.type,
         address: {
           address1: data.address1,
@@ -33,10 +35,6 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
           state: data.state,
           postalCode: data.postalCode
         },
-        size: {
-          value: Number(data.size),
-          units: "SQUARE_FEET" 
-        }
       },
     })
       .then(() => {
@@ -62,8 +60,9 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
             defaultValues={{
               name: property?.name,
               accessInstructions: property?.accessInstructions,
+              accessContact: property?.accessContact,
+              noOfRooms: property?.noOfRooms,
               type: property?.type,
-              size: property?.size.value,
               address1: property?.address.address1,
               address2: property?.address.address2,
               city: property?.address.city,

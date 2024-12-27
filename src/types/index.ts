@@ -14,9 +14,15 @@ export type Property = {
   organizationId: string;
   address: Address;
   accessInstructions: string;
+  accessContact: string;
+  noOfRooms: number;
   type: string;
   size: Size;
   orderCount: number;
+  frontImages: { fileUrl: string }[];
+  backImages: { fileUrl: string }[];
+  leftImages: { fileUrl: string }[];
+  rightImages: { fileUrl: string }[];
 };
 
 export type Role = {

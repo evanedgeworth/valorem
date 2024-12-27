@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useContext } from "react";
 import { Button, Modal} from "flowbite-react";
+import { useState, useRef, useContext } from "react";
 import { UserContext } from "@/context/userContext";
 import request from "@/utils/request";
 import PropertyForm, { PropertyInput } from "./propertyForm";
+import uploadFiles from "@/utils/uploadFile";
 
 export default function NewPropertyModal({
   showModal,
@@ -21,6 +22,11 @@ export default function NewPropertyModal({
 
 
   async function handleCreateProperty(data: PropertyInput) {
+    const frontImages = data.frontImages ? await uploadFiles(data.frontImages.map(item => item.data)) : [];
+    const backImages = data.backImages ? await uploadFiles(data.backImages.map(item => item.data)) : [];
+    const leftImages = data.leftImages ? await uploadFiles(data.leftImages.map(item => item.data)) : [];
+    const rightImages = data.rightImages ? await uploadFiles(data.rightImages.map(item => item.data)) : [];
+
     setIsLoading(true);
     await request({
       url: `/properties`,
@@ -30,6 +36,8 @@ export default function NewPropertyModal({
         organizationId: selectedOrganization?.organizationId,
         accessInstructions: data.accessInstructions,
         type: data.type,
+        accessContact: data.accessContact,
+        noOfRooms: Number(data.noOfRooms),
         address: {
           address1: data.address1,
           address2: data.address2,
@@ -37,10 +45,10 @@ export default function NewPropertyModal({
           state: data.state,
           postalCode: data.postalCode
         },
-        size: {
-          value: Number(data.size),
-          units: "SQUARE_FEET" 
-        }
+        frontImages: frontImages.map((item) => ({ fileId: item.key })),
+        backImages: backImages.map((item) => ({ fileId: item.key })),
+        leftImages: leftImages.map((item) => ({ fileId: item.key })),
+        rightImages: rightImages.map((item) => ({ fileId: item.key })),
       },
     });
     await refresh();
@@ -52,7 +60,7 @@ export default function NewPropertyModal({
     <div ref={rootRef}>
       <Button onClick={() => setShowModal(true)}>+ Add Property</Button>
       <Modal show={showModal} size="xl" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
-        <Modal.Header className="items-center p-8">
+        <Modal.Header className="items-center px-8 pt-4">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">New Property</h3>
         </Modal.Header>
         <Modal.Body>

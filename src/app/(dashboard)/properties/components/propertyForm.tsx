@@ -1,6 +1,14 @@
 import { Button, Label, TextInput, Select, Textarea } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { states } from "@/utils/defaults";
+import formatGoogleAddressComponents from "@/utils/formatGoogleAddressComponents";
+import AddressInput from "./address-input";
+import ImageInput from "./image-input";
+
+export type Image = {
+  data: any;
+  url: string;
+}
 
 export type PropertyInput = {
   name: string;
@@ -9,9 +17,14 @@ export type PropertyInput = {
   city: string;
   postalCode: string;
   state: string;
-  size: number;
+  noOfRooms: number;
+  accessContact: string;
   type: string;
   accessInstructions: string;
+  frontImages: Image[];
+  backImages: Image[];
+  leftImages: Image[];
+  rightImages: Image[];
 };
 
 type PropertyFormProps = {
@@ -22,8 +35,7 @@ type PropertyFormProps = {
   isEdit?: boolean;
 }
 
-const propertyTypes = ["Single-family home", "Townhouses/Row houses", "Condominium", "Apartment", "Multi-family home"];
-
+const propertyTypes = ["single family home", "multi family home"];
 
 export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdit, onClose }: PropertyFormProps) {
   const {
@@ -34,12 +46,28 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
     formState: { errors },
   } = useForm<PropertyInput>({ defaultValues });
 
+  const address1 = watch('address1');
+  const frontImages = watch('frontImages');
+  const backImages = watch('backImages');
+  const leftImages = watch('leftImages');
+  const rightImages = watch('rightImages');
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-2">
+      <div className="space-y-2 h-[calc(100vh-300px)] overflow-auto">
         <div>
           <Label htmlFor="address">Address Line 1</Label>
-          <TextInput type="string" {...register("address1")} required />
+          <AddressInput
+            onChange={(place: any) => {
+              const formattedAddress = formatGoogleAddressComponents(place);
+              setValue('address1', formattedAddress.addressLine1);
+              setValue('address2', formattedAddress.addressLine2);
+              setValue('city', formattedAddress.city);
+              setValue('postalCode', formattedAddress.zipCode);
+              setValue('state', formattedAddress.state);
+            }}
+            value={address1}
+          />
         </div>
         <div>
           <Label>Addres Line 2</Label>
@@ -80,21 +108,47 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           </Select>
         </div>
         <div>
-          <Label>Size sq/ft</Label>
-          <TextInput type="number" {...register("size")} required />
+          <Label>Number of Rooms</Label>
+          <TextInput type="number" {...register("noOfRooms")} required />
+        </div>
+        <div>
+          <Label>Access Contact</Label>
+          <TextInput type="string" {...register("accessContact")} required />
         </div>
         <div id="textarea">
           <Label htmlFor="comment">Access Instructions</Label>
           <Textarea placeholder="Please give detailed instructions..." rows={4} {...register("accessInstructions")} />
         </div>
-        <div className="flex gap-4">
-          <Button disabled={isLoading} type="submit" fullSized>
-            { isEdit ? "Save" : "Create Property +" }
-          </Button>
-          <Button type="button" onClick={onClose} fullSized color={"light"}>
-            Close
-          </Button>
-        </div>
+        {
+          !isEdit && (
+            <>
+              <div>
+                <Label>Front Images</Label>
+                <ImageInput value={frontImages} onChange={(value) => setValue('frontImages', value)} />
+              </div>
+              <div>
+                <Label>Back Images</Label>
+                <ImageInput value={backImages} onChange={(value) => setValue('backImages', value)} />
+              </div>
+              <div>
+                <Label>Left Images</Label>
+                <ImageInput value={leftImages} onChange={(value) => setValue('leftImages', value)} />
+              </div>
+              <div>
+                <Label>Right Images</Label>
+                <ImageInput value={rightImages} onChange={(value) => setValue('rightImages', value)} />
+              </div>
+            </>
+          )
+        }
+      </div>
+      <div className="flex gap-4 mt-4">
+        <Button disabled={isLoading} type="submit" fullSized>
+          {isEdit ? "Save" : "Create Property +"}
+        </Button>
+        <Button type="button" onClick={onClose} fullSized color={"light"}>
+          Close
+        </Button>
       </div>
     </form>
   )
