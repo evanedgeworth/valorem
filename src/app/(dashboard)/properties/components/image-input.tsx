@@ -33,8 +33,8 @@ export default function ImageInput({ onChange, value }: ImageInputProps) {
     <div className="">
       <div className="flex gap-2 mb-2">
         {
-          value?.map(item => (
-            <div>
+          value?.map((item, index) => (
+            <div key={index}>
               <Avatar size="lg" img={item.url} />
             </div>
           ))

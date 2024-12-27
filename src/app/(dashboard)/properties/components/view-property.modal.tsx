@@ -16,7 +16,7 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
       <div className="flex gap-2 mb-2">
         {
           value?.map((item: any) => (
-            <a target="_blank" href={item.fileUrl}>
+            <a key={item.fileUrl} target="_blank" href={item.fileUrl}>
               <Avatar size="lg" img={item.fileUrl} />
             </a>
           ))
