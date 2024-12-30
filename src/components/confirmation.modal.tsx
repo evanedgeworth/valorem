@@ -13,7 +13,7 @@ export default function ConfirmationModal({
   handleConfirm,
 }: {
   showModal: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   setShowModal: (value: boolean) => void;
   title: string;
   description: string;
