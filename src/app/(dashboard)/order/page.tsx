@@ -24,7 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import OrderHistory from "./orderHistory";
 
 export default function OrderList() {
-  const supabase = createClientComponentClient<Database>();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>("");
@@ -32,6 +31,7 @@ export default function OrderList() {
   const [showEditOrderModal, setShowEditOrderModal] = useState<boolean>(false);
   const selectedOrder = useRef<Scope | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
   const [viewHistory, setViewHistory] = useState<string | null>(null);
   const router = useRouter();
   const { user, selectedOrganization, role } = useContext(UserContext);
@@ -69,10 +69,12 @@ export default function OrderList() {
 
   async function handleRemoveOrder() {
     let orderId = selectedOrder.current?.id || "";
+    setIsLoadingDelete(true);
     await request({
       url: `/scope/${orderId}`,
       method: "DELETE",
     });
+    setIsLoadingDelete(false);
 
     setShowDeleteConfirmModal(false);
     getOrders();
@@ -133,20 +135,6 @@ export default function OrderList() {
           </div>
           <TextInput placeholder="Project name" onChange={debounce((e) => setSearchInput(e.target.value))} className="w-60" />
         </div>
-        {/* {allOrganizations.length > 1 && (
-          <div className="max-w-md">
-            <div className="mb-2 block">
-              <Label htmlFor="countries" value="Select your organization" />
-            </div>
-            <Select id="countries" required onChange={(e) => setSelectedOrginization(e.target.value)}>
-              {allOrganizations.map((item: Orginizations) => (
-                <option value={item.id} key={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        )} */}
 
         <Dropdown label={<BiSortDown size={17} className=" dark:text-white" />} arrowIcon={false} color="white">
           <Dropdown.Header>
@@ -255,6 +243,7 @@ export default function OrderList() {
         description="Are you sure you would like to remove this order? This action is permanent."
         handleCancel={() => setShowDeleteConfirmModal(false)}
         handleConfirm={handleRemoveOrder}
+        isLoading={isLoadingDelete}
       />
       <EditOrderModal showModal={showEditOrderModal} setShowModal={setShowEditOrderModal} order={selectedOrder.current} refresh={getOrders} />
     </section>

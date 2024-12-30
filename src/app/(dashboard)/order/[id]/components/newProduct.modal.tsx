@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../../types/supabase";
-type Order = Database["public"]["Tables"]["orders"]["Row"];
-type Catalog = Database["public"]["Tables"]["materials"]["Row"];
-type Product = Database["public"]["Tables"]["products"]["Row"];
-import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
+import { useState, useRef } from "react";
+import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
+import request from "@/utils/request";
+import { useQuery } from "@tanstack/react-query";
+import { CategoryItem } from "@/types";
 
 export default function NewProductModal({
   showModal,
@@ -20,74 +18,62 @@ export default function NewProductModal({
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   addProduct: (product: any) => void;
-  orderId: number;
+  orderId: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient<Database>();
   const [category, setCategory] = useState<string | null>("");
   const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [size, setSize] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(0);
-  const [price, setPrice] = useState<number>(0);
-  const [catalog, setCatalog] = useState<Catalog[]>([]);
-  const [selectedCatalog, setSelectedCatalog] = useState<Catalog>();
+  const [selectedCatalog, setSelectedCatalog] = useState<CategoryItem>();
   const [open, setOpen] = useState(false);
-  const loading = open && catalog.length === 0;
 
   function handleAddProduct() {
     let product = {
-      item_id: { description: description, id: orderId },
+      categoryItemId: selectedCatalog?.id,
+      categoryItem: selectedCatalog,
       quantity: quantity,
-      price: price || 0,
-      // size: size,
-      room: category || "",
-      order_id: orderId,
+      area: category || "",
+      orderId: orderId,
       status: "new",
     };
     addProduct(product);
     setShowModal(false);
   }
+  const { data, isLoading } = useQuery({
+    queryKey: ['category-items'],
+    queryFn: async () => {
+      const res = await request({
+        url: `/category-items`,
+        method: "GET",
+        params: {
 
-  async function searchCatalog() {
-    const { data, error } = await supabase.from("materials").select().textSearch("name", name);
-    if (data) {
-      setCatalog(data);
-    }
-  }
+        },
+      })
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    },
+  });
 
-  function handleSelectCatalogItem(value: Catalog) {
+  const catalog = data?.categoryItems || [];
+  const loading = isLoading;
+
+  function handleSelectCatalogItem(value: CategoryItem) {
     setSelectedCatalog(value);
-    // setCategory(value.category);
-    setDescription(value.description || "");
-    setPrice(value.retail_price || 0);
     setQuantity(1);
   }
 
-  useEffect(() => {
-    const getData = setTimeout(() => {
-      searchCatalog();
-    }, 500);
-    return () => clearTimeout(getData);
-  }, [name]);
-
-  useEffect(() => {
-    if (!open) {
-      setCatalog([]);
-    }
-  }, [open]);
-
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add Product</Button>
+      <Button onClick={() => setShowModal(true)}>+ Add Item</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
           <div className="space-y-6">
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Product</h3>
+            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Item</h3>
             <div>
               <Label>Product Name</Label>
-              {/* <TextInput id="name" required value={name} onChange={(e) => setName(e.target.value)} /> */}
               <Autocomplete
                 open={open}
                 fullWidth
@@ -98,7 +84,7 @@ export default function NewProductModal({
                   setOpen(false);
                 }}
                 filterOptions={(x) => x}
-                getOptionLabel={(option) => option.description || ""}
+                getOptionLabel={(option) => option.lineItem || ""}
                 options={catalog}
                 loading={loading}
                 value={selectedCatalog}
@@ -167,7 +153,7 @@ export default function NewProductModal({
             {selectedCatalog && (
               <>
                 <div>
-                  <Label htmlFor="countries">Category</Label>
+                  <Label htmlFor="countries">Area</Label>
                   <Select id="countries" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
                     <option>{category}</option>
                     <option>Applicances</option>
@@ -197,29 +183,11 @@ export default function NewProductModal({
                     <option>Window</option>
                   </Select>
                 </div>
-                <div>
-                  <Label>Sqft</Label>
-                  <TextInput required type="number" value={size} onChange={(e) => setSize(e.target.valueAsNumber)} />
-                </div>
+  
                 <div>
                   <Label>Quantity</Label>
                   <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
                 </div>
-                <div>
-                  <Label>Price</Label>
-                  <TextInput addon="$" required type="number" value={price} onChange={(e) => setPrice(e.target.valueAsNumber)} />
-                </div>
-                {/* <div className="max-w-md" id="textarea">
-                  <Label htmlFor="comment">Description</Label>
-                  <Textarea
-                    id="comment"
-                    placeholder="Please give a detailed description..."
-                    required
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div> */}
 
                 <div className="flex justify-end">
                   <Button onClick={handleAddProduct}>Save</Button>

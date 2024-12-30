@@ -84,6 +84,7 @@ export type OrderHistory = {
 
 export interface Scope {
   projectName: string;
+  budget: number;
   organizationId: string;
   propertyId: string;
   dueDate: string;
@@ -119,6 +120,7 @@ export interface ScopeItem {
   categoryItemId: string;
   categoryItem: any;
   area: string;
+  status: string;
   scopeItemImages: {
     fileId: string;
     fileUrl: string;
@@ -166,3 +168,19 @@ export type Organization = {
   userId: string;
   name: string;
 }
+
+export type CategoryItem = {
+  id: string;
+  lineItem: string;
+  taskDescription: string;
+  targetClientPrice: string;
+  costCategory: string;
+  costCode: string;
+  options: string;
+  notes: string;
+  uom: string;
+  materialId: string;
+  originalMaterialId: string;
+  targetVendorPrice: string;
+  equipmentUsageRental: string;
+};

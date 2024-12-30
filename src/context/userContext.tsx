@@ -66,6 +66,10 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     if (token && user) {
       handleGetUser(JSON.parse(user));
       handleGetOrganizations(JSON.parse(user));
+    } else {
+      localStorage.clear();
+      setSelectedOrganization(null);
+      setUser(null);
     }
   }, []);
 

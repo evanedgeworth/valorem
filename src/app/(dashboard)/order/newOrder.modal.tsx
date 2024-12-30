@@ -1,15 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useContext } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../types/supabase";
-import moment from "moment";
-import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea, Datepicker } from "flowbite-react";
-import { usePlacesWidget } from "react-google-autocomplete";
-import Autocomplete from "react-google-autocomplete";
+import { useRef, useContext } from "react";
+import { Button, Label, Modal, TextInput, Textarea, Datepicker } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import request from "@/utils/request";
 import SelectProperty from "./selectProperty";
@@ -19,7 +14,7 @@ type Inputs = {
   projectName: string;
   address: string;
   dueDate: Date;
-  size: number;
+  budget: number;
   description: string;
   additionalDetails: string;
   propertyId: string;
@@ -27,14 +22,6 @@ type Inputs = {
 
 export default function NewOrderModal({ showModal, setShowModal }: { showModal: boolean; setShowModal: (value: boolean) => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient<Database>();
-  // const [name, setName] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [location, setLocation] = useState<any>({ lat: "", long: "" });
-  // const [trade, setTrade] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date>(new Date());
-  // const [size, setSize] = useState<number>(0);
-  // const [description, setDescription] = useState<string>("");
   const router = useRouter();
   const { user, selectedOrganization } = useContext(UserContext);
   const {
@@ -50,7 +37,10 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
       const res = await request({
         url: `/scope`,
         method: 'POST',
-        data: body
+        data: {
+          ...body,
+          organizationId: selectedOrganization?.organizationId
+        }
       });
 
       if (res?.status === 200) {
@@ -67,6 +57,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
   async function handleCreateOrder(data: Inputs) {
     mutate({
       ...data,
+      budget: Number(data.budget),
       organizationId: selectedOrganization?.organizationId
     });
   }
@@ -99,10 +90,10 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
                   onSelectedDateChanged={(date) => setValue('dueDate', date)}
                 />
               </div>
-              {/* <div>
-                <Label>Main Sqft</Label>
-                <TextInput type="number" {...register("size")} required />
-              </div> */}
+              <div>
+                <Label>Budget</Label>
+                <TextInput type="number" {...register("budget")} required />
+              </div>
 
               <div className="max-w-md" id="textarea">
                 <Label htmlFor="comment">Description</Label>
@@ -110,7 +101,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
               </div>
 
               <div className="flex justify-end">
-                <Button type="submit">Save</Button>
+                <Button disabled={isPending} type="submit">Save</Button>
               </div>
             </div>
           </form>

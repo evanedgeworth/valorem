@@ -1,4 +1,4 @@
-import { Button, Label, TextInput, Select, Textarea } from "flowbite-react";
+import { Button, Label, TextInput, Select, Textarea, Spinner } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { states } from "@/utils/defaults";
 import formatGoogleAddressComponents from "@/utils/formatGoogleAddressComponents";
@@ -51,6 +51,15 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
   const backImages = watch('backImages');
   const leftImages = watch('leftImages');
   const rightImages = watch('rightImages');
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const key = event.key;
+    if (!/^\d$/.test(key) && key !== "Backspace" && key !== "ArrowLeft" && key !== "ArrowRight") {
+      event.preventDefault();
+    }
+  };
+
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -109,7 +118,7 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
         </div>
         <div>
           <Label>Number of Rooms</Label>
-          <TextInput type="number" {...register("noOfRooms")} required />
+          <TextInput min={0} onKeyDown={handleKeyDown} type="number" {...register("noOfRooms")} required />
         </div>
         <div>
           <Label>Access Contact</Label>
@@ -144,7 +153,7 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
       </div>
       <div className="flex gap-4 mt-4">
         <Button disabled={isLoading} type="submit" fullSized>
-          {isEdit ? "Save" : "Create Property +"}
+          {isLoading ? <Spinner size="xs" /> : isEdit ? "Save" : "Create Property +"}
         </Button>
         <Button type="button" onClick={onClose} fullSized color={"light"}>
           Close
