@@ -8,6 +8,7 @@ import request from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
 import Cookies from 'js-cookie';
 import moment from "moment";
+import { useToast } from "@/context/toastContext";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ export default function AuthForm() {
   const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient<Database>();
+  const { showToast } = useToast();
 
   const handleSignIn = async () => {
     setIsloading(true);
@@ -44,7 +45,7 @@ export default function AuthForm() {
       });
       router.push("/dashboard");
     } else {
-      alert(res.data?.message || 'Failed');
+      showToast(res.data?.message || 'Failed!', 'error')
       setIsloading(false);
     }
   };

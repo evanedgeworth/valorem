@@ -9,6 +9,7 @@ import { flowbiteTheme } from "@/app/theme";
 import SidebarProvider from "@/context/sidebarContext";
 import React from "react";
 import QueryProvider from "@/utils/get-query-client";
+import { ToastProvider } from "@/context/toastContext";
 
 const RootLayout: FC<PropsWithChildren> = function ({ children }) {
   return (
@@ -24,10 +25,12 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
           <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
             <QueryProvider>
               <Flowbite theme={{ theme: flowbiteTheme }}>
-                <SidebarProvider>
-                  <SidebarNav />
-                  <div className="ml-[64px] md:ml-64 w-full flex flex-1 h-auto">{children}</div>
-                </SidebarProvider>
+                <ToastProvider>
+                  <SidebarProvider>
+                    <SidebarNav />
+                    <div className="ml-[64px] md:ml-64 w-full flex flex-1 h-auto">{children}</div>
+                  </SidebarProvider>
+                </ToastProvider>
               </Flowbite>
             </QueryProvider>
           </main>
