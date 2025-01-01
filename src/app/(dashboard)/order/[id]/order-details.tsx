@@ -4,7 +4,6 @@ import { Accordion, Button, Spinner, Dropdown } from "flowbite-react";
 import { useState, useEffect, useRef, useContext, useMemo } from "react";
 import moment from "moment";
 import NewProductModal from "./components/newProduct.modal";
-import ApproveCOModal from "./components/approve.modal";
 import { UserContext } from "@/context/userContext";
 import { useRouter } from "next/navigation";
 import { MdClose, MdDashboard, MdCheck, MdOutlineModeEdit } from "react-icons/md";
@@ -13,18 +12,14 @@ import { IoEye, IoEyeOff } from "react-icons/io5";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { BiHistory } from "react-icons/bi";
 import ConfirmationModal from "@/components/confirmation.modal";
-import OrderTimeLine from "./components/timeLine";
 import ActiveOrder from "./components/activeOrder";
-import Warranties from "./components/warranties";
 import Settings from "./components/settings";
 import History from "./components/history";
-import { checkPermission, compareArrays, formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
+import { formatToUSD, parseCurrencyToNumber } from "@/utils/commonUtils";
 
-import { calculateTotalPrice } from "@/utils/commonUtils";
 import { useSearchParams } from "next/navigation";
-import CSVSelector from "@/components/csvSelector";
 import request from "@/utils/request";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Order, Property, Scope, ScopeItem } from "@/types";
 
 export default function OrderDetails({ orderId }: { orderId: string }) {
@@ -64,7 +59,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
   const property = (propertyData || {}) as Property;
 
-  const [products, setProducts] = useState<ScopeItem[]>([]);
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditMenu, setShowEditMenu] = useState<boolean>(false);
@@ -72,28 +66,48 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [showApproveModal, setShowApproveModal] = useState<boolean>(false);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState<boolean>(false);
   const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
-  const [productsLoading, setProductsLoading] = useState<boolean>(false);
-  const [showToast, setShowToast] = useState(false);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "details";
   const { user, role } = useContext(UserContext);
   const router = useRouter();
 
-  async function getOrders() {
-    refetch();
-  }
 
   async function getProducts() {
     refetch();
   }
 
-
   function handleTabChange(selectedTab: string) {
     router.replace(`/order/${orderId}?orderId=${orderId}&view=${selectedTab}`);
   }
 
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (body: any) => {
+      const res = await request({
+        url: `/scope/${order.id}/populate`,
+        method: 'POST',
+        data: {
+          ...body,
+        }
+      });
+
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    },
+    onSuccess(data, variables, context) {
+      refetch();
+      setShowSubmitButton(false);
+      setShowSubmitConfirmation(false);
+    },
+  });
+
   async function createChangeOrder() {
-    let orderId: number | null = null;
+    const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
+    await mutate({
+      sendForApproval: true,
+      scopeItems: formattedScopeItems,
+    });
   }
 
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
@@ -105,6 +119,12 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     return total;
   }, [scopeItemRevision]);
 
+
+  useEffect(() => {
+    if (scopeItemRevision) {
+      setAddedProducts(scopeItemRevision.scopeItems);
+    }
+  }, [scopeItemRevision]);
 
   if (isLoading) {
     return (
@@ -216,29 +236,25 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     <strong>Allocated Amount: </strong>
                     {formatToUSD(allocatedAmount)}
                   </p>
+                  <p className="mb-2 text-sm text-gray-900 dark:text-white">
+                    <strong>Status:</strong>
+                    <br />
+                    {order.scopeStatus}
+                  </p>
                 </Accordion.Content>
               </Accordion.Panel>
             </Accordion>
 
 
-            {order.scopeStatus !== 'APPROVED' && showEditMenu && (
+            {order.scopeStatus !== 'APPROVED' && (
               <div className="flex justify-end mb-5 gap-4">
-                <CSVSelector
-                  showModal={showUploadModal}
-                  setShowModal={setShowUploadModal}
-                  orderId={Number(order.id)}
-                  addProduct={(newProduct) => {
-                    setAddedProducts([...addedProducts, ...newProduct]), setShowSubmitButton(true);
-                  }}
-                />
-                <Button onClick={() => router.push(`/add-event/${order.id}`)}>+ Add Event</Button>
                 <NewProductModal
                   showModal={showModal}
                   setShowModal={setShowModal}
                   addProduct={(newProduct) => {
                     setAddedProducts([...addedProducts, newProduct]), setShowSubmitButton(true);
                   }}
-                  orderId={Number(order.id)}
+                  orderId={order.id}
                 />
                 {showSubmitButton && (
                   <Button className="h-fit" onClick={() => setShowSubmitConfirmation(true)}>
@@ -253,10 +269,11 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   setShowModal={setShowSubmitConfirmation}
                   handleConfirm={createChangeOrder}
                   handleCancel={() => setShowSubmitConfirmation(false)}
+                  isLoading={isPending}
                 />
               </div>
             )}
-            {productsLoading ? (
+            {isLoading ? (
               <div className="flex justify-center items-center">
                 <Spinner aria-label="Loading" size="xl" />
               </div>
@@ -264,13 +281,11 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <ActiveOrder
                 isEditing={showEditMenu}
                 remove={(newProduct) => {
-                  let filtered = products.filter((item) => item.id !== newProduct.id);
-                  setProducts(filtered);
-                  setAddedProducts([...addedProducts, newProduct]);
+                  const filter = [...addedProducts].filter(item => item.id !== newProduct.id);
+                  setAddedProducts([...filter, newProduct]);
                   setShowSubmitButton(true);
                 }}
-                refresh={getProducts}
-                products={scopeItemRevision?.scopeItems}
+                products={[...addedProducts]}
               />
             )}
           </section>

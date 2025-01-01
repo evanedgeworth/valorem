@@ -6,45 +6,56 @@ import { UserContext } from "@/context/userContext";
 import { Property } from "@/types";
 import request from "@/utils/request";
 import PropertyForm, { PropertyInput } from "./propertyForm";
+import { useToast } from "@/context/toastContext";
+import { useQueryClient } from "@tanstack/react-query";
 
-type props = { showModal: boolean; setShowModal: (value: boolean) => void; property: Property | null; refresh: () => void };
+type props = { showModal: boolean; setShowModal: (value: boolean) => void; property: Property | null; };
 
-export default function EditPropertyModal({ showModal, setShowModal, property, refresh }: props) {
+export default function EditPropertyModal({ showModal, setShowModal, property }: props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
   const { selectedOrganization } = useContext(UserContext);
 
   async function handleSaveProperty(data: PropertyInput) {
-    setIsLoading(true);
-    request({
-      url: `/properties/${property?.id}`,
-      method: "PUT",
-      data: {
-        ...property,
-        name: data.name,
-        organizationId: selectedOrganization?.organizationId,
-        accessInstructions: data.accessInstructions,
-        type: data.type,
-        address: {
-          address1: data.address1,
-          address2: data.address2,
-          city: data.city,
-          state: data.state,
-          postalCode: data.postalCode
+    try {
+      setIsLoading(true);
+      const res = await request({
+        url: `/properties/${property?.id}`,
+        method: "PUT",
+        data: {
+          ...property,
+          name: data.name,
+          organizationId: selectedOrganization?.organizationId,
+          accessInstructions: data.accessInstructions,
+          accessContact: data.accessContact,
+          noOfRooms: Number(data.noOfRooms),
+          type: data.type,
+          address: {
+            address1: data.address1,
+            address2: data.address2,
+            city: data.city,
+            state: data.state,
+            postalCode: data.postalCode
+          },
         },
-        size: {
-          value: Number(data.size),
-          units: "SQUARE_FEET" 
-        }
-      },
-    })
-      .then(() => {
-        refresh();
+      });
+
+      if (res?.status === 200) {
         setIsLoading(false);
         setShowModal(false);
-      })
-      .catch((e) => console.log(e));
+        showToast('Successfully updated the property.', 'success');
+        queryClient.setQueryData(['properties'], (old: any) => ({ ...old, properties: [...old.properties].map(item => item.id === res.data.id ? res.data : item) }))
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    } catch (error: any) {
+      setIsLoading(false);
+      showToast(error.message, 'error');
+
+    }
   }
 
   return (
@@ -62,8 +73,9 @@ export default function EditPropertyModal({ showModal, setShowModal, property, r
             defaultValues={{
               name: property?.name,
               accessInstructions: property?.accessInstructions,
+              accessContact: property?.accessContact,
+              noOfRooms: property?.noOfRooms,
               type: property?.type,
-              size: property?.size.value,
               address1: property?.address.address1,
               address2: property?.address.address2,
               city: property?.address.city,

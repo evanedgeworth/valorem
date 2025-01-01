@@ -16,8 +16,9 @@ import { FaList, FaMapMarkedAlt } from "react-icons/fa";
 import ViewPropertyModal from "./components/view-property.modal";
 import request from "@/utils/request";
 import { Property } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { checkPermission, parseAddress } from "@/utils/commonUtils";
+import { useToast } from "@/context/toastContext";
 
 
 export default function Properties() {
@@ -33,6 +34,9 @@ export default function Properties() {
   const { selectedOrganization, role } = useContext(UserContext);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "List";
+  const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
     queryKey: ['properties'],
@@ -69,20 +73,25 @@ export default function Properties() {
 
   async function handleRemoveProperty() {
     let propertyId = selectedProperty.current?.id || "";
-    await request({
+    setIsLoadingDelete(true);
+    const res = await request({
       url: `/properties/${propertyId}`,
       method: "DELETE",
     });
-
+    
+    setIsLoadingDelete(false);
     setShowDeleteConfirmModal(false);
-    getProperties();
+    if (res?.status === 200) {
+      showToast(res.data.message, 'success');
+      queryClient.setQueryData(['properties'], (old: any) => ({ ...old, properties: [...old.properties].filter(item => item.id !== propertyId) }))
+    }
   }
 
   return (
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
-        {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} refresh={getProperties} />}
+        {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
       </div>
 
       <div className="flex gap-4 mb-4 items-end">
@@ -198,7 +207,7 @@ export default function Properties() {
       )}
       {selectedTab === "Map" && <Map properties={properties} />}
 
-      <EditPropertyModal showModal={showEditModal} setShowModal={setShowEditModal} property={selectedProperty.current} refresh={getProperties} />
+      <EditPropertyModal showModal={showEditModal} setShowModal={setShowEditModal} property={selectedProperty.current} />
       <ViewPropertyModal
         showModal={showViewModal}
         setShowModal={setShowViewModal}
@@ -211,10 +220,11 @@ export default function Properties() {
       <ConfirmationModal
         showModal={showDeleteConfirmModal}
         setShowModal={setShowDeleteConfirmModal}
-        title="Delete Order"
+        title="Delete Property"
         description="Are you sure you would like to remove this property? This action is permanent."
         handleCancel={() => setShowDeleteConfirmModal(false)}
         handleConfirm={handleRemoveProperty}
+        isLoading={isLoadingDelete}
       />
     </section>
   );

@@ -1,10 +1,8 @@
-import { Card, Toast, Table } from "flowbite-react";
-import { useState } from "react";
+import { Card, Table } from "flowbite-react";
 import { MdDeleteOutline } from "react-icons/md";
 import { numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 
-import { HiCheck } from "react-icons/hi";
 import { ScopeItem } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
@@ -32,15 +30,12 @@ function ProductDescription ({ categoryItemId }: { categoryItemId: string }) {
 export default function ActiveOrder({
   remove,
   isEditing,
-  refresh,
   products,
 }: {
   remove: (product: ScopeItem) => void;
   isEditing: boolean;
-  refresh: () => Promise<void>;
   products: ScopeItem[] | null;
 }) {
-  const [showToast, setShowToast] = useState(false);
 
   function handleRemoveProduct(product: ScopeItem) {
     let removedProduct = { ...product, status: "removed" };
@@ -67,7 +62,6 @@ export default function ActiveOrder({
                   {isEditing && <Table.HeadCell></Table.HeadCell>}
                 </Table.Head>
                 {item
-                  // .sort((a, b) => (a.item_id?.description || "z").localeCompare(b.item_id?.description || "z"))
                   .map((product, index) => (
                     <Table.Body className="divide-y" key={product.id}>
                       <Table.Row
@@ -106,15 +100,6 @@ export default function ActiveOrder({
           </div>
         )}
       </div>
-      {showToast && (
-        <Toast className="fixed bottom-10 right-10" duration={100}>
-          <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
-            <HiCheck className="h-5 w-5" />
-          </div>
-          <div className="ml-3 text-sm font-normal">Product added successfully.</div>
-          <Toast.Toggle />
-        </Toast>
-      )}
     </div>
   );
 }

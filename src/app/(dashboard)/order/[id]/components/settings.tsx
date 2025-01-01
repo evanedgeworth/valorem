@@ -15,10 +15,10 @@ export default function Settings({ order, refetch }: { order: Scope, refetch: ()
     }
   }, [order]);
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (body: any) => {
       const res = await request({
-        url: `/orders/${order.id}`,
+        url: `/scope/${order.id}`,
         method: 'PUT',
         data: body
       });
@@ -31,7 +31,7 @@ export default function Settings({ order, refetch }: { order: Scope, refetch: ()
     onSuccess(data, variables, context) {
       refetch();
     },
-  })
+  });
 
   async function handleSave() {
     mutate({ projectName: name, additionalDetails: description });
@@ -63,7 +63,7 @@ export default function Settings({ order, refetch }: { order: Scope, refetch: ()
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={handleSave}>Save</Button>
+          <Button disabled={isPending} onClick={handleSave}>Save</Button>
         </div>
       </div>
     </section>

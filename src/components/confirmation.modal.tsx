@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea } from "flowbite-react";
+import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea, Spinner } from "flowbite-react";
 
 export default function ConfirmationModal({
   showModal,
+  isLoading,
   setShowModal,
   title,
   description,
@@ -12,6 +13,7 @@ export default function ConfirmationModal({
   handleConfirm,
 }: {
   showModal: boolean;
+  isLoading?: boolean;
   setShowModal: (value: boolean) => void;
   title: string;
   description: string;
@@ -32,8 +34,8 @@ export default function ConfirmationModal({
               <Button color="gray" className="w-28" onClick={handleCancel}>
                 No
               </Button>
-              <Button className="w-28" onClick={handleConfirm}>
-                Yes
+              <Button disabled={isLoading} className="w-28" onClick={handleConfirm}>
+                { isLoading ? <Spinner size="sm" /> : "Yes" }
               </Button>
             </div>
           </div>
