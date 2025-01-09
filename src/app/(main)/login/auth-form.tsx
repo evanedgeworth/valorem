@@ -45,7 +45,7 @@ export default function AuthForm() {
       });
       router.push("/dashboard");
     } else {
-      showToast(res.data?.message || 'Failed!', 'error')
+      showToast(res?.data?.message || 'Failed!', 'error')
       setIsloading(false);
     }
   };

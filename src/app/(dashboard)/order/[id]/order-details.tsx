@@ -212,7 +212,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             </div>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
-              {moment(order.createdAt).format("MMMM DD, YYYY hh:mm a")}
+              {moment(order.createdAt).format("l")}
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
@@ -285,7 +285,17 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   setAddedProducts([...filter, newProduct]);
                   setShowSubmitButton(true);
                 }}
+                edit={(newProduct) => {
+                  const data = [...addedProducts].map(item => item.id === newProduct.id ? newProduct : item);
+                  setAddedProducts(data);
+                  setShowSubmitButton(true);
+                }}
+                add={(newProduct) => {
+                  setAddedProducts([...addedProducts, newProduct]);
+                  setShowSubmitButton(true);
+                }}
                 products={[...addedProducts]}
+                orderId={orderId}
               />
             )}
           </section>

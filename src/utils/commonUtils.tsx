@@ -93,7 +93,7 @@ function toRad(Value: number) {
 
 // Adds commas to numbers
 export function numberWithCommas(x: number) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return x.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // export function calculateTotalPrice(products: Product[], property: "retail_price" | "price") {

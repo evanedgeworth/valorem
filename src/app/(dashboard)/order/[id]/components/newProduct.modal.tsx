@@ -9,6 +9,35 @@ import request from "@/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { CategoryItem } from "@/types";
 
+export const areaOptions = [
+  "Applicances",
+  "Bathroom",
+  "Bedroom",
+  "Cabinet",
+  "Ceiling Fan",
+  "Cleaning",
+  "Countertop",
+  "Demo",
+  "Door",
+  "Drywall",
+  "Electrical",
+  "Exterior / Landscaping",
+  "Flooring",
+  "Garage",
+  "General",
+  "HVAC",
+  "Kitchen",
+  "Landscaping",
+  "Laundry",
+  "Lighting",
+  "Paint",
+  "Permit",
+  "Plumbing",
+  "Roofing",
+  "Window",
+];
+
+
 export default function NewProductModal({
   showModal,
   setShowModal,
@@ -35,6 +64,7 @@ export default function NewProductModal({
       area: category || "",
       orderId: orderId,
       status: "new",
+      id: new Date().toTimeString()
     };
     addProduct(product);
     setShowModal(false);
@@ -66,124 +96,97 @@ export default function NewProductModal({
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add Item</Button>
+      <Button size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
-        <Modal.Header />
+        <Modal.Header>
+          <h3 className="text-xl font-medium text-gray-900 dark:text-white px-6 pt-3">Add product</h3>
+        </Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Item</h3>
             <div>
               <Label>Product Name</Label>
-              <Autocomplete
-                open={open}
-                fullWidth
-                onOpen={() => {
-                  setOpen(true);
-                }}
-                onClose={() => {
-                  setOpen(false);
-                }}
-                filterOptions={(x) => x}
-                getOptionLabel={(option) => option.lineItem || ""}
-                options={catalog}
-                loading={loading}
-                value={selectedCatalog}
-                onChange={(event: React.SyntheticEvent, value: any | null) => handleSelectCatalogItem(value)}
-                onInputChange={(event, newInputValue) => {
-                  setName(newInputValue);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label=""
-                    id="productSelector"
-                    fullWidth
-                    variant="standard"
-                    size="small"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderStyle: "none",
-                        borderWidth: 0,
-                        backgroundColor: "#F9FAFB",
-                        borderRadius: ".5rem",
-                        "--tw-ring-color": "transparent",
-                        legend: {
-                          marginLeft: "30px",
+              <div className=" border-gray-300 bg-gray-50 border rounded-lg py-1">
+                <Autocomplete
+                  open={open}
+                  fullWidth
+                  onOpen={() => {
+                    setOpen(true);
+                  }}
+                  onClose={() => {
+                    setOpen(false);
+                  }}
+                  filterOptions={(x) => x}
+                  getOptionLabel={(option) => option.lineItem || ""}
+                  options={catalog}
+                  loading={loading}
+                  value={selectedCatalog}
+                  onChange={(event: React.SyntheticEvent, value: any | null) => handleSelectCatalogItem(value)}
+                  onInputChange={(event, newInputValue) => {
+                    setName(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label=""
+                      id="productSelector"
+                      fullWidth
+                      variant="standard"
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+
+                          backgroundColor: "#F9FAFB",
+                          borderRadius: ".5rem",
+                          "--tw-ring-color": "transparent",
+                          legend: {
+                            marginLeft: "30px",
+                          },
                         },
-                      },
-                      "& .MuiAutocomplete-inputRoot": {
-                        borderStyle: "none",
-                        borderWidth: 0,
-                        paddingLeft: "20px !important",
-                        borderRadius: ".5rem",
-                        "--tw-ring-color": "transparent",
-                      },
-                      "& .MuiInputLabel-outlined": {
-                        borderStyle: "none",
-                        borderWidth: 0,
-                        paddingLeft: "20px",
-                        "--tw-ring-color": "transparent",
-                      },
-                      "& .MuiInputLabel-shrink": {
-                        marginLeft: "20px",
-                        paddingLeft: "10px",
-                        paddingRight: 0,
-                        background: "white",
-                        borderStyle: "none",
-                        borderWidth: 0,
-                        "--tw-ring-color": "transparent",
-                      },
-                      border: "none",
-                      "& fieldset": { border: "none" },
-                    }}
-                    InputProps={{
-                      ...params.InputProps,
-                      disableUnderline: true,
-                      endAdornment: (
-                        <>
-                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-              />
+                        "& .MuiAutocomplete-inputRoot": {
+                          paddingLeft: "10px !important",
+                          paddingRight: "20px !important",
+                          borderRadius: ".5rem",
+                          "--tw-ring-color": "transparent",
+                        },
+                        "& .MuiInputLabel-outlined": {
+                          paddingLeft: "20px",
+                          "--tw-ring-color": "transparent",
+                        },
+                        "& .MuiInputLabel-shrink": {
+                          marginLeft: "20px",
+                          paddingLeft: "10px",
+                          paddingRight: 0,
+                          background: "white",
+                          "--tw-ring-color": "transparent",
+                        },
+                      }}
+                      InputProps={{
+                        ...params.InputProps,
+                        disableUnderline: true,
+                        endAdornment: (
+                          <>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+              </div>
             </div>
             {selectedCatalog && (
               <>
                 <div>
-                  <Label htmlFor="countries">Area</Label>
-                  <Select id="countries" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
+                  <Label htmlFor="area">Room / Area</Label>
+                  <Select id="area" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
                     <option>{category}</option>
-                    <option>Applicances</option>
-                    <option>Bathroom</option>
-                    <option>Bedroom</option>
-                    <option>Cabinet</option>
-                    <option>Ceiling Fan</option>
-                    <option>Cleaning</option>
-                    <option>Countertop</option>
-                    <option>Demo</option>
-                    <option>Door</option>
-                    <option>Drywall</option>
-                    <option>Electrical</option>
-                    <option>Exterior / Landscaping</option>
-                    <option>Flooring</option>
-                    <option>Garage</option>
-                    <option>General</option>
-                    <option>HVAC</option>
-                    <option>Kitchen</option>
-                    <option>Landscaping</option>
-                    <option>Laundry</option>
-                    <option>Lighting</option>
-                    <option>Paint</option>
-                    <option>Permit</option>
-                    <option>Plumbing</option>
-                    <option>Roofing</option>
-                    <option>Window</option>
+                    {areaOptions.map((option) => (
+                      <option key={option}>{option}</option>
+                    ))}
                   </Select>
                 </div>
-  
+
                 <div>
                   <Label>Quantity</Label>
                   <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />

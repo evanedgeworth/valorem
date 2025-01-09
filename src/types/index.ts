@@ -118,7 +118,7 @@ export interface ScopeItem {
   updatedAt: string;
   id: string;
   categoryItemId: string;
-  categoryItem: any;
+  categoryItem?: CategoryItem;
   area: string;
   status: string;
   scopeItemImages: {

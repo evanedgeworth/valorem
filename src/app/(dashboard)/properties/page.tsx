@@ -19,6 +19,7 @@ import { Property } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { checkPermission, parseAddress } from "@/utils/commonUtils";
 import { useToast } from "@/context/toastContext";
+import Link from "next/link";
 
 
 export default function Properties() {
@@ -46,7 +47,9 @@ export default function Properties() {
         method: "GET",
         params: {
           organizationId: selectedOrganization?.organizationId,
-          includeOrdersCount: true
+          // organizationId: "9443835d-590d-41bb-b39f-c4ef028dd6a0",
+          includeOrdersCount: true,
+          includeAssignee: true,
         },
       })
       if (res?.status === 200) {
@@ -78,7 +81,7 @@ export default function Properties() {
       url: `/properties/${propertyId}`,
       method: "DELETE",
     });
-    
+
     setIsLoadingDelete(false);
     setShowDeleteConfirmModal(false);
     if (res?.status === 200) {
@@ -159,13 +162,20 @@ export default function Properties() {
                       <div className="relative cursor-pointer">
                         <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
                           {checkPermission(role, "properties_view") && (
+                            <Link
+                              href={{ pathname: `/properties/${encodeURIComponent(property.id)}` }}
+                            >
+                              <Dropdown.Item>View</Dropdown.Item>
+                            </Link>
+                          )}
+                          {checkPermission(role, "properties_view") && (
                             <Dropdown.Item
                               onClick={() => {
                                 selectedProperty.current = property;
                                 setShowViewModal(true);
                               }}
                             >
-                              View
+                              Details
                             </Dropdown.Item>
                           )}
                           {checkPermission(role, "properties_update") && (
