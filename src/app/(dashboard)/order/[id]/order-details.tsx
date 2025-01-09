@@ -68,7 +68,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "details";
-  const { user, role } = useContext(UserContext);
+  const { user, categoryItems } = useContext(UserContext);
   const router = useRouter();
 
 
@@ -121,10 +121,13 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
 
   useEffect(() => {
-    if (scopeItemRevision) {
-      setAddedProducts(scopeItemRevision.scopeItems);
+    if (scopeItemRevision && categoryItems.length > 0) {
+      setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+        ...item,
+        categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+      })));
     }
-  }, [scopeItemRevision]);
+  }, [scopeItemRevision, categoryItems]);
 
   if (isLoading) {
     return (
