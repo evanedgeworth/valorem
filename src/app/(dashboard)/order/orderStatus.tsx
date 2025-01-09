@@ -1,4 +1,6 @@
 import { Badge } from "flowbite-react";
+import { BiSolidPackage } from "react-icons/bi";
+import { HiCheck, HiClock } from "react-icons/hi";
 
 export default function OrderStatus({ status }: { status: string }) {
   switch (status) {
