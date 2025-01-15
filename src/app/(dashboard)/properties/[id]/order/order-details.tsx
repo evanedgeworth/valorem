@@ -127,7 +127,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
-        <div className="flex justify-between">
+        <div className="flex justify-between border-t border-t-gray-700 border-b border-b-gray-700 py-3 mb-3">
           <div className="flex gap-1 items-center">
             <button onClick={router.back}>
               <HiOutlineArrowSmLeft size={22} />
@@ -149,7 +149,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             }
           </div>
         </div>
-        <div className="flex justify-between font-semibold">
+        <div className="flex justify-between font-semibold border-t border-t-gray-700 border-b border-b-gray-700 py-3">
           <div>
             <p className="text-xl">Scope estimate as of {moment(order.dueDate).format('l')}</p>
           </div>

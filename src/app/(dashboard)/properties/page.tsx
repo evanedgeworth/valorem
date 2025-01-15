@@ -7,7 +7,6 @@ import Map from "./components/map";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BiSortDown } from "react-icons/bi";
 import { UserContext } from "@/context/userContext";
 import NewPropertyModal from "./components/newProperty.modal";
 import ConfirmationModal from "@/components/confirmation.modal";
@@ -20,13 +19,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { checkPermission, parseAddress } from "@/utils/commonUtils";
 import { useToast } from "@/context/toastContext";
 import Link from "next/link";
-
+import ScopeRequestModal from "./components/scopeRequest.modal";
+import { BiPlus } from "react-icons/bi";
+import classNames from 'classnames';
+import { DeleteIcon, DetailsIcon, EditIcon, ViewIcon } from "@/components/icon";
 
 export default function Properties() {
   const pathname = usePathname();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
+
   const [searchInput, setSearchInput] = useState<string>("");
   const [sortBy, setSortBy] = useState<"createdAt" | "address">("createdAt");
   const selectedProperty = useRef<Property | null>(null);
@@ -92,37 +96,17 @@ export default function Properties() {
 
   return (
     <section className="p-5 w-full">
-      <div className="flex justify-between mb-4">
-        <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
+      <div className="flex justify-between items-center mb-4 bg-gray-800 p-4 border-b-gray-900 border-b">
+        <div>
+          <h5 className="text-lg font-medium">Properties</h5>
+          <div className="flex gap-2 mt-2">
+            <a className={classNames({ "cursor-pointer": true, "border-b-white border-b": selectedTab === 'List' })} onClick={() => handleTabChange("List")}>List</a>
+            <a className={classNames({ "cursor-pointer": true, "border-b-white border-b": selectedTab === 'Map' })} onClick={() => handleTabChange("Map")}>Map</a>
+          </div>
+        </div>
         {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
       </div>
 
-      <div className="flex gap-4 mb-4 items-end">
-        <div className="max-w-md">
-          <div className="mb-2 block">
-            <Label htmlFor="search" value="Search" />
-          </div>
-          <TextInput placeholder="Name" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} className="w-60" />
-        </div>
-
-        {/* <Dropdown label={<BiSortDown size={17} className=" dark:text-white" />} arrowIcon={false} color="white">
-          <Dropdown.Header>
-            <strong>Sort By</strong>
-          </Dropdown.Header>
-          <Dropdown.Item onClick={() => setSortBy("address")}>Address</Dropdown.Item>
-          <Dropdown.Item onClick={() => setSortBy("createdAt")}>Creation Date</Dropdown.Item>
-        </Dropdown> */}
-        <Button.Group>
-          <Button color="gray" value={"List"} onClick={() => handleTabChange("List")}>
-            <FaList className="mr-3 h-4 w-4" />
-            List
-          </Button>
-          <Button color="gray" value={"Map"} onClick={() => handleTabChange("Map")}>
-            <FaMapMarkedAlt className="mr-3 h-4 w-4" />
-            Map
-          </Button>
-        </Button.Group>
-      </div>
       {selectedTab === "List" ? (
         tableIsLoading ? (
           <div className=" ml-auto mr-auto mt-72 text-center">
@@ -142,31 +126,45 @@ export default function Properties() {
             <Table.Body className="divide-y">
               {properties.map((property) => (
                 <Fragment key={property.id}>
-                  <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                    <Table.Cell className="p-4 cursor-pointer">{property.id}</Table.Cell>
-                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                  <Table.Row>
+                    <Table.Cell>{property.id}</Table.Cell>
+                    <Table.Cell>
                       {property.name}
                     </Table.Cell>
-                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    <Table.Cell>
                       {parseAddress(property.address)}
                     </Table.Cell>
-                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    <Table.Cell>
                       {moment(property.createdAt).format("MMM DD, YYYY")}
                     </Table.Cell>
-                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{property.type}</Table.Cell>
-                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    <Table.Cell>{property.type}</Table.Cell>
+                    <Table.Cell>
                       {property?.orderCount}
                     </Table.Cell>
 
-                    <Table.Cell className="flex justify-end">
+                    <Table.Cell>
                       <div className="relative cursor-pointer">
-                        <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-50px] !top-6">
-                          {checkPermission(role, "properties_view") && (
-                            <Link
-                              href={{ pathname: `/properties/${encodeURIComponent(property.id)}` }}
+                        <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-120px] !top-6">
+                          {checkPermission(role, "orders_create") && (
+                            <Dropdown.Item
+                              onClick={() => {
+                                selectedProperty.current = property;
+                                setShowRequestModal(true);
+                              }}
+
+                              icon={() => <BiPlus size={18} />}
                             >
-                              <Dropdown.Item>View</Dropdown.Item>
-                            </Link>
+                              Request Scope
+                            </Dropdown.Item>
+                          )}
+                          {checkPermission(role, "properties_view") && (
+                            <Dropdown.Item
+                              icon={ViewIcon}
+                              as={Link}
+                              href={`/properties/${encodeURIComponent(property.id)}`}
+                            >
+                                View
+                            </Dropdown.Item>
                           )}
                           {checkPermission(role, "properties_view") && (
                             <Dropdown.Item
@@ -174,6 +172,7 @@ export default function Properties() {
                                 selectedProperty.current = property;
                                 setShowViewModal(true);
                               }}
+                              icon={DetailsIcon}
                             >
                               Details
                             </Dropdown.Item>
@@ -184,6 +183,7 @@ export default function Properties() {
                                 selectedProperty.current = property;
                                 setShowEditModal(true);
                               }}
+                              icon={EditIcon}
                             >
                               Edit
                             </Dropdown.Item>
@@ -194,6 +194,8 @@ export default function Properties() {
                                 setShowDeleteConfirmModal(true);
                                 selectedProperty.current = property;
                               }}
+                              className="text-red-500"
+                              icon={DeleteIcon}
                             >
                               Delete
                             </Dropdown.Item>
@@ -235,6 +237,11 @@ export default function Properties() {
         handleCancel={() => setShowDeleteConfirmModal(false)}
         handleConfirm={handleRemoveProperty}
         isLoading={isLoadingDelete}
+      />
+      <ScopeRequestModal
+        setShowModal={setShowRequestModal}
+        showModal={showRequestModal}
+        property={selectedProperty.current}
       />
     </section>
   );

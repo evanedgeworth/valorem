@@ -9,6 +9,11 @@ import { HiChartPie, HiInbox, HiBell, HiUser, HiCalendar } from "react-icons/hi"
 import { HiBolt, HiOutlineHomeModern } from "react-icons/hi2";
 import { RiSettings3Fill } from "react-icons/ri";
 import { TbDeviceIpadDollar } from "react-icons/tb";
+import { TiHome } from "react-icons/ti";
+import { PiClipboardTextFill } from "react-icons/pi";
+import { FaUserGroup } from "react-icons/fa6";
+import { FaCalendarAlt } from "react-icons/fa";
+import { AnalyticIcon, InvoiceIcon } from "./icon";
 
 export default function SidebarNav() {
   const { collapseSidebar, setCollapseSidebar } = useContext(SidebarContext);
@@ -36,31 +41,22 @@ export default function SidebarNav() {
     <Sidebar aria-label="Sidebar" className="fixed left-0" collapsed={collapseSidebar}>
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item as={Link} href="/dashboard" icon={HiChartPie} active={pathname === "/dashboard"} prefetch={false}>
-            Dashboard
+          <Sidebar.Item as={Link} href="/dashboard" icon={TiHome} active={pathname === "/dashboard"} prefetch={false}>
+            Home
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/properties" icon={HiOutlineHomeModern} active={pathname === "/properties"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/properties" icon={PiClipboardTextFill} active={pathname === "/properties"} prefetch={false}>
             Properties
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/order" icon={HiBolt} active={pathname === "/order"} prefetch={false}>
-            Orders
-          </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/inbox" icon={HiInbox} active={pathname === "/inbox"} prefetch={false}>
-            Inbox
-          </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/users" icon={HiUser} active={pathname === "/users"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/users" icon={FaUserGroup} active={pathname === "/users"} prefetch={false}>
             Users
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/notifications" icon={HiBell} active={pathname === "/notifications"} prefetch={false}>
-            Notifications
-          </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/calendar" icon={HiCalendar} active={pathname === "/calendar"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/calendar" icon={FaCalendarAlt} active={pathname === "/calendar"} prefetch={false}>
             Calendar
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/invoices" icon={TbDeviceIpadDollar} active={pathname === "/invoices"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/invoices" icon={InvoiceIcon} active={pathname === "/invoices"} prefetch={false}>
             Invoicing
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/settings" icon={RiSettings3Fill} active={pathname === "/settings"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/settings" icon={AnalyticIcon} active={pathname === "/settings"} prefetch={false}>
             Settings
           </Sidebar.Item>
         </Sidebar.ItemGroup>

@@ -56,7 +56,7 @@ export default function EditProductModal({
   return (
     <Modal show={showModal} size="2xl" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
       <Modal.Header>
-        <h3 className="text-xl font-medium text-gray-900 dark:text-white px-4 pt-3">Edit product</h3>
+        <h3 className="text-xl font-medium px-5 pt-3">Edit product</h3>
       </Modal.Header>
       <Modal.Body>
         <div className="space-y-6">

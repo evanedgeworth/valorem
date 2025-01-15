@@ -1,13 +1,13 @@
-import { Button, Card, Dropdown, Table } from "flowbite-react";
-import { MdDeleteOutline } from "react-icons/md";
+import { Card, Dropdown, Table } from "flowbite-react";
 import { numberWithCommas, parseCurrencyToNumber, sortOrderTable } from "@/utils/commonUtils";
 import { MergeProductsbyKey } from "@/utils/commonUtils";
 
 import { ScopeItem } from "@/types";
-import { BiDotsVerticalRounded, BiDotsHorizontalRounded } from "react-icons/bi";
+import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { useRef, useState } from "react";
 import NewProductModal from "./newProduct.modal";
 import EditProductModal from "./editProduct.modal";
+import { DeleteIcon, EditIcon } from "@/components/icon";
 
 
 export default function ActiveOrder({
@@ -44,7 +44,7 @@ export default function ActiveOrder({
           productSortedByType.sort(sortOrderTable).map((item) => (
             <Card key={item[0].id} className="">
               <div className="flex justify-between">
-                <h5 className="mb-2 text-2xl text-left font-bold text-gray-900 dark:text-white">{item[0].area}</h5>
+                <h5 className="mb-2 text-2xl text-left font-bold">{item[0].area}</h5>
                 <div>
                   <NewProductModal
                     showModal={showAddModal}
@@ -57,30 +57,30 @@ export default function ActiveOrder({
                 </div>
               </div>
               <Table>
-                <Table.Head>
+                <Table.Head className="bg-transparent">
                   <Table.HeadCell>Product Name</Table.HeadCell>
                   <Table.HeadCell>Description</Table.HeadCell>
                   <Table.HeadCell>Qty</Table.HeadCell>
                   <Table.HeadCell>Price</Table.HeadCell>
                   <Table.HeadCell>Total Price</Table.HeadCell>
 
-                  {isEditing && <Table.HeadCell></Table.HeadCell>}
+                  {isEditing && <Table.HeadCell>Action</Table.HeadCell>}
                 </Table.Head>
                 {item
                   .map((product, index) => (
                     <Table.Body className="divide-y" key={product.id}>
                       <Table.Row
                         className={
-                          `dark:border-gray-700 dark:bg-gray-800 ` +
+                          `border-t-gray-700 border-t ` +
                           ((product.status === "updated" && ` bg-amber-200 dark:bg-amber-800`) ||
                             (product.status === "removed" && ` bg-red-200 dark:bg-red-800`) ||
                             (product.status === "new" && ` bg-green-200 dark:bg-green-800`))
                         }
                       >
-                        <Table.Cell className="font-medium text-gray-900 dark:text-white">
+                        <Table.Cell className="font-medium">
                           <div>{product.categoryItem?.lineItem || ''}</div>
                         </Table.Cell>
-                        <Table.Cell className="font-medium text-gray-900 dark:text-white">
+                        <Table.Cell className="font-medium">
                           <div>{product.categoryItem?.taskDescription || ''}</div>
                         </Table.Cell>
                         <Table.Cell>{product.quantity}</Table.Cell>
@@ -99,6 +99,7 @@ export default function ActiveOrder({
                                     selectedProduct.current = product;
                                     setShowEditModal(true);
                                   }}
+                                  icon={EditIcon}
                                 >
                                   Edit
                                 </Dropdown.Item>
@@ -108,6 +109,8 @@ export default function ActiveOrder({
                                     selectedProduct.current = product;
                                     handleRemoveProduct(product);
                                   }}
+                                  icon={DeleteIcon}
+                                  className="text-red-500"
                                 >
                                   Delete
                                 </Dropdown.Item>

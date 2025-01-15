@@ -8,7 +8,7 @@ import { ToastProvider } from "@/context/toastContext";
 
 const RootLayout: FC<PropsWithChildren> = function ({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <ThemeModeScript />
       </head>

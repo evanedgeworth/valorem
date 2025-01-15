@@ -67,33 +67,32 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
     <section className="p-5 w-full">
       <div>
         <Card>
-          <div>
-            <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{property.name}</h1>
+          <div className="border-b border-b-gray-700 pb-2">
+            <h1 className="text-2xl font-bold">{property.name}</h1>
           </div>
           <div>
-            <p className="mb-2 text-sm text-gray-900 dark:text-white">
+            <p className="mb-2">
               <b>Address: </b>
               {parseAddress(property.address)}
             </p>
-            <p className="mb-2 text-sm text-gray-900 dark:text-white">
+            <p className="mb-2">
               <b>Date Created: </b>
               {moment(property.createdAt).format("l")}
             </p>
-            <p className="mb-2 font-semibold text-base text-gray-900 dark:text-white">
+            <p className="mb-2 font-semibold text-base">
               Details
             </p>
-            <p className="mb-2 text-sm text-gray-900 dark:text-white">
+            <p className="mb-2">
               <b>Access Instructions: </b>
               {property.accessInstructions}
             </p>
-            <p className="mb-2 text-sm text-gray-900 dark:text-white">
+            <p className="mb-2">
               <b>Notes: </b>
               {property.notes}
             </p>
           </div>
         </Card>
-        <Card className="mt-4">
-          <Table>
+          <Table className="mt-4">
             <Table.Head>
               <Table.HeadCell>ID</Table.HeadCell>
               <Table.HeadCell>PROJECT NAME</Table.HeadCell>
@@ -103,7 +102,11 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
             </Table.Head>
             {
               tableIsLoading ? (
-                <div className="mx-auto"><Spinner /></div>
+                <Table.Body>
+                  <Table.Cell colSpan={5}>
+                  <div className="mx-auto"><Spinner /></div>
+                  </Table.Cell>
+                </Table.Body>
               ) : (
                 <Table.Body className="divide-y">
                   {
@@ -127,7 +130,6 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
               )
             }
           </Table>
-        </Card>
       </div>
     </section>
   )
