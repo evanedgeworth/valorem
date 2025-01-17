@@ -32,6 +32,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
   button: {
     color: {
       primary: "bg-blue-500 hover:bg-red-600",
+      gray: "bg-gray-700 hover:bg-gray-800"
     },
   },
   sidebar: {
@@ -84,6 +85,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
   },
   label: {
     root: {
+      base: "mb-1.5",
       colors: {
         default: "text-white"
       }
@@ -93,14 +95,23 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     field: {
       input: {
         colors: {
-          gray: "bg-gray-700"
+          gray: "bg-gray-700 border-gray-600"
         }
       }
     },
   },
   textarea: {
     colors: {
-      gray: "bg-gray-700"
+      gray: "bg-gray-700 border-gray-600"
+    }
+  },
+  select: {
+    field: {
+      select: {
+        colors: {
+          gray: "bg-gray-700"
+        }
+      }
     }
   }
 };

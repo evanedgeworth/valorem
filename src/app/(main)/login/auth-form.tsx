@@ -9,10 +9,12 @@ import { localStorageKey } from "@/utils/useLocalStorage";
 import Cookies from 'js-cookie';
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
+import { PasswordHide, PasswordShow } from "@/components/icon";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
@@ -52,50 +54,43 @@ export default function AuthForm() {
 
   return (
     <div className="w-full place-self-center lg:col-span-6">
-      <div className="mx-auto rounded-lg bg-white p-6 shadow dark:bg-gray-800 sm:max-w-xl sm:p-8">
-        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Welcome back</h1>
-        <p className="text-sm font-light text-gray-500 dark:text-gray-300">
-          Don&apos;t have an account?{" "}
-          <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
-            Sign up
-          </a>
-          .
-        </p>
+      <div className="mx-auto rounded-lg bg-[#252525CC] px-10 py-14 shadow dark:bg-gray-800 sm:max-w-xl">
+        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight ">Welcome back! Please <br />login into your account.</h1>
         <form className="mt-4 space-y-6 sm:mt-6" action="#">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-4">
             <div>
-              <Label htmlFor="email">Email</Label>
-              <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <TextInput id="email" placeholder="Email" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
+            <div className="relative">
               <TextInput
                 id="password"
-                //placeholder="••••••••"
-                //required
-                type="password"
+                placeholder="Password"
+                required
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button className="absolute top-2 right-2 cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <PasswordHide /> : <PasswordShow />}
+              </button>
             </div>
           </div>
-
-          <div className="flex items-center justify-between">
-            {/* <div className="flex items-start">
+          <Button className="w-full" onClick={handleSignIn}>
+            {isLoading ? <Spinner /> : "Sign in"}
+          </Button>
+          {/* <div className="flex items-center justify-between">
+            <div className="flex items-start">
               <div className="flex h-5 items-center">
                 <Checkbox id="remember" required />
               </div>
               <div className="ml-3 text-sm">
                 <Label htmlFor="remember">Remember me</Label>
               </div>
-            </div> */}
+            </div>
             <a href="/forgot" className="text-sm font-medium text-primary-600 hover:underline dark:text-white">
               Forgot password?
             </a>
-          </div>
-          <Button className="w-full" onClick={handleSignIn}>
-            {isLoading ? <Spinner /> : "Sign in to your account"}
-          </Button>
+          </div> */}
         </form>
       </div>
     </div>

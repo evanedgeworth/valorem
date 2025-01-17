@@ -9,8 +9,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { NotificationIcon } from "./icon";
 import { IoIosArrowDown } from "react-icons/io";
+import classNames from "classnames";
 
-export default function NavbarWithDropdown() {
+export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
   const router = useRouter();
   const { user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,11 @@ export default function NavbarWithDropdown() {
 
   return (
     <header className="flex flex-col">
-      <nav className="px-4 lg:px-6 py-2.5 bg-gray-800 border-gray-700 order-1 border-b">
+      <nav className={classNames({
+        "px-4 lg:px-6 py-2.5 order-1 border-b": true,
+        "bg-gray-800 border-gray-700": !isMain,
+        "bg-black border-black": isMain,
+      })}>
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
             <Link href="/" className="flex mr-6">
@@ -117,24 +122,11 @@ export default function NavbarWithDropdown() {
                 </div>
               </>
             ) : (
-              <Button href="/login">Login</Button>
+              <Link href="/login">
+                <Button>Login</Button>
+              </Link>
             )}
 
-            <button
-              type="button"
-              id="toggleMobileMenuButton"
-              data-collapse-toggle="toggleMobileMenu"
-              className="items-center p-2 text-gray-500 rounded-lg md:ml-2 md:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-            >
-              <span className="sr-only">Open menu</span>
-              <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
-            </button>
           </div>
         </div>
       </nav>

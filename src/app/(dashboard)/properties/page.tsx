@@ -159,20 +159,20 @@ export default function Properties() {
                           )}
                           {checkPermission(role, "properties_view") && (
                             <Dropdown.Item
-                              icon={ViewIcon}
-                              as={Link}
-                              href={`/properties/${encodeURIComponent(property.id)}`}
-                            >
-                                View
-                            </Dropdown.Item>
-                          )}
-                          {checkPermission(role, "properties_view") && (
-                            <Dropdown.Item
                               onClick={() => {
                                 selectedProperty.current = property;
                                 setShowViewModal(true);
                               }}
                               icon={DetailsIcon}
+                            >
+                              View
+                            </Dropdown.Item>
+                          )}
+                          {checkPermission(role, "properties_view") && (
+                            <Dropdown.Item
+                              icon={ViewIcon}
+                              as={Link}
+                              href={`/properties/${encodeURIComponent(property.id)}`}
                             >
                               Details
                             </Dropdown.Item>

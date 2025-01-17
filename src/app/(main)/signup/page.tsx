@@ -44,7 +44,7 @@ function ActiveStepFormComponent() {
 export default function Home() {
   return (
     <FormProvider>
-      <section className="bg-gray-50 dark:bg-gray-900">
+      <section>
         <div className="mx-auto grid max-w-screen-xl px-4 py-8lg:gap-20 lg:py-16">
           <SignupProgress />
           <ActiveStepFormComponent />
