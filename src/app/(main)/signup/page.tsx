@@ -10,34 +10,19 @@ import VerifyEmail from "./components/verifyEmail";
 
 function ActiveStepFormComponent() {
   const { step, formData } = useFormState();
-  if (formData?.accountType === "client") {
-    switch (step) {
-      case 1:
-        return <AccountType />;
-      case 2:
-        return <AuthForm />;
-      case 3:
-        return <CompanyForm />;
-      case 4:
-        return <Confirmation />;
-      case 5:
-        return <VerifyEmail />;
-      default:
-        return null;
-    }
-  } else {
-    switch (step) {
-      case 1:
-        return <AccountType />;
-      case 2:
-        return <AuthForm />;
-      case 3:
-        return <Confirmation />;
-      case 4:
-        return <VerifyEmail />;
-      default:
-        return null;
-    }
+  switch (step) {
+    case 1:
+      return <AccountType />;
+    case 2:
+      return <AuthForm />;
+    case 3:
+      return <CompanyForm />;
+    case 4:
+      return <Confirmation />;
+    case 5:
+      return <VerifyEmail />;
+    default:
+      return null;
   }
 }
 

@@ -50,8 +50,8 @@ export default function Properties() {
         url: `/properties`,
         method: "GET",
         params: {
-          organizationId: selectedOrganization?.organizationId,
-          // organizationId: "9443835d-590d-41bb-b39f-c4ef028dd6a0",
+          // organizationId: selectedOrganization?.organizationId,
+          organizationId: "4dbde905-98d2-4428-aca0-6357c97286c9",
           includeOrdersCount: true,
           includeAssignee: true,
         },

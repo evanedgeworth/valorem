@@ -56,8 +56,8 @@ export default function SidebarNav() {
           <Sidebar.Item as={Link} href="/invoices" icon={InvoiceIcon} active={pathname === "/invoices"} prefetch={false}>
             Invoicing
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/settings" icon={AnalyticIcon} active={pathname === "/settings"} prefetch={false}>
-            Settings
+          <Sidebar.Item as={Link} href="/analytics" icon={AnalyticIcon} active={pathname === "/settings"} prefetch={false}>
+            Analytics
           </Sidebar.Item>
         </Sidebar.ItemGroup>
       </Sidebar.Items>

@@ -99,13 +99,13 @@ export default function NewProductModal({
       <Button size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header>
-          <h3 className="text-xl font-medium text-gray-900 dark:text-white px-6 pt-3">Add product</h3>
+          <h3 className="text-xl font-medium px-4 pt-3">Add product</h3>
         </Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
             <div>
               <Label>Product Name</Label>
-              <div className=" border-gray-300 bg-gray-50 border rounded-lg py-1">
+              <div className="bg-gray-700 border-gray-600 text-white border rounded-lg py-1">
                 <Autocomplete
                   open={open}
                   fullWidth
@@ -135,7 +135,7 @@ export default function NewProductModal({
                       sx={{
                         "& .MuiOutlinedInput-root": {
 
-                          backgroundColor: "#F9FAFB",
+                          backgroundColor: "#374151",
                           borderRadius: ".5rem",
                           "--tw-ring-color": "transparent",
                           legend: {
@@ -147,6 +147,7 @@ export default function NewProductModal({
                           paddingRight: "20px !important",
                           borderRadius: ".5rem",
                           "--tw-ring-color": "transparent",
+                          color: "white"
                         },
                         "& .MuiInputLabel-outlined": {
                           paddingLeft: "20px",

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { NotificationIcon } from "./icon";
 import { IoIosArrowDown } from "react-icons/io";
 import classNames from "classnames";
+import Notifications from "./notifications";
 
 export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
   const router = useRouter();
@@ -39,7 +40,9 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
           </div>
           <div className="flex flex-shrink-0 justify-between items-center ml-4 lg:order-2">
             {isLoading ? (
-              <Spinner />
+              <div className="h-[42px] flex items-center">
+                <Spinner />
+              </div>
             ) : user?.id ? (
               <>
                 <ul className="hidden flex-col justify-center mt-0 w-full text-sm font-medium text-gray-500 md:flex-row dark:text-gray-400 md:flex items-center">
@@ -74,38 +77,8 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
 
                   <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
                     <div className="block py-3 px-3 rounded-lg  cursor-pointer">
-                      <Dropdown
-                        inline
-                        label=""
-                        placement="bottom"
-                        renderTrigger={() => (
-                          <span className="text-gray-400 hover:text-gray-200">
-                            <NotificationIcon />
-                          </span>
-                        )}
-                        size={"sm"}
-                      >
-                        <Dropdown.Header>
-                          <span className="flex justify-center">Notifications</span>
-                        </Dropdown.Header>
-                        <Dropdown.Item onClick={() => router.push("/notifications")}>
-                          <strong>Josh H.</strong>&nbsp;has declined the change order
-                        </Dropdown.Item>
-                        <Dropdown.Divider />
-                        <Dropdown.Item>
-                          <strong>Land Excavation</strong>&nbsp;has been successfully created
-                        </Dropdown.Item>
-                        <Dropdown.Divider />
-                        <Dropdown.Item>
-                          <strong>Project 568</strong>&nbsp;has been successfully created
-                        </Dropdown.Item>
-                      </Dropdown>
+                      <Notifications />
                     </div>
-                    {/* <Dropdown label="awf" inline dismissOnClick={false} renderTrigger={() => <MdNotificationsNone size={30} />}>
-                      <Dropdown.Item>Notification 1</Dropdown.Item>
-                      <Dropdown.Item>Notification 2</Dropdown.Item>
-                      <Dropdown.Item>Notification 3</Dropdown.Item>
-                    </Dropdown> */}
                   </li>
                 </ul>
 

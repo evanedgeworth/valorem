@@ -32,7 +32,8 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
   button: {
     color: {
       primary: "bg-blue-500 hover:bg-red-600",
-      gray: "bg-gray-700 hover:bg-gray-800"
+      gray: "bg-gray-700 hover:bg-gray-800",
+      light: "bg-white hover:bg-white text-black"
     },
   },
   sidebar: {

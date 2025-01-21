@@ -1,8 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
-import ConfirmationModal from "@/components/confirmation.modal";
+import { Button } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { useFormState } from "./formState";
 import { BiChevronRight } from "react-icons/bi";
@@ -10,14 +7,10 @@ import classNames from "classnames";
 import Link from "next/link";
 
 type FormValues = {
-  type: string;
+  accountType: string;
 };
 
 export default function AccountType() {
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [companyAddress, setCompanyAddress] = useState("");
-  const [error, setError] = useState<boolean>(false);
-  const router = useRouter();
   const { onHandleNext, setFormData, formData } = useFormState();
 
   const {
@@ -28,9 +21,9 @@ export default function AccountType() {
     formState: { errors },
   } = useForm<FormValues>();
 
-  const type = watch("type");
+  const accountType = watch("accountType");
   function onSubmit() {
-    const data = { accountType: type };
+    const data = { accountType };
     setFormData((prev: any) => ({ ...prev, ...data }));
     onHandleNext();
   }
@@ -50,7 +43,7 @@ export default function AccountType() {
             {
               types.map(item => (
                 <div key={item.value}>
-                <Button color="gray"  className={classNames("block w-full border hover:bg-gray-700", { "border-[#0C6291] text-white": item.value === type, "border-transparent text-gray-400": item.value !== type })} size="xl" onClick={() => setValue("type", item.value)}>
+                <Button color="gray"  className={classNames("block w-full border hover:bg-gray-700", { "border-[#0C6291] text-white": item.value === accountType, "border-transparent text-gray-400": item.value !== accountType })} size="xl" onClick={() => setValue("accountType", item.value)}>
                   <div className="flex flex-1 justify-between cursor-pointer w-full items-center">
                     {item.label}
                     <BiChevronRight size={20} />
@@ -60,23 +53,15 @@ export default function AccountType() {
               ))
             }
             <div className="pt-2">
-              <Button disabled={!type} className=" flex flex-1 w-full" size="md" fullSized onClick={onSubmit}>
+              <Button disabled={!accountType} color="light" className=" flex flex-1 w-full" size="md" fullSized onClick={onSubmit}>
                 Next: Account Info
               </Button>
             </div>
             <div>
-              <p>Already have an account? <Link href="/login" className="text-[#0C6291]">Login here</Link></p>
+              <p>Already have an account? <Link href="/login" className="underline">Login here</Link></p>
             </div>
           </div>
         </div>
-        <ConfirmationModal
-          showModal={showConfirmationModal}
-          setShowModal={setShowConfirmationModal}
-          title="Confirm your email"
-          description="We have sent an email to the email provided. Please confirm the email to login."
-          handleCancel={() => router.push("/")}
-          handleConfirm={() => router.push("/")}
-        />
       </div>
     </form>
   );

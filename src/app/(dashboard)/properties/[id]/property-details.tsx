@@ -38,7 +38,8 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
         url: `/scope`,
         method: "GET",
         params: {
-          organizationId: selectedOrganization?.organizationId,
+          // organizationId: selectedOrganization?.organizationId,
+          organizationId: "4dbde905-98d2-4428-aca0-6357c97286c9",
           includeProperty: false,
           propertyId: propertyId
         },

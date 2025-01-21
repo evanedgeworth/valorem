@@ -1,21 +1,21 @@
 "use client";
-import { Button, Checkbox, Label, TextInput, Select, Badge } from "flowbite-react";
+import { Button, Label, TextInput } from "flowbite-react";
 import { Controller, useForm } from "react-hook-form";
 import { useFormState } from "./formState";
 import Autocomplete from "@mui/material/Autocomplete";
-import { states, Markets } from "@/utils/defaults";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
+import { Market } from "@/types";
 
 type CompanyFormValues = {
   companyName: string;
   companyEmail: string;
-  address: string;
+  companyAddress: string;
   city: string;
   zipCode: number;
   state: string;
-  markets: string[];
+  markets: Market[];
 };
 
 export default function CompanyForm() {
@@ -34,125 +34,116 @@ export default function CompanyForm() {
     onHandleNext();
   });
 
-  const fetchAllMarkets = async (nextToken = '') => {
-    const res = await request({
-      url: `/markets${nextToken ? `?nextToken=${nextToken}` : ''}`,
-      method: 'GET',
-    });
+  const { data } = useQuery({
+    queryKey: ['markets'],
+    queryFn: async () => {
+      const res = await request({
+        url: `/markets`,
+        method: 'GET',
+      });
   
-    if (res?.status !== 200) {
-      throw new Error(res.data.message);
-    }
-  
-    const { markets, nextToken: newNextToken } = res.data;
-  
-    if (newNextToken) {
-      const nextMarkets: any[] = await fetchAllMarkets(newNextToken);
-      return [...markets, ...nextMarkets];
-    }
-  
-    return markets;
-  };
+      if (res?.status !== 200) {
+        throw new Error(res.data.message);
+      }
 
+      return res.data;
+    }
+  });
 
-  // const {} = useQuery({
-  //   queryKey: ['markets'],
-  //   queryFn: async () => {
-  //     const res = await fetchAllMarkets();
-  //     return res;
-  //   },
-  // })
+  const markets: Market[] = data?.markets || [];
 
   return (
     <form onSubmit={onSubmit} className="w-full place-self-center lg:col-span-6">
       <div>
         <div className="">
           <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight">Company Info</h1>
-          {/* <p className="text-sm font-light text-gray-500 dark:text-gray-300">Fill out this form to request access to Valorem.</p> */}
           <div className="mt-4 space-y-6 sm:mt-6">
             <div className="grid gap-6 sm:grid-rows-2">
               <div className="flex flex-row gap-4">
+                <div className="flex flex-col flex-1">
+                  <Label htmlFor="companyName">Company Name*</Label>
+                  <TextInput
+                    id="companyName"
+                    {...register("companyName", { required: "Company Name is required" })}
+                  />
+                  {errors.companyName && <p className="text-red-500 text-sm">{errors.companyName.message}</p>}
+                </div>
 
                 <div className="flex flex-col flex-1">
-                  <Label htmlFor="company">Company Name*</Label>
-                  <TextInput required {...register("companyName")} />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">Company Email*</Label>
-                  <TextInput placeholder="name@company.com" required type="email" {...register("companyEmail")} />
+                  <Label htmlFor="companyEmail">Company Email*</Label>
+                  <TextInput
+                    id="companyEmail"
+                    type="email"
+                    placeholder="name@company.com"
+                    {...register("companyEmail", {
+                      required: "Company Email is required",
+                      pattern: {
+                        value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                        message: "Invalid email format",
+                      },
+                    })}
+                  />
+                  {errors.companyEmail && <p className="text-red-500 text-sm">{errors.companyEmail.message}</p>}
                 </div>
               </div>
 
               <div className="flex flex-row gap-4">
                 <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">Street Address</Label>
-                  <TextInput id="first name" required {...register("address")} />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">City</Label>
-                  <TextInput id="last name" required {...register("city")} />
-                </div>
-              </div>
-              <div className="flex flex-row gap-4">
-                <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">Zip Code</Label>
-                  <TextInput id="zip code" type="number" required {...register("zipCode")} />
-                </div>
-                <div className="flex flex-col flex-1">
-                  <Label htmlFor="state" value="State" />
-                  <Select id="state" required {...register("state")}>
-                    {states.map((state) => (
-                      <option key={state}>{state}</option>
-                    ))}
-                  </Select>
+                  <Label htmlFor="companyAddress">Address</Label>
+                  <TextInput
+                    id="companyAddress"
+                    {...register("companyAddress", { required: "Company Address is required" })}
+                  />
+                  {errors.companyAddress && <p className="text-red-500 text-sm">{errors.companyAddress.message}</p>}
                 </div>
               </div>
             </div>
+
             <div>
-              <Label htmlFor="markets" value="Markets" />
+              <Label htmlFor="markets">Markets</Label>
               <Controller
                 control={control}
                 name="markets"
-                rules={{
-                  required: true,
-                  minLength: 5,
-                }}
-                render={({ field: { onChange, value }, fieldState, formState }) => (
+                rules={{ required: "Please select at least 1 market" }}
+                render={({ field: { onChange, value }, fieldState }) => (
                   <Autocomplete
                     multiple
-                    limitTags={2}
                     id="multiple-limit-tags"
-                    options={Markets}
-                    getOptionLabel={(option) => option}
+                    options={markets}
+                    getOptionLabel={(option) => `${option.zipCode}, ${option.city}, ${option.stateId}`}
                     onChange={(e, data) => onChange(data)}
-                    value={value}
-                    size="small"
+                    value={value || []}
+                    size="medium"
+                    ChipProps={{
+                      style: {
+                        backgroundColor: "white",
+                        borderRadius: "6px"
+                      },
+                    }}
                     disableCloseOnSelect
-                    renderOption={(props, option, { selected }) => (
-                      <li {...props}>
-                        <Checkbox id="remember" checked={selected} className="mr-2" />
-                        {option}
-                      </li>
-                    )}
+                    
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        className="bg-gray-700 border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full text-white p-10"
-                        error={fieldState?.invalid || value?.length < 1}
-                        helperText={fieldState?.invalid && "Please select at least 5 markets."}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        placeholder="Search for markets"
+                        className="bg-gray-700 border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full text-white p-10 placeholder:text-gray-400"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { color: 'white', fontSize: '14px' }
+                        }}
                       />
                     )}
                   />
                 )}
               />
             </div>
+
             <div>
-            <Button className="w-full" type="submit">
-              Next: Confirmation
-            </Button>
-            <Button fullSized className="bg-transparent border-white border mt-3">
-              Add Later
-            </Button>
+              <Button className="w-full" type="submit" color="light">
+                Next: Confirmation
+              </Button>
             </div>
           </div>
         </div>
