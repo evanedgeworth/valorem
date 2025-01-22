@@ -70,7 +70,7 @@ export default function NewPropertyModal({
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ New Property</Button>
+      <Button color="primary" onClick={() => setShowModal(true)}>+ New Property</Button>
       <Modal show={showModal} size="xl" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header className="items-center px-6 pt-4">
           <h3 className="text-xl font-medium">New Property</h3>

@@ -96,7 +96,7 @@ export default function NewProductModal({
 
   return (
     <div ref={rootRef}>
-      <Button size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
+      <Button color="primary" size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header>
           <h3 className="text-xl font-medium px-4 pt-3">Add product</h3>
@@ -194,7 +194,7 @@ export default function NewProductModal({
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleAddProduct}>Save</Button>
+                  <Button color="primary" onClick={handleAddProduct}>Save</Button>
                 </div>
               </>
             )}

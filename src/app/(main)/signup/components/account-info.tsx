@@ -104,7 +104,7 @@ export default function AuthForm() {
             </div>
           </div>
         </div>
-        <Button className="w-full mt-8" type="submit" color="light">
+        <Button className="w-full mt-8" type="submit" color="primary">
           Next: Company Info
         </Button>
       </div>

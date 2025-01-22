@@ -5,10 +5,6 @@ import { Sidebar } from "flowbite-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useContext, useEffect } from "react";
-import { HiChartPie, HiInbox, HiBell, HiUser, HiCalendar } from "react-icons/hi";
-import { HiBolt, HiOutlineHomeModern } from "react-icons/hi2";
-import { RiSettings3Fill } from "react-icons/ri";
-import { TbDeviceIpadDollar } from "react-icons/tb";
 import { TiHome } from "react-icons/ti";
 import { PiClipboardTextFill } from "react-icons/pi";
 import { FaUserGroup } from "react-icons/fa6";
@@ -56,7 +52,7 @@ export default function SidebarNav() {
           <Sidebar.Item as={Link} href="/invoices" icon={InvoiceIcon} active={pathname === "/invoices"} prefetch={false}>
             Invoicing
           </Sidebar.Item>
-          <Sidebar.Item as={Link} href="/analytics" icon={AnalyticIcon} active={pathname === "/settings"} prefetch={false}>
+          <Sidebar.Item as={Link} href="/analytics" icon={AnalyticIcon} active={pathname === "/analytics"} prefetch={false}>
             Analytics
           </Sidebar.Item>
         </Sidebar.ItemGroup>

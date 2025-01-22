@@ -11,6 +11,7 @@ type UserContext = {
   user: User | undefined;
   selectedOrganization: Organization | undefined;
   setSelectedOrganization: (value: Organization) => void;
+  setUser: (value: User) => void;
   allOrganizations: Organization[];
   categoryItems: CategoryItem[];
   signOut: () => Promise<void>;
@@ -103,6 +104,6 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ user, setUser, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems }}>{children}</UserContext.Provider>
   );
 }

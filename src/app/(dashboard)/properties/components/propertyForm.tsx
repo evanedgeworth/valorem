@@ -1,4 +1,4 @@
-import { Button, Label, TextInput, Select, Textarea, Spinner } from "flowbite-react";
+import { Button, Label, TextInput, Select, Textarea } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { states } from "@/utils/defaults";
 import formatGoogleAddressComponents from "@/utils/formatGoogleAddressComponents";
@@ -163,11 +163,11 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
         }
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="button" onClick={onClose} fullSized color={"light"}>
+        <Button type="button" onClick={onClose} fullSized outline>
           Close
         </Button>
-        <Button disabled={isLoading} type="submit" fullSized>
-          {isLoading ? <Spinner size="xs" /> : isEdit ? "Save" : "Create Property +"}
+        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized color="primary">
+          {isEdit ? "Save" : "Create Property +"}
         </Button>
       </div>
     </form>

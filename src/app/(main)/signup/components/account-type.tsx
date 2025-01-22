@@ -53,7 +53,7 @@ export default function AccountType() {
               ))
             }
             <div className="pt-2">
-              <Button disabled={!accountType} color="light" className=" flex flex-1 w-full" size="md" fullSized onClick={onSubmit}>
+              <Button disabled={!accountType} color="primary" className=" flex flex-1 w-full" size="md" fullSized onClick={onSubmit}>
                 Next: Account Info
               </Button>
             </div>

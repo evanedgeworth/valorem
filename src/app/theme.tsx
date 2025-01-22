@@ -31,10 +31,15 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
   },
   button: {
     color: {
-      primary: "bg-blue-500 hover:bg-red-600",
+      primary: "bg-white hover:bg-white text-black",
       gray: "bg-gray-700 hover:bg-gray-800",
-      light: "bg-white hover:bg-white text-black"
     },
+    outline: {
+      on: "bg-transparent hover:bg-transparent",
+      color: {
+        default: "bg-transparent hover:bg-transparent border border-gray-600 text-gray-400"
+      }
+    }
   },
   sidebar: {
     root: {

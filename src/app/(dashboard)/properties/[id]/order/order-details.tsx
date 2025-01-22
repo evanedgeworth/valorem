@@ -138,11 +138,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
             {
               showSubmitButton ? (
-                <Button disabled={isPendingPopulate} onClick={populateOrder}>
+                <Button color="primary" disabled={isPendingPopulate} onClick={populateOrder}>
                   {isPendingPopulate && <Spinner size="xs" />} Send for review
                 </Button>
               ) : (
-                <Button onClick={() => setActionModal("APPROVE")}>
+                <Button color="primary" onClick={() => setActionModal("APPROVE")}>
                   Approve
                 </Button>
               )

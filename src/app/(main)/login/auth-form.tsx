@@ -76,8 +76,8 @@ export default function AuthForm() {
               </button>
             </div>
           </div>
-          <Button color="light" type="submit" className="w-full" >
-            {isLoading ? <Spinner /> : "Login"}
+          <Button isProcessing={isLoading} color="primary" type="submit" fullSized >
+            Login
           </Button>
           <div className="flex items-center justify-between">
             <div></div>

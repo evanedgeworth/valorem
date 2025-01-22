@@ -1,12 +1,14 @@
 "use client";
 import { Button, Label, TextInput } from "flowbite-react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useFormState } from "./formState";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
 import { Market } from "@/types";
+import { useState } from "react";
+import useDebounce from "@/utils/useDebounce";
 
 type CompanyFormValues = {
   companyName: string;
@@ -20,7 +22,10 @@ type CompanyFormValues = {
 
 export default function CompanyForm() {
   const { onHandleNext, setFormData, formData } = useFormState();
+  const [inputValue, setInputValue] = useState('');
+  const [marketValue, setMarketValue] = useState<Market[]>([]);
 
+  const debouncedSearch = useDebounce(inputValue, 500);
   const {
     register,
     setValue,
@@ -30,18 +35,18 @@ export default function CompanyForm() {
   } = useForm<CompanyFormValues>();
 
   const onSubmit = handleSubmit((data) => {
-    setFormData((prev: any) => ({ ...prev, ...data }));
+    setFormData((prev: any) => ({ ...prev, ...data, markets }));
     onHandleNext();
   });
 
-  const { data } = useQuery({
-    queryKey: ['markets'],
+  const { data, isLoading } = useQuery({
+    queryKey: ['markets', debouncedSearch],
     queryFn: async () => {
       const res = await request({
-        url: `/markets`,
+        url: `/markets?searchInput=${debouncedSearch}`,
         method: 'GET',
       });
-  
+
       if (res?.status !== 200) {
         throw new Error(res.data.message);
       }
@@ -101,47 +106,41 @@ export default function CompanyForm() {
 
             <div>
               <Label htmlFor="markets">Markets</Label>
-              <Controller
-                control={control}
-                name="markets"
-                rules={{ required: "Please select at least 1 market" }}
-                render={({ field: { onChange, value }, fieldState }) => (
-                  <Autocomplete
-                    multiple
-                    id="multiple-limit-tags"
-                    options={markets}
-                    getOptionLabel={(option) => `${option.zipCode}, ${option.city}, ${option.stateId}`}
-                    onChange={(e, data) => onChange(data)}
-                    value={value || []}
-                    size="medium"
-                    ChipProps={{
-                      style: {
-                        backgroundColor: "white",
-                        borderRadius: "6px"
-                      },
+              <Autocomplete
+                multiple
+                id="multiple-limit-tags"
+                options={markets}
+                getOptionLabel={(option) => `${option.zipCode}, ${option.city}, ${option.stateId}`}
+                onChange={(e, data) => setMarketValue(data)}
+                onInputChange={(e, v) => {
+                  setInputValue(v);
+                }}
+                value={marketValue || []}
+                size="medium"
+                ChipProps={{
+                  style: {
+                    backgroundColor: "white",
+                    borderRadius: "6px"
+                  },
+                }}
+                loading={isLoading}
+                disableCloseOnSelect
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Search for markets"
+                    className="bg-gray-700 border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full text-white p-10 placeholder:text-gray-400"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { color: 'white', fontSize: '14px' }
                     }}
-                    disableCloseOnSelect
-                    
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                        placeholder="Search for markets"
-                        className="bg-gray-700 border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full text-white p-10 placeholder:text-gray-400"
-                        inputProps={{
-                          ...params.inputProps,
-                          style: { color: 'white', fontSize: '14px' }
-                        }}
-                      />
-                    )}
                   />
                 )}
               />
             </div>
 
             <div>
-              <Button className="w-full" type="submit" color="light">
+              <Button className="w-full" type="submit" color="primary">
                 Next: Confirmation
               </Button>
             </div>

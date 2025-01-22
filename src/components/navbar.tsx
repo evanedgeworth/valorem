@@ -7,7 +7,6 @@ import { UserContext } from "@/context/userContext";
 import Valorem from "../../public/valorem.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { NotificationIcon } from "./icon";
 import { IoIosArrowDown } from "react-icons/io";
 import classNames from "classnames";
 import Notifications from "./notifications";
@@ -40,7 +39,7 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
           </div>
           <div className="flex flex-shrink-0 justify-between items-center ml-4 lg:order-2">
             {isLoading ? (
-              <div className="h-[42px] flex items-center">
+              <div className="h-[50px] flex items-center">
                 <Spinner />
               </div>
             ) : user?.id ? (
@@ -88,7 +87,7 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
                       {/* <span className="block text-sm">{user.first_name + " " + user.last_name}</span> */}
                       <span className="block truncate text-sm font-medium text-white">{user.email}</span>
                     </Dropdown.Header>
-                    <Dropdown.Item href="/settings">Settings</Dropdown.Item>
+                    <Dropdown.Item as={Link} href="/settings">Settings</Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={handleSignOut}>Sign out</Dropdown.Item>
                   </Dropdown>
@@ -96,7 +95,7 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
               </>
             ) : (
               <Link href="/login">
-                <Button>Login</Button>
+                <Button color="primary">Login</Button>
               </Link>
             )}
 

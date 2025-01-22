@@ -210,3 +210,8 @@ export type Notification = {
     body: string;
   };
 };
+
+export type ImageFile = {
+  data: File;
+  url: string;
+}
