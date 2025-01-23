@@ -1,8 +1,6 @@
 "use client";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Database } from "../../../../types/supabase";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
 import request from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
@@ -14,7 +12,6 @@ import Link from "next/link";
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
@@ -36,12 +33,10 @@ export default function AuthForm() {
       const expiresAt = moment.unix(res.data.expiresAt).toDate();
       Cookies.set(localStorageKey.accessToken, res.data.accessToken, {
         expires: expiresAt,
-        secure: true,
         sameSite: 'Strict',
       });
       Cookies.set(localStorageKey.refreshToken, res.data.refreshToken, {
         expires: expiresAt,
-        secure: true,
         sameSite: 'Strict',
       });
       router.push("/dashboard");
