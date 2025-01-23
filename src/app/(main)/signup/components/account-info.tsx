@@ -38,9 +38,8 @@ export default function AuthForm() {
   return (
     <form onSubmit={onSubmit} className="w-full place-self-center lg:col-span-6">
       <div className="w-full place-self-center lg:col-span-6">
-        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight">
-          Account details
-        </h1>
+        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Account Info</h1>
+        <p className="text-sm font-light text-gray-500 dark:text-gray-300">Fill out this form to request access to Valorem.</p>
         <div className="mt-4 space-y-6 sm:mt-6">
           <div className="grid gap-6 sm:grid-rows-2">
             <div className="flex flex-row gap-4">
@@ -104,8 +103,8 @@ export default function AuthForm() {
             </div>
           </div>
         </div>
-        <Button className="w-full mt-8" type="submit" color="primary">
-          Next: Company Info
+        <Button className="w-full mt-8" type="submit">
+          Continue
         </Button>
       </div>
     </form>

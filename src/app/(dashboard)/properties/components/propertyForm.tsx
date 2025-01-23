@@ -166,7 +166,7 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
         <Button type="button" onClick={onClose} fullSized outline>
           Close
         </Button>
-        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized color="primary">
+        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized>
           {isEdit ? "Save" : "Create Property +"}
         </Button>
       </div>

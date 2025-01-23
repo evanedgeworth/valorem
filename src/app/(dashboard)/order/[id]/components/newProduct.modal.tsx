@@ -96,16 +96,16 @@ export default function NewProductModal({
 
   return (
     <div ref={rootRef}>
-      <Button color="primary" size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
+      <Button size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header>
-          <h3 className="text-xl font-medium px-4 pt-3">Add product</h3>
+          <h3 className="text-xl font-medium px-5 pt-3">Add product</h3>
         </Modal.Header>
         <Modal.Body>
           <div className="space-y-6">
             <div>
               <Label>Product Name</Label>
-              <div className="bg-gray-700 border-gray-600 text-white border rounded-lg py-1">
+              <div className="border-gray-300 bg-gray-50 text-gray-900 border rounded-lg py-1">
                 <Autocomplete
                   open={open}
                   fullWidth
@@ -147,7 +147,7 @@ export default function NewProductModal({
                           paddingRight: "20px !important",
                           borderRadius: ".5rem",
                           "--tw-ring-color": "transparent",
-                          color: "white"
+                          color: "black"
                         },
                         "& .MuiInputLabel-outlined": {
                           paddingLeft: "20px",
@@ -194,7 +194,7 @@ export default function NewProductModal({
                 </div>
 
                 <div className="flex justify-end">
-                  <Button color="primary" onClick={handleAddProduct}>Save</Button>
+                  <Button onClick={handleAddProduct}>Save</Button>
                 </div>
               </>
             )}

@@ -21,7 +21,6 @@ import { useToast } from "@/context/toastContext";
 import Link from "next/link";
 import ScopeRequestModal from "./components/scopeRequest.modal";
 import { BiPlus } from "react-icons/bi";
-import classNames from 'classnames';
 import { DeleteIcon, DetailsIcon, EditIcon, ViewIcon } from "@/components/icon";
 
 export default function Properties() {
@@ -50,8 +49,7 @@ export default function Properties() {
         url: `/properties`,
         method: "GET",
         params: {
-          // organizationId: selectedOrganization?.organizationId,
-          organizationId: "4dbde905-98d2-4428-aca0-6357c97286c9",
+          organizationId: selectedOrganization?.organizationId,
           includeOrdersCount: true,
           includeAssignee: true,
         },
@@ -96,15 +94,29 @@ export default function Properties() {
 
   return (
     <section className="p-5 w-full">
-      <div className="flex justify-between items-center mb-4 bg-gray-800 p-4 border-b-gray-900 border-b">
-        <div>
-          <h5 className="text-lg font-medium">Properties</h5>
-          <div className="flex gap-2 mt-2">
-            <a className={classNames({ "cursor-pointer": true, "border-b-white border-b": selectedTab === 'List' })} onClick={() => handleTabChange("List")}>List</a>
-            <a className={classNames({ "cursor-pointer": true, "border-b-white border-b": selectedTab === 'Map' })} onClick={() => handleTabChange("Map")}>Map</a>
-          </div>
-        </div>
+      <div className="flex justify-between mb-4">
+        <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
         {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
+      </div>
+
+      <div className="flex gap-4 mb-4 items-end">
+        <div className="max-w-md">
+          <div className="mb-2 block">
+            <Label htmlFor="search" value="Search" />
+          </div>
+          <TextInput placeholder="Name" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} className="w-60" />
+        </div>
+
+        <Button.Group>
+          <Button color="gray" value={"List"} onClick={() => handleTabChange("List")}>
+            <FaList className="mr-3 h-4 w-4" />
+            List
+          </Button>
+          <Button color="gray" value={"Map"} onClick={() => handleTabChange("Map")}>
+            <FaMapMarkedAlt className="mr-3 h-4 w-4" />
+            Map
+          </Button>
+        </Button.Group>
       </div>
 
       {selectedTab === "List" ? (
@@ -151,8 +163,6 @@ export default function Properties() {
                                 selectedProperty.current = property;
                                 setShowRequestModal(true);
                               }}
-
-                              icon={() => <BiPlus size={18} />}
                             >
                               Request Scope
                             </Dropdown.Item>
@@ -163,14 +173,12 @@ export default function Properties() {
                                 selectedProperty.current = property;
                                 setShowViewModal(true);
                               }}
-                              icon={DetailsIcon}
                             >
                               View
                             </Dropdown.Item>
                           )}
                           {checkPermission(role, "properties_view") && (
                             <Dropdown.Item
-                              icon={ViewIcon}
                               as={Link}
                               href={`/properties/${encodeURIComponent(property.id)}`}
                             >
@@ -183,7 +191,6 @@ export default function Properties() {
                                 selectedProperty.current = property;
                                 setShowEditModal(true);
                               }}
-                              icon={EditIcon}
                             >
                               Edit
                             </Dropdown.Item>
@@ -195,7 +202,6 @@ export default function Properties() {
                                 selectedProperty.current = property;
                               }}
                               className="text-red-500"
-                              icon={DeleteIcon}
                             >
                               Delete
                             </Dropdown.Item>

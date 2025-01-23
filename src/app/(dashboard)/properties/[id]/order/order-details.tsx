@@ -127,7 +127,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
-        <div className="flex justify-between border-t border-t-gray-700 border-b border-b-gray-700 py-3 mb-3">
+        <div className="flex justify-between border-t border-t-gray-200 border-b border-b-gray-200 py-3 mb-3">
           <div className="flex gap-1 items-center">
             <button onClick={router.back}>
               <HiOutlineArrowSmLeft size={22} />
@@ -138,18 +138,18 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
             {
               showSubmitButton ? (
-                <Button color="primary" disabled={isPendingPopulate} onClick={populateOrder}>
+                <Button disabled={isPendingPopulate} onClick={populateOrder}>
                   {isPendingPopulate && <Spinner size="xs" />} Send for review
                 </Button>
               ) : (
-                <Button color="primary" onClick={() => setActionModal("APPROVE")}>
+                <Button onClick={() => setActionModal("APPROVE")}>
                   Approve
                 </Button>
               )
             }
           </div>
         </div>
-        <div className="flex justify-between font-semibold border-t border-t-gray-700 border-b border-b-gray-700 py-3">
+        <div className="flex justify-between font-semibold border-t border-t-gray-200 border-b border-b-gray-200 py-3">
           <div>
             <p className="text-xl">Scope estimate as of {moment(order.dueDate).format('l')}</p>
           </div>

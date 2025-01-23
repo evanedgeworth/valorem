@@ -38,8 +38,7 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
         url: `/scope`,
         method: "GET",
         params: {
-          // organizationId: selectedOrganization?.organizationId,
-          organizationId: "4dbde905-98d2-4428-aca0-6357c97286c9",
+          organizationId: selectedOrganization?.organizationId,
           includeProperty: false,
           propertyId: propertyId
         },
@@ -68,7 +67,7 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
     <section className="p-5 w-full">
       <div>
         <Card>
-          <div className="border-b border-b-gray-700 pb-2">
+          <div className="border-b border-b-gray-200 pb-2">
             <h1 className="text-2xl font-bold">{property.name}</h1>
           </div>
           <div>
@@ -93,7 +92,8 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
             </p>
           </div>
         </Card>
-          <Table className="mt-4">
+        <Card className="mt-4">
+          <Table striped>
             <Table.Head>
               <Table.HeadCell>ID</Table.HeadCell>
               <Table.HeadCell>PROJECT NAME</Table.HeadCell>
@@ -131,6 +131,7 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
               )
             }
           </Table>
+          </Card>
       </div>
     </section>
   )

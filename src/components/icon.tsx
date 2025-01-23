@@ -6,7 +6,7 @@ import { MdNotifications } from "react-icons/md";
 
 export const ViewIcon = () => <PiClipboardTextFill size={16} />
 export const DetailsIcon = () => <TbEyeFilled size={16} />
-export const EditIcon = () => <FaUserEdit size={14} />
+export const EditIcon = () => <FaUserEdit size={16} />
 export const DeleteIcon = () => <PiTrashFill size={16} />
 export const NotificationIcon = () => <MdNotifications size={28} />
 

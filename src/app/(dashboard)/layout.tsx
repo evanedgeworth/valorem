@@ -17,13 +17,13 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
       <head>
         <ThemeModeScript />
       </head>
-      <body className="flex flex-col bg-gray-900 text-white">
+      <body className="flex flex-col dark:bg-gray-900">
         <QueryProvider>
           <UserProvider>
             <div className="fixed top-0 w-full z-10">
               <NavbarWithDropdown />
             </div>
-            <main className="min-h-[calc(100vh-67px)] bg-gray-900 mt-[54px] md:mt-[67px] flex">
+            <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
               <Flowbite theme={{ theme: flowbiteTheme }}>
                 <ToastProvider>
                   <SidebarProvider>

@@ -22,8 +22,8 @@ export default function AccountType() {
   } = useForm<FormValues>();
 
   const accountType = watch("accountType");
-  function onSubmit() {
-    const data = { accountType };
+  function onSubmit(type: string) {
+    const data = { accountType: type };
     setFormData((prev: any) => ({ ...prev, ...data }));
     onHandleNext();
   }
@@ -37,29 +37,21 @@ export default function AccountType() {
     <form className="w-full place-self-center lg:col-span-6">
       <div className="w-full place-self-center lg:col-span-6">
         <div className="">
-          <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight">Request access to Valorem</h1>
-          <p className="text-lg font-light text-gray-400 mt-4">Tell us about yourself</p>
-          <div className="mt-2 space-y-6">
+        <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Request Access</h1>
+        <p className="text-sm font-light text-gray-500 dark:text-gray-300">What type of user are you?</p>
+          <div className="mt-4 space-y-6 sm:mt-6">
             {
               types.map(item => (
                 <div key={item.value}>
-                <Button color="gray"  className={classNames("block w-full border hover:bg-gray-700", { "border-[#0C6291] text-white": item.value === accountType, "border-transparent text-gray-400": item.value !== accountType })} size="xl" onClick={() => setValue("accountType", item.value)}>
-                  <div className="flex flex-1 justify-between cursor-pointer w-full items-center">
-                    {item.label}
-                    <BiChevronRight size={20} />
-                  </div>
-                </Button>
+                  <Button className="w-full" outline onClick={() => onSubmit(item.value)}>
+                    <div className="flex flex-1 justify-between cursor-pointer">
+                      {item.label}
+                      <BiChevronRight size={20} />
+                    </div>
+                  </Button>
                 </div>
               ))
             }
-            <div className="pt-2">
-              <Button disabled={!accountType} color="primary" className=" flex flex-1 w-full" size="md" fullSized onClick={onSubmit}>
-                Next: Account Info
-              </Button>
-            </div>
-            <div>
-              <p>Already have an account? <Link href="/login" className="underline">Login here</Link></p>
-            </div>
           </div>
         </div>
       </div>

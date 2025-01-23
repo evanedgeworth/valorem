@@ -1,10 +1,10 @@
 "use client";
 import { Dropdown, Spinner } from "flowbite-react";
-import { NotificationIcon } from "./icon";
 import { useQuery } from "@tanstack/react-query";
 import request from "@/utils/request";
 import { Fragment, useEffect, useState } from "react";
 import { Notification } from "@/types";
+import { MdNotificationsNone } from "react-icons/md";
 
 export default function Notifications() {
   const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function Notifications() {
       renderTrigger={() => (
         <div>
           <span onClick={() => setOpen(!open)} className="text-gray-400 hover:text-gray-200">
-            <NotificationIcon />
+            <MdNotificationsNone size={30} />
           </span>
         </div>
       )}

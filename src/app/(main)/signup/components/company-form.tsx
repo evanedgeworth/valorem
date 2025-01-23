@@ -116,20 +116,14 @@ export default function CompanyForm() {
                   setInputValue(v);
                 }}
                 value={marketValue || []}
-                size="medium"
-                ChipProps={{
-                  style: {
-                    backgroundColor: "white",
-                    borderRadius: "6px"
-                  },
-                }}
+                size="small"
                 loading={isLoading}
                 disableCloseOnSelect
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     placeholder="Search for markets"
-                    className="bg-gray-700 border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full text-white p-10 placeholder:text-gray-400"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 p-10"
                     inputProps={{
                       ...params.inputProps,
                       style: { color: 'white', fontSize: '14px' }
@@ -140,8 +134,8 @@ export default function CompanyForm() {
             </div>
 
             <div>
-              <Button className="w-full" type="submit" color="primary">
-                Next: Confirmation
+              <Button className="w-full" type="submit">
+                Continue
               </Button>
             </div>
           </div>

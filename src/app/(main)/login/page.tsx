@@ -1,21 +1,18 @@
 import AuthForm from "./auth-form";
 import Image from "next/image";
-import Valorem from "../../../../public/auth.png";
 
 export default function Login() {
   return (
-    <section className="relative bg-gray-900 text-white min-h-screen">
-      <Image
-        src={Valorem}
-        alt="Background"
-        layout="fill"
-        objectFit="cover"
-        priority
-        className="z-0"
-      />
-
-      <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-8 lg:py-16">
+    <section className="bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto grid max-w-screen-xl px-4 py-8 lg:grid-cols-12 lg:gap-20 lg:py-16">
         <AuthForm />
+        <div className="mr-auto place-self-center lg:col-span-6">
+          <img
+            className="mx-auto hidden lg:flex"
+            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/authentication/illustration.svg"
+            alt="illustration"
+          />
+        </div>
       </div>
     </section>
   );

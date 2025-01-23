@@ -101,7 +101,7 @@ export default function Confirmation() {
               </div>
             </>
           )}
-          <Button disabled={isLoading} className="w-full" onClick={onSubmit} color="light">
+          <Button disabled={isLoading} className="w-full" onClick={onSubmit}>
             {isLoading ? <Spinner size="xs" /> : "Confirm Account"}
           </Button>
         </div>

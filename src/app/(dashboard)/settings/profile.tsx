@@ -1,6 +1,6 @@
 "use client";
 import { Avatar, Button, Label, TextInput } from "flowbite-react";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { UserContext } from "@/context/userContext";
 import request from "@/utils/request";
 import { useToast } from "@/context/toastContext";
@@ -80,26 +80,31 @@ export default function Profile() {
     }
   }
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className="mx-auto rounded-lg bg-gray-800 p-6 shadow sm:max-w-xl sm:p-8">
+    <div className="mx-auto rounded-lg p-6 shadow sm:max-w-xl sm:p-8">
       <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight ">Account</h1>
       <div className="mt-4 space-y-6 sm:mt-6">
         <div className="grid gap-6 sm:grid-rows-2">
           <div className="flex items-center gap-6">
             <Avatar img={image?.url || user?.profileImage?.fileUrl} alt="User" rounded size="lg" />
-            <label>
-              <span className="bg-white text-black px-3 py-1.5 text-sm rounded-md cursor-pointer flex gap-2">
-                <FaUpload size={16} />
-                Upload
-              </span>
-              <input
-                type="file"
-                name="file_upload"
-                accept="image/*"
-                className="hidden"
-                onChange={selectImages}
-              />
-            </label>
+            <Button size="sm" onClick={handleButtonClick}>
+              <FaUpload size={16} className="mr-1.5" />
+              Upload
+            </Button>
+            <input
+              type="file"
+              name="file_upload"
+              accept="image/*"
+              className="hidden"
+              onChange={selectImages}
+              ref={fileInputRef}
+            />
           </div>
           <div className="flex flex-row gap-4">
             <div className="flex flex-col flex-1">
@@ -116,7 +121,7 @@ export default function Profile() {
             <TextInput id="phone" required value={phone} type="phone" onChange={(e) => setPhone(e.target.value)} />
           </div>
         </div>
-        <Button color="primary" className="w-full" onClick={handleSubmitChanges} isProcessing={isLoading}>
+        <Button className="w-full" onClick={handleSubmitChanges} isProcessing={isLoading}>
           Save changes
         </Button>
       </div>
