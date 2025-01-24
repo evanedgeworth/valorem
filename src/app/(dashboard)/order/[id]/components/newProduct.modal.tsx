@@ -76,7 +76,7 @@ export default function NewProductModal({
         url: `/category-items`,
         method: "GET",
         params: {
-
+          all: true
         },
       })
       if (res?.status === 200) {

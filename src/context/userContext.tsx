@@ -78,6 +78,9 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   async function handleGetCategory() {
     const res = await request({
       url: `/category-items`,
+      params: {
+        all: true,
+      }
     });
 
     
