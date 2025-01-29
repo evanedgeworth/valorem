@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 export const localStorageKey = {
   accessToken: 'accessToken',
   refreshToken: 'refreshToken',
+  roleId: 'roleId',
   expiresAt: 'expiresAt',
   user: 'currentUser',
+  organization: 'currentOrganization',
   userOrganization: 'userOrganization'
 }
 

@@ -21,8 +21,8 @@ type UserContext = {
 export const UserContext = createContext<UserContext>({} as UserContext);
 
 export default function UserProvider({ children }: { children: JSX.Element[] }) {
-  const [user, setUser] = useLocalStorage("currentUser", {} as User);
-  const [selectedOrganization, setSelectedOrganization] = useLocalStorage("currentOrganization", {} as Organization);
+  const [user, setUser] = useLocalStorage(localStorageKey.user, {} as User);
+  const [selectedOrganization, setSelectedOrganization] = useLocalStorage(localStorageKey.organization, {} as Organization);
   const [role, setRole] = useLocalStorage("currentRole", {} as Role);
 
   const [categoryItems, setCategoryItems] = useLocalStorage("categoryItems", [] as CategoryItem[]);
@@ -36,31 +36,45 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     });
     localStorage.clear();
     Cookies.remove(localStorageKey.accessToken);
+    Cookies.remove(localStorageKey.refreshToken);
+    Cookies.remove(localStorageKey.roleId);
     router.replace('/login');
   }
 
-  async function handleGetUser(user: any) {
+  async function handleGetRole(roleId: string) {
     const role = await request({
-      url: `/roles/${user.roleId}`
+      url: `/roles/${roleId}`
     });
     if (role?.data) {
       setRole(role.data);
     }
   }
 
-  async function handleGetOrganizations(user: any) {
+  async function handleGetOrganizations(user: any, userOrganization: Organization | null) {
+    const userId = user.id;
     const res = await request({
-      url: `/user_organizations?filterType=user&id=${user.id}`
+      url: `/user_organizations`,
+      params: {
+        filterType: "user",
+        includeRoles: true,
+        id: userId,
+      }
     });
 
     if (res?.status === 403) {
       signOut();
     }
-    const userOrganization = res.data?.userOrganizations?.[0];
-    if (userOrganization) {
-      setSelectedOrganization(userOrganization);
-      setAllOrganizations(res.data?.userOrganizations);
+
+    const firstOrganization = res?.data?.userOrganizations?.[0];
+    if (!userOrganization && firstOrganization) {
+      setSelectedOrganization(firstOrganization);
+      setRole(firstOrganization.role);
+      Cookies.set(localStorageKey.roleId, firstOrganization.roleId);
     }
+
+    setAllOrganizations(res.data?.userOrganizations || []);
+
+    return res.data?.userOrganizations;
   }
 
   async function handleGetProfile(user: any) {
@@ -92,11 +106,12 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   useEffect(() => {
     const token = Cookies.get(localStorageKey.accessToken);
     const user = localStorage.getItem(localStorageKey.user);
+    const userOrganization = localStorage.getItem(localStorageKey.organization);
 
     if (token && user) {
-      const userData = JSON.parse(user)
-      handleGetUser(userData);
-      handleGetOrganizations(userData);
+      const userData = JSON.parse(user);
+      const organization = userOrganization ? JSON.parse(userOrganization) : null;
+      handleGetOrganizations(userData, organization);
       handleGetProfile(userData);
       handleGetCategory();
     } else {

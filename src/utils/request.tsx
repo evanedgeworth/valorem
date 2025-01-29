@@ -25,6 +25,11 @@ const request = async (options: AxiosRequestConfig): Promise<AxiosResponse> => {
     client.defaults.headers.common.Authorization = `${accessToken}`;
   }
 
+  const roleId = typeof window !== 'undefined' ? Cookies.get(localStorageKey.roleId) : '';
+  if (roleId) {
+    client.defaults.headers.common['Role-Id'] = `${roleId}`;
+  }
+
   const onSuccess = (response: AxiosResponse) => response;
   const onError = (error: any) => {
     // optionally catch errors and add some additional logging here

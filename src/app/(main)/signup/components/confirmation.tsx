@@ -22,20 +22,26 @@ export default function Confirmation() {
 
   const handleSignUp = async () => {
     setIsLoading(true);
+    const contractorRoleId = "f5878656-2927-4b56-bdee-2648bcf8dbb9";
+    const clientRoleId = "6af06eaa-3ba2-4aad-8021-1f7bb88dd6bb";
     const data: any = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
-      roleId: formData.accountType === "client" ?  "CLIENT_VALOREM" : "CONTRACTOR_VALOREM",
+      roleId: formData.accountType === "client" ?  clientRoleId : contractorRoleId,
+      organizationType: formData.accountType === "client" ?  "CLIENT" : "CONTRACTOR",
+      marketIds: formData.markets ? formData.markets.map((item: Market) => item.id) : []
     };
 
-    if (formData.type === 'client') {
+    if (formData.accountType === 'client') {
       data.companyName = formData.companyName;
       data.companyAddress = formData.address;
       data.organizationName = formData.companyName;
-      data.marketIds = formData.markets ? formData.markets.map((item: Market) => item.id) : [];
+      data.organizationAddress = formData.address;
+    } else {
+      data.organizationName = "Valorem Organization";
     }
     const res = await request({
       url: '/profiles',

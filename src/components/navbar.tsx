@@ -10,6 +10,8 @@ import Link from "next/link";
 import { IoIosArrowDown } from "react-icons/io";
 import classNames from "classnames";
 import Notifications from "./notifications";
+import Cookies from "js-cookie";
+import { localStorageKey } from "@/utils/useLocalStorage";
 
 export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
   const router = useRouter();
@@ -63,7 +65,10 @@ export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
                           </Dropdown.Header>
                           {allOrganizations.length > 1 &&
                             allOrganizations.map((org) => (
-                              <Dropdown.Item onClick={() => setSelectedOrganization(org)} key={org.organizationId}>
+                              <Dropdown.Item onClick={() => {
+                                setSelectedOrganization(org);
+                                Cookies.set(localStorageKey.roleId, org.roleId);
+                              }} key={org.organizationId}>
                                 {org.name}
                               </Dropdown.Item>
                             ))}
