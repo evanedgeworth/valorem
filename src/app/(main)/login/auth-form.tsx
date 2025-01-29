@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
-import request from "@/utils/request";
+import request, { saveSession } from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
 import Cookies from 'js-cookie';
 import moment from "moment";
@@ -30,15 +30,7 @@ export default function AuthForm() {
 
     if (res?.status === 200) {
       localStorage.setItem(localStorageKey.user, JSON.stringify(res.data.user));
-      const expiresAt = moment.unix(res.data.expiresAt).toDate();
-      Cookies.set(localStorageKey.accessToken, res.data.accessToken, {
-        expires: expiresAt,
-        sameSite: 'Strict',
-      });
-      Cookies.set(localStorageKey.refreshToken, res.data.refreshToken, {
-        expires: expiresAt,
-        sameSite: 'Strict',
-      });
+      saveSession(res.data);
       router.push("/dashboard");
     } else {
       showToast(res.data?.message || 'Failed!', 'error')

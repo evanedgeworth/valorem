@@ -21,7 +21,6 @@ import { useToast } from "@/context/toastContext";
 import Link from "next/link";
 import ScopeRequestModal from "./components/scopeRequest.modal";
 import { BiPlus } from "react-icons/bi";
-import { DeleteIcon, DetailsIcon, EditIcon, ViewIcon } from "@/components/icon";
 
 export default function Properties() {
   const pathname = usePathname();

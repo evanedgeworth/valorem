@@ -215,3 +215,12 @@ export type ImageFile = {
   data: File;
   url: string;
 }
+
+export type Session = {
+  accessToken: string;
+  user: User;
+  expiresAt: number;
+  expiresIn: number;
+  refreshToken: string;
+  tokenType: string;
+};

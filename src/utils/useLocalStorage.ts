@@ -11,6 +11,18 @@ export const localStorageKey = {
   userOrganization: 'userOrganization'
 }
 
+export function getLocalStorage(key:string) {
+  let currentValue;
+
+  try {
+    currentValue = JSON.parse(localStorage.getItem(key) || String({}));
+  } catch (error) {
+    currentValue = null;
+  }
+
+  return currentValue;
+}
+
 const useLocalStorage = (key: string, defaultValue: unknown) => {
   const [value, setValue] = useState(() => {
     let currentValue;
