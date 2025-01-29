@@ -1,19 +1,17 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { Dropdown, Navbar, Avatar, Button, Spinner, DarkThemeToggle } from "flowbite-react";
+import { Dropdown, Navbar, Avatar, Button, Spinner } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/userContext";
 import Valorem from "../../public/valorem.svg";
 import Image from "next/image";
 import Link from "next/link";
-import { IoIosArrowDown } from "react-icons/io";
-import classNames from "classnames";
 import Notifications from "./notifications";
 import Cookies from "js-cookie";
 import { localStorageKey } from "@/utils/useLocalStorage";
 
-export default function NavbarWithDropdown({ isMain }: { isMain?: boolean }) {
+export default function NavbarWithDropdown() {
   const router = useRouter();
   const { user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);

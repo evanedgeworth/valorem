@@ -17,7 +17,7 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
         <QueryProvider>
           <ToastProvider>
             <UserProvider>
-              <NavbarWithDropdown isMain />
+              <NavbarWithDropdown />
               <main className="min-h-screen">
                 <div>
                   <Flowbite theme={{ theme: flowbiteTheme }}>{children}</Flowbite>
