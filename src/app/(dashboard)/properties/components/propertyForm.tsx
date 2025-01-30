@@ -37,7 +37,7 @@ type PropertyFormProps = {
   isEdit?: boolean;
 }
 
-const propertyTypes = ["single family home", "multi family home", "commercial", "other"];
+const propertyTypes = ["SINGLE_UNIT", "MULTI_UNIT", "COMMERCIAL"];
 const roomOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"];
 
 export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdit, onClose }: PropertyFormProps) {
@@ -101,11 +101,11 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           <TextInput type="string" {...register("name")} required />
         </div>
         <div>
-          <Label htmlFor="type" value="Select your organization" />
+          <Label htmlFor="type" value="Select your type" />
           <Select id="type" required {...register("type")}>
             {propertyTypes.map((item) => (
               <option value={item} key={item}>
-                {item}
+                {item.replace('_', ' ')}
               </option>
             ))}
           </Select>
