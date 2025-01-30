@@ -2,12 +2,10 @@
 
 import { useState, useRef } from "react";
 import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
 import request from "@/utils/request";
 import { useQuery } from "@tanstack/react-query";
 import { CategoryItem } from "@/types";
+import Autocomplete from "@/components/autocomplete";
 
 export const areaOptions = [
   "Exterior",
@@ -27,9 +25,8 @@ export const areaOptions = [
   "Bedroom",
   "Bathroom",
   "Attic",
-  "Basement"
+  "Basement",
 ];
-
 
 export default function NewProductModal({
   showModal,
@@ -44,10 +41,8 @@ export default function NewProductModal({
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [category, setCategory] = useState<string | null>("");
-  const [name, setName] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(0);
   const [selectedCatalog, setSelectedCatalog] = useState<CategoryItem>();
-  const [open, setOpen] = useState(false);
 
   function handleAddProduct() {
     let product = {
@@ -57,21 +52,21 @@ export default function NewProductModal({
       area: category || "",
       orderId: orderId,
       status: "new",
-      id: new Date().toTimeString()
+      id: new Date().toTimeString(),
     };
     addProduct(product);
     setShowModal(false);
   }
   const { data, isLoading } = useQuery({
-    queryKey: ['category-items'],
+    queryKey: ["category-items"],
     queryFn: async () => {
       const res = await request({
         url: `/category-items`,
         method: "GET",
         params: {
-          all: true
+          all: true,
         },
-      })
+      });
       if (res?.status === 200) {
         return res.data;
       }
@@ -79,7 +74,7 @@ export default function NewProductModal({
     },
   });
 
-  const catalog = data?.categoryItems || [];
+  const catalog: CategoryItem[] = data?.categoryItems || [];
   const loading = isLoading;
 
   function handleSelectCatalogItem(value: CategoryItem) {
@@ -89,7 +84,9 @@ export default function NewProductModal({
 
   return (
     <div ref={rootRef}>
-      <Button size="sm" onClick={() => setShowModal(true)}>+ Add Product</Button>
+      <Button size="sm" onClick={() => setShowModal(true)}>
+        + Add Product
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header>
           <h3 className="text-xl font-medium px-5 pt-3">Add product</h3>
@@ -98,76 +95,12 @@ export default function NewProductModal({
           <div className="space-y-6">
             <div>
               <Label>Product Name</Label>
-              <div className="border-gray-300 bg-gray-50 text-gray-900 border rounded-lg py-1">
-                <Autocomplete
-                  open={open}
-                  fullWidth
-                  onOpen={() => {
-                    setOpen(true);
-                  }}
-                  onClose={() => {
-                    setOpen(false);
-                  }}
-                  filterOptions={(x) => x}
-                  getOptionLabel={(option) => option.lineItem || ""}
-                  options={catalog}
-                  loading={loading}
-                  value={selectedCatalog}
-                  onChange={(event: React.SyntheticEvent, value: any | null) => handleSelectCatalogItem(value)}
-                  onInputChange={(event, newInputValue) => {
-                    setName(newInputValue);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label=""
-                      id="productSelector"
-                      fullWidth
-                      variant="standard"
-                      size="small"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-
-                          backgroundColor: "#374151",
-                          borderRadius: ".5rem",
-                          "--tw-ring-color": "transparent",
-                          legend: {
-                            marginLeft: "30px",
-                          },
-                        },
-                        "& .MuiAutocomplete-inputRoot": {
-                          paddingLeft: "10px !important",
-                          paddingRight: "20px !important",
-                          borderRadius: ".5rem",
-                          "--tw-ring-color": "transparent",
-                          color: "black"
-                        },
-                        "& .MuiInputLabel-outlined": {
-                          paddingLeft: "20px",
-                          "--tw-ring-color": "transparent",
-                        },
-                        "& .MuiInputLabel-shrink": {
-                          marginLeft: "20px",
-                          paddingLeft: "10px",
-                          paddingRight: 0,
-                          background: "white",
-                          "--tw-ring-color": "transparent",
-                        },
-                      }}
-                      InputProps={{
-                        ...params.InputProps,
-                        disableUnderline: true,
-                        endAdornment: (
-                          <>
-                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </div>
+              <Autocomplete
+                options={catalog}
+                isLoading={loading}
+                getOptionLabel={(option) => option.lineItem || ""}
+                onOptionSelect={handleSelectCatalogItem}
+              />
             </div>
             {selectedCatalog && (
               <>
