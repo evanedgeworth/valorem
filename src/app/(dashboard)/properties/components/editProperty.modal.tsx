@@ -30,8 +30,10 @@ export default function EditPropertyModal({ showModal, setShowModal, property }:
           name: data.name,
           organizationId: selectedOrganization?.organizationId,
           accessInstructions: data.accessInstructions,
+          notes: data.notes,
           accessContact: data.accessContact,
           noOfRooms: Number(data.noOfRooms),
+          noOfBathrooms: Number(data.noOfBathrooms),
           type: data.type,
           address: {
             address1: data.address1,
@@ -73,8 +75,9 @@ export default function EditPropertyModal({ showModal, setShowModal, property }:
             defaultValues={{
               name: property?.name,
               accessInstructions: property?.accessInstructions,
-              accessContact: property?.accessContact,
-              noOfRooms: property?.noOfRooms,
+              notes: property?.notes,
+              noOfRooms: String(property?.noOfRooms),
+              noOfBathrooms: String(property?.noOfBathrooms),
               type: property?.type,
               address1: property?.address.address1,
               address2: property?.address.address2,

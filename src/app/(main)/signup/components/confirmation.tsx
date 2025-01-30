@@ -1,13 +1,12 @@
 "use client";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Database } from "../../../../../types/supabase";
-import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
-import { useForm } from "react-hook-form";
+import { Button, Spinner } from "flowbite-react";
 import { useFormState } from "./formState";
+import request from "@/utils/request";
+import { useToast } from "@/context/toastContext";
+import { Market } from "@/types";
 
-type CompanyFormValues = {
+export type CompanyFormValues = {
   companyName: string;
   companyEmail: string;
   address: string;
@@ -17,68 +16,46 @@ type CompanyFormValues = {
 };
 
 export default function Confirmation() {
-  const router = useRouter();
-  const supabase = createClientComponentClient<Database>();
   const { onHandleNext, setFormData, formData } = useFormState();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { showToast } = useToast();
 
   const handleSignUp = async () => {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.signUp({
+    setIsLoading(true);
+    const contractorRoleId = "f5878656-2927-4b56-bdee-2648bcf8dbb9";
+    const clientRoleId = "6af06eaa-3ba2-4aad-8021-1f7bb88dd6bb";
+    const data: any = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
+      phone: formData.phone,
       password: formData.password,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback?next=dashboard`,
-        data: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-        },
-      },
+      roleId: formData.accountType === "client" ?  clientRoleId : contractorRoleId,
+      organizationType: formData.accountType === "client" ?  "CLIENT" : "CONTRACTOR",
+      marketIds: formData.markets ? formData.markets.map((item: Market) => item.id) : []
+    };
+
+    if (formData.accountType === 'client') {
+      data.companyName = formData.companyName;
+      data.companyAddress = formData.address;
+      data.organizationName = formData.companyName;
+      data.organizationAddress = formData.address;
+    } else {
+      data.organizationName = "Valorem Organization";
+    }
+    const res = await request({
+      url: '/profiles',
+      method: 'POST',
+      data
     });
-    if (error) alert(error.message);
-    if (user) {
-      if (formData.accountType === "client") {
-        let organization = await handleCreateOrgination();
-        if (organization) {
-          await handleAddUserToOrg(user.id, organization.id);
-        }
-      } else {
-        // Not a client
-        onHandleNext();
-      }
+
+    if (res?.status === 200) {
+      onHandleNext();
+    } else {
+      setIsLoading(false);
+      showToast(res?.data?.message || 'Failed', 'error');
     }
   };
-
-  async function handleCreateOrgination() {
-    const { data: organization, error } = await supabase
-      .from("organizations")
-      .insert([{ name: formData.companyName, address: formData.address + " " + formData.city + " " + formData.state + ", " + formData.zipCode }])
-      .select()
-      .single();
-    if (error) alert(error.message);
-    if (organization) {
-      return organization;
-    }
-  }
-
-  async function handleAddUserToOrg(userId: string, organizationId: string) {
-    const { data, error } = await supabase
-      .from("user_organizations")
-      .insert([{ user: userId, organization: organizationId, type: "client", role: "admin" }])
-      .select();
-
-    if (error) alert(error.message);
-    if (data) onHandleNext();
-  }
-
-  const {
-    register,
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<CompanyFormValues>();
 
   function onSubmit() {
     handleSignUp();
@@ -91,22 +68,22 @@ export default function Confirmation() {
           <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Confirmation</h1>
           <div className="grid grid-cols-2">
             <div>
-              <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">First Name:</p>
-              <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white"> {formData.firstName}</p>
+              <p className="mb-2 leading-none">First Name:</p>
+              <p className="mb-4 font-medium sm:mb-5"> {formData.firstName}</p>
             </div>
             <div>
-              <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Last Name:</p>
-              <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white">{formData.lastName}</p>
+              <p className="mb-2 leading-none">Last Name:</p>
+              <p className="mb-4 font-medium sm:mb-5">{formData.lastName}</p>
             </div>
           </div>
           <div className="grid grid-cols-2">
             <div>
-              <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Email:</p>
-              <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white"> {formData.email}</p>
+              <p className="mb-2 leading-none">Email:</p>
+              <p className="mb-4 font-medium sm:mb-5"> {formData.email}</p>
             </div>
             <div>
-              <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Phone:</p>
-              <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white">{formData.phone}</p>
+              <p className="mb-2 leading-none">Phone:</p>
+              <p className="mb-4 font-medium sm:mb-5">{formData.phone}</p>
             </div>
           </div>
 
@@ -114,26 +91,24 @@ export default function Confirmation() {
             <>
               <div className="grid grid-cols-2 pt-4 border-t border-gray-200">
                 <div>
-                  <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Company Name:</p>
-                  <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white"> {formData.companyName}</p>
+                  <p className="mb-2 leading-none">Company Name:</p>
+                  <p className="mb-4 font-medium sm:mb-5"> {formData.companyName}</p>
                 </div>
                 <div>
-                  <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Company Email:</p>
-                  <p className="mb-4 font-medium text-gray-900 sm:mb-5 dark:text-white">{formData.companyEmail}</p>
+                  <p className="mb-2 leading-none">Company Email:</p>
+                  <p className="mb-4 font-medium sm:mb-5">{formData.companyEmail}</p>
                 </div>
               </div>
               <div>
-                <p className="mb-2 leading-none text-gray-500 dark:text-gray-400">Company Address:</p>
-                <p className="font-medium text-gray-900 sm:mb-5 dark:text-white">
-                  {formData.address}
-                  <br />
-                  {formData.city + " " + formData.state + ", " + formData.zipCode}
+                <p className="mb-2 leading-none">Company Address:</p>
+                <p className="font-medium sm:mb-5">
+                  {formData.companyAddress}
                 </p>
               </div>
             </>
           )}
-          <Button className="w-full" onClick={onSubmit}>
-            Confirm Account
+          <Button disabled={isLoading} className="w-full" onClick={onSubmit}>
+            {isLoading ? <Spinner size="xs" /> : "Confirm Account"}
           </Button>
         </div>
       </div>

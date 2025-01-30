@@ -909,13 +909,13 @@ const AcquisitionOverview: FC<DashboardPageData> = function ({ dashboard }) {
             <div className="overflow-hidden shadow sm:rounded-lg">
               <Table className="min-w-full table-fixed">
                 <Table.Head>
-                  <Table.HeadCell className="whitespace-nowrap rounded-l border-x-0 bg-gray-50 px-4 py-3 text-left align-middle text-xs font-semibold uppercase text-gray-700 dark:bg-gray-700 dark:text-white">
+                  <Table.HeadCell className="whitespace-nowrap rounded-l border-x-0 px-4 py-3 text-left align-middle text-xs font-semibold uppercase ">
                     Category
                   </Table.HeadCell>
-                  <Table.HeadCell className="whitespace-nowrap border-x-0 bg-gray-50 px-4 py-3 text-left align-middle text-xs font-semibold uppercase text-gray-700 dark:bg-gray-700 dark:text-white">
+                  <Table.HeadCell className="whitespace-nowrap border-x-0 px-4 py-3 text-left align-middle text-xs font-semibold uppercase ">
                     Total Spent
                   </Table.HeadCell>
-                  <Table.HeadCell className="min-w-[140px] whitespace-nowrap rounded-r border-x-0 bg-gray-50 px-4 py-3 text-left align-middle text-xs font-semibold uppercase text-gray-700 dark:bg-gray-700 dark:text-white">
+                  <Table.HeadCell className="min-w-[140px] whitespace-nowrap rounded-r border-x-0 px-4 py-3 text-left align-middle text-xs font-semibold uppercase ">
                     Acquisition
                   </Table.HeadCell>
                 </Table.Head>
@@ -923,7 +923,7 @@ const AcquisitionOverview: FC<DashboardPageData> = function ({ dashboard }) {
                   {dashboard.acquisitionOverview.topChannels.map(({ channel, users, acquisition }) => (
                     <Table.Row key={channel} className="text-gray-500 dark:text-gray-400">
                       <Table.Cell className="whitespace-nowrap border-t-0 p-4 text-left align-middle text-sm font-normal">{channel}</Table.Cell>
-                      <Table.Cell className="whitespace-nowrap border-t-0 p-4 align-middle text-xs font-medium text-gray-900 dark:text-white">
+                      <Table.Cell className="whitespace-nowrap border-t-0 p-4 align-middle text-xs font-medium ">
                         ${users.toLocaleString()}
                       </Table.Cell>
                       <Table.Cell className="whitespace-nowrap border-t-0 p-4 align-middle text-xs">

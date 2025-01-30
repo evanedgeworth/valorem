@@ -18,12 +18,12 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
         <ThemeModeScript />
       </head>
       <body className="flex flex-col dark:bg-gray-900">
-        <UserProvider>
-          <div className="fixed top-0 w-full z-10">
-            <NavbarWithDropdown />
-          </div>
-          <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
-            <QueryProvider>
+        <QueryProvider>
+          <UserProvider>
+            <div className="fixed top-0 w-full z-10">
+              <NavbarWithDropdown />
+            </div>
+            <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
               <Flowbite theme={{ theme: flowbiteTheme }}>
                 <ToastProvider>
                   <SidebarProvider>
@@ -32,9 +32,9 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
                   </SidebarProvider>
                 </ToastProvider>
               </Flowbite>
-            </QueryProvider>
-          </main>
-        </UserProvider>
+            </main>
+          </UserProvider>
+        </QueryProvider>
       </body>
     </html>
   );

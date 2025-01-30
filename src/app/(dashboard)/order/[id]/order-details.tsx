@@ -68,7 +68,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const selectedTab = searchParams.get("view") || "details";
-  const { user, role } = useContext(UserContext);
+  const { user, categoryItems } = useContext(UserContext);
   const router = useRouter();
 
 
@@ -121,10 +121,13 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
 
 
   useEffect(() => {
-    if (scopeItemRevision) {
-      setAddedProducts(scopeItemRevision.scopeItems);
+    if (scopeItemRevision && categoryItems.length > 0) {
+      setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+        ...item,
+        categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+      })));
     }
-  }, [scopeItemRevision]);
+  }, [scopeItemRevision, categoryItems]);
 
   if (isLoading) {
     return (
@@ -212,7 +215,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             </div>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Date Created: </b>
-              {moment(order.createdAt).format("MMMM DD, YYYY hh:mm a")}
+              {moment(order.createdAt).format("l")}
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
@@ -285,7 +288,17 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   setAddedProducts([...filter, newProduct]);
                   setShowSubmitButton(true);
                 }}
+                edit={(newProduct) => {
+                  const data = [...addedProducts].map(item => item.id === newProduct.id ? newProduct : item);
+                  setAddedProducts(data);
+                  setShowSubmitButton(true);
+                }}
+                add={(newProduct) => {
+                  setAddedProducts([...addedProducts, newProduct]);
+                  setShowSubmitButton(true);
+                }}
                 products={[...addedProducts]}
+                orderId={orderId}
               />
             )}
           </section>

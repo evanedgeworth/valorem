@@ -1,4 +1,4 @@
-import { Button, Label, TextInput, Select, Textarea, Spinner } from "flowbite-react";
+import { Button, Label, TextInput, Select, Textarea } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { states } from "@/utils/defaults";
 import formatGoogleAddressComponents from "@/utils/formatGoogleAddressComponents";
@@ -17,9 +17,11 @@ export type PropertyInput = {
   city: string;
   postalCode: string;
   state: string;
-  noOfRooms: number;
+  noOfRooms: string;
+  noOfBathrooms: string;
   accessContact: string;
   type: string;
+  notes: string;
   accessInstructions: string;
   frontImages: Image[];
   backImages: Image[];
@@ -35,7 +37,8 @@ type PropertyFormProps = {
   isEdit?: boolean;
 }
 
-const propertyTypes = ["single family home", "multi family home"];
+const propertyTypes = ["SINGLE_UNIT", "MULTI_UNIT", "COMMERCIAL"];
+const roomOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"];
 
 export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdit, onClose }: PropertyFormProps) {
   const {
@@ -52,18 +55,9 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
   const leftImages = watch('leftImages');
   const rightImages = watch('rightImages');
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const key = event.key;
-    if (!/^\d$/.test(key) && key !== "Backspace" && key !== "ArrowLeft" && key !== "ArrowRight") {
-      event.preventDefault();
-    }
-  };
-
-
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-2 h-[calc(100vh-300px)] overflow-auto">
+      <div className="space-y-2 h-[calc(100vh-300px)] overflow-auto px-1">
         <div>
           <Label htmlFor="address">Address Line 1</Label>
           <AddressInput
@@ -107,9 +101,19 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           <TextInput type="string" {...register("name")} required />
         </div>
         <div>
-          <Label htmlFor="type" value="Select your organization" />
+          <Label htmlFor="type" value="Select your type" />
           <Select id="type" required {...register("type")}>
             {propertyTypes.map((item) => (
+              <option value={item} key={item}>
+                {item.replace('_', ' ')}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="noOfRooms">Number of Rooms</Label>
+          <Select id="noOfRooms" required {...register("noOfRooms")}>
+            {roomOptions.map((item) => (
               <option value={item} key={item}>
                 {item}
               </option>
@@ -117,16 +121,23 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           </Select>
         </div>
         <div>
-          <Label>Number of Rooms</Label>
-          <TextInput min={0} onKeyDown={handleKeyDown} type="number" {...register("noOfRooms")} required />
+          <Label htmlFor="noOfBathrooms">Number of Bathrooms</Label>
+          <Select id="noOfBathrooms" required {...register("noOfBathrooms")}>
+            {roomOptions.map((item) => (
+              <option value={item} key={item}>
+                {item}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="accessInstructions">Access Instructions</Label>
+          <Textarea id="accessInstructions" placeholder="" rows={4} {...register("accessInstructions")} />
         </div>
         <div>
-          <Label>Access Contact</Label>
-          <TextInput type="string" {...register("accessContact")} required />
-        </div>
-        <div id="textarea">
-          <Label htmlFor="comment">Access Instructions</Label>
-          <Textarea placeholder="Please give detailed instructions..." rows={4} {...register("accessInstructions")} />
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea id="notes" placeholder="" rows={4} {...register("notes")} />
         </div>
         {
           !isEdit && (
@@ -152,11 +163,11 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
         }
       </div>
       <div className="flex gap-4 mt-4">
-        <Button disabled={isLoading} type="submit" fullSized>
-          {isLoading ? <Spinner size="xs" /> : isEdit ? "Save" : "Create Property +"}
-        </Button>
-        <Button type="button" onClick={onClose} fullSized color={"light"}>
+        <Button type="button" onClick={onClose} fullSized outline>
           Close
+        </Button>
+        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized>
+          {isEdit ? "Save" : "Create Property +"}
         </Button>
       </div>
     </form>

@@ -1,19 +1,17 @@
 "use client";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Database } from "../../../../types/supabase";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
-import request from "@/utils/request";
+import request, { saveSession } from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
 import Cookies from 'js-cookie';
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
+import Link from "next/link";
 
 export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
@@ -32,17 +30,7 @@ export default function AuthForm() {
 
     if (res?.status === 200) {
       localStorage.setItem(localStorageKey.user, JSON.stringify(res.data.user));
-      const expiresAt = moment.unix(res.data.expiresAt).toDate();
-      Cookies.set(localStorageKey.accessToken, res.data.accessToken, {
-        expires: expiresAt,
-        secure: true,
-        sameSite: 'Strict',
-      });
-      Cookies.set(localStorageKey.refreshToken, res.data.refreshToken, {
-        expires: expiresAt,
-        secure: true,
-        sameSite: 'Strict',
-      });
+      saveSession(res.data);
       router.push("/dashboard");
     } else {
       showToast(res.data?.message || 'Failed!', 'error')
@@ -56,9 +44,9 @@ export default function AuthForm() {
         <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Welcome back</h1>
         <p className="text-sm font-light text-gray-500 dark:text-gray-300">
           Don&apos;t have an account?{" "}
-          <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+          <Link href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">
             Sign up
-          </a>
+          </Link>
           .
         </p>
         <form className="mt-4 space-y-6 sm:mt-6" action="#">

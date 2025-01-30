@@ -29,7 +29,7 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
     <div ref={rootRef}>
       <Modal show={showModal} size="xl" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header className="items-center p-8">
-          <h3 className="text-xl font-medium text-gray-900 dark:text-white">Property</h3>
+          <h3 className="text-xl font-medium">Property</h3>
         </Modal.Header>
         <Modal.Body>
           <div className="space-y-2">

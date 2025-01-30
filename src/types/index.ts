@@ -16,6 +16,7 @@ export type Property = {
   accessInstructions: string;
   accessContact: string;
   noOfRooms: number;
+  noOfBathrooms: number;
   type: string;
   size: Size;
   orderCount: number;
@@ -118,7 +119,7 @@ export interface ScopeItem {
   updatedAt: string;
   id: string;
   categoryItemId: string;
-  categoryItem: any;
+  categoryItem?: CategoryItem;
   area: string;
   status: string;
   scopeItemImages: {
@@ -183,4 +184,43 @@ export type CategoryItem = {
   originalMaterialId: string;
   targetVendorPrice: string;
   equipmentUsageRental: string;
+};
+
+export type Market = {
+  id: string;
+  city: string;
+  countyName: string;
+  state: string;
+  stateId: string;
+  zipCode: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Notification = {
+  id: string;
+  userId: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  dateTime: string;
+  message: {
+    title: string;
+    body: string;
+  };
+};
+
+export type ImageFile = {
+  data: File;
+  url: string;
+}
+
+export type Session = {
+  accessToken: string;
+  user: User;
+  expiresAt: number;
+  expiresIn: number;
+  refreshToken: string;
+  tokenType: string;
 };

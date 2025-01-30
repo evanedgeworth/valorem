@@ -1,7 +1,7 @@
 import { Avatar } from "flowbite-react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 
-interface ImageFile {
+export interface ImageFile {
   data: File;
   url: string;
 }

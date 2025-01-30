@@ -4,9 +4,23 @@ import { useState, useEffect } from "react";
 export const localStorageKey = {
   accessToken: 'accessToken',
   refreshToken: 'refreshToken',
+  roleId: 'roleId',
   expiresAt: 'expiresAt',
   user: 'currentUser',
+  organization: 'currentOrganization',
   userOrganization: 'userOrganization'
+}
+
+export function getLocalStorage(key:string) {
+  let currentValue;
+
+  try {
+    currentValue = JSON.parse(localStorage.getItem(key) || String({}));
+  } catch (error) {
+    currentValue = null;
+  }
+
+  return currentValue;
 }
 
 const useLocalStorage = (key: string, defaultValue: unknown) => {

@@ -1,11 +1,12 @@
 "use client";
-// import AuthForm from "./auth-form";
-import { Button, Checkbox, Label, TextInput, Select } from "flowbite-react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
-import { useState, useContext, useEffect } from "react";
-import { Database } from "../../../../types/supabase";
+import { Avatar, Button, Label, TextInput } from "flowbite-react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { UserContext } from "@/context/userContext";
+import request from "@/utils/request";
+import { useToast } from "@/context/toastContext";
+import { ImageFile } from "@/types";
+import uploadFiles from "@/utils/uploadFile";
+import { FaUpload } from "react-icons/fa";
 
 export default function Profile() {
   const [email, setEmail] = useState("");
@@ -13,9 +14,9 @@ export default function Profile() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [isLoading, setIsloading] = useState<boolean>(false);
-  const router = useRouter();
-  const supabase = createClientComponentClient<Database>();
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
+  const { showToast } = useToast();
+  const [image, setImage] = useState<ImageFile | null>(null);
 
   useEffect(() => {
     setEmail(user?.email || "");
@@ -26,44 +27,85 @@ export default function Profile() {
 
   const handleSubmitChanges = async () => {
     setIsloading(true);
-    const { data, error } = await supabase.auth.updateUser(
-      {
-        email: email,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-        },
-      },
-      { emailRedirectTo: `${location.origin}/auth/callback` }
-    );
-    if (error) {
-      alert(error.message);
+    const body: any = { firstName, lastName, phone };
+    if (image) {
+      const upload = await uploadFiles([image.data]);
+      if (upload?.[0]) {
+        body.profileImage = {
+          fileId: upload[0].key,
+          fileUrl: upload[0].url,
+          fileType: "image/jpeg"
+        }
+      }
     }
-    if (data) {
-      updateProfile();
-      console.log(data);
+
+    const res = await request({
+      method: "PUT",
+      url: `/profiles/${user?.id}`,
+      data: body,
+    });
+
+
+    setIsloading(false);
+    if (res.status === 200) {
+      console.log(res.data);
+      showToast('Successfully updated profile', 'success');
+
+      const resProfile = await request({
+        method: "GET",
+        url: `/profiles/${user?.id}`,
+      });
+      const profile = resProfile.data.profile;
+      if (profile) {
+        setUser({ ...profile, id: profile });
+      }
+    } else {
+      showToast(res.data.message || 'Failed', 'error');
     }
   };
 
-  async function updateProfile() {
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ email: email, first_name: firstName, last_name: lastName, phone: phone })
-      .eq("id", user?.id || "")
-      .select();
-    if (data) {
-      router.refresh();
+  function selectImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFiles: ImageFile[] = [];
+
+    if (e.target.files) {
+      const targetFiles = Array.from(e.target.files);
+
+      targetFiles.forEach((file) => {
+        selectedFiles.push({
+          data: file,
+          url: URL.createObjectURL(file),
+        });
+      });
+      setImage(selectedFiles[0]);
     }
-    setIsloading(false);
   }
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className="mx-auto rounded-lg bg-white p-6 shadow dark:bg-gray-800 sm:max-w-xl sm:p-8">
-      <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">Account Info</h1>
-      <p className="text-sm font-light text-gray-500 dark:text-gray-300">Make changes to your account here.</p>
+    <div className="mx-auto rounded-lg p-6 shadow sm:max-w-xl sm:p-8">
+      <h1 className="mb-2 text-2xl font-bold leading-tight tracking-tight ">Account</h1>
       <div className="mt-4 space-y-6 sm:mt-6">
         <div className="grid gap-6 sm:grid-rows-2">
+          <div className="flex items-center gap-6">
+            <Avatar img={image?.url || user?.profileImage?.fileUrl} alt="User" rounded size="lg" />
+            <Button size="sm" onClick={handleButtonClick}>
+              <FaUpload size={16} className="mr-1.5" />
+              Upload
+            </Button>
+            <input
+              type="file"
+              name="file_upload"
+              accept="image/*"
+              className="hidden"
+              onChange={selectImages}
+              ref={fileInputRef}
+            />
+          </div>
           <div className="flex flex-row gap-4">
             <div className="flex flex-col flex-1">
               <Label htmlFor="email">First Name</Label>
@@ -75,16 +117,12 @@ export default function Profile() {
             </div>
           </div>
           <div>
-            <Label htmlFor="email">Email</Label>
-            <TextInput id="email" placeholder="name@company.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div>
             <Label>Phone Number</Label>
             <TextInput id="phone" required value={phone} type="phone" onChange={(e) => setPhone(e.target.value)} />
           </div>
         </div>
         <Button className="w-full" onClick={handleSubmitChanges} isProcessing={isLoading}>
-          {!isLoading && "Submit Changes"}
+          Save changes
         </Button>
       </div>
     </div>
