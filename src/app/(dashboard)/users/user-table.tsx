@@ -15,7 +15,7 @@ import { UserContext } from "@/context/userContext";
 type User = Database["public"]["Tables"]["profiles"]["Row"] & { user_organizations: User_Organizations[] };
 type User_Organizations = Database["public"]["Tables"]["user_organizations"]["Row"];
 
-export default function UserTable({ user }: { user: User }) {
+export default function UserTable() {
   const supabase = createClientComponentClient<Database>();
   const [users, setUsers] = useState<User[]>();
   const [tableIsLoading, setTableIsLoading] = useState<boolean>(false);

@@ -120,7 +120,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
                 <Button outline fullSized onClick={() => setShowModal(false)}>
                   Cancel
                 </Button>
-                <Button disabled={isPending} fullSized type="submit">Save</Button>
+                <Button disabled={isPending} isProcessing={isPending} fullSized type="submit">Save</Button>
               </div>
             </div>
           </form>

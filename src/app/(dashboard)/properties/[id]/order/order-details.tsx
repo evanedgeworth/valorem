@@ -7,7 +7,7 @@ import { Button, Card, Spinner } from "flowbite-react";
 import { HiOutlineArrowSmLeft } from "react-icons/hi";
 import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useMemo, useState } from "react";
-import { parseCurrencyToNumber } from "@/utils/commonUtils";
+import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 import ActiveOrder from "@/app/(dashboard)/order/[id]/components/activeOrder";
 import { UserContext } from "@/context/userContext";
 import moment from "moment";
@@ -19,7 +19,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
   const { categoryItems } = useContext(UserContext);
   const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
-  const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | null>(null);
+  const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "SCHEDULED" | null>(null);
   const { showToast } = useToast();
 
   const { data, isLoading, refetch } = useQuery({
@@ -38,13 +38,14 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   });
 
   const order = data as Scope;
+  const scopeStatus = order?.scopeStatus;
 
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
 
   const totalAmount = useMemo(() => {
     let total = 0;
     addedProducts?.forEach(item => {
-      total += parseCurrencyToNumber(item.categoryItem?.targetClientPrice || "0") * item.quantity;
+      total += parseCurrencyToNumber(item.targetClientPrice ?? item.categoryItem?.targetClientPrice ?? "0") * item.quantity;
     });
     return total;
   }, [addedProducts]);
@@ -63,6 +64,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     mutationFn: async (body: any) => {
       const res = await request({
         url: `/scope/${orderId}/populate`,
+        params: {
+          sendForApproval: true,
+        },
         method: 'POST',
         data: body
       });
@@ -108,11 +112,40 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
+  const { mutate: mutateInitiate, isPending: isPendingInitiate } = useMutation({
+    mutationFn: async (body: {
+      scopeStatus: "SCHEDULED",
+      reason: string
+    }) => {
+      const res = await request({
+        url: `/scope/${orderId}/initiate`,
+        method: 'PATCH',
+        data: body
+      });
+
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    },
+    onSuccess: () => {
+      showToast('Successfully updated data.');
+      setActionModal(null);
+      refetch();
+    },
+    onError: (error) => {
+      showToast(error.message, 'error');
+    }
+  });
+
   async function populateOrder() {
     const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
     await mutate({
-      sendForApproval: true,
-      scopeItems: formattedScopeItems,
+      scopeItems: formattedScopeItems.map(item => ({
+        "categoryItemId": item.categoryItemId,
+        "area": item.area,
+        "quantity": item.quantity,
+      })),
     });
   }
 
@@ -135,16 +168,24 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             <h3 className="font-semibold text-xl">{order.projectName}</h3>
           </div>
           <div className="flex gap-4">
-            <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
             {
-              showSubmitButton ? (
-                <Button disabled={isPendingPopulate} onClick={populateOrder}>
-                  {isPendingPopulate && <Spinner size="xs" />} Send for review
-                </Button>
+              scopeStatus === "REQUESTED" ? (
+                <Button onClick={() => setActionModal("SCHEDULED")}>Scheduled</Button>
               ) : (
-                <Button onClick={() => setActionModal("APPROVE")}>
-                  Approve
-                </Button>
+                <>
+                  <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                  {
+                    showSubmitButton ? (
+                      <Button disabled={isPendingPopulate} onClick={populateOrder}>
+                        {isPendingPopulate && <Spinner size="xs" />} Send for review
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setActionModal("APPROVE")}>
+                        Approve
+                      </Button>
+                    )
+                  }
+                </>
               )
             }
           </div>
@@ -155,7 +196,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           </div>
           <div className="flex gap-8 text-lg">
             <p>Order total</p>
-            <p>{totalAmount}</p>
+            <p>$ {numberWithCommas(totalAmount)}</p>
           </div>
         </div>
       </Card>
@@ -183,11 +224,15 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         actionModal && (
           <ReviewModal
             showModal={Boolean(actionModal)}
-            isLoading={isPendingReview}
+            isLoading={isPendingReview || isPendingInitiate}
             handleCancel={() => setActionModal(null)}
-            title={`Are you sure you want to ${actionModal === 'APPROVE' ? 'approve' : actionModal === 'REJECT' ? 'reject' : 'revision'}?`}
+            title={`Are you sure you want to ${actionModal?.toLowerCase()}?`}
             handleConfirm={(note) => {
-              mutateReview({ action: actionModal, note })
+              if (actionModal === "SCHEDULED") {
+                mutateInitiate({ scopeStatus: "SCHEDULED", reason: note });
+              } else {
+                mutateReview({ action: actionModal, note });
+              }
             }}
           />
         )

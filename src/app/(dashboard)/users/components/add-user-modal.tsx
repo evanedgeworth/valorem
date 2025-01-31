@@ -1,60 +1,91 @@
 "use client";
 
-import { useState, useEffect, useRef, useContext } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Database } from "../../../../../types/supabase";
-import { Button, Checkbox, Label, Modal, TextInput, Select, Textarea, Datepicker, Radio } from "flowbite-react";
-import { useRouter } from "next/navigation";
-import { UserContext } from "@/context/userContext";
-import { useForm, SubmitHandler } from "react-hook-form";
-type User = Database["public"]["Tables"]["profiles"]["Row"] & { user_organizations: User_Organizations[] };
-type User_Organizations = Database["public"]["Tables"]["user_organizations"]["Row"];
+import { useState, useRef } from "react";
+import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
+import { useUserContext } from "@/context/userContext";
+import { useForm } from "react-hook-form";
+import request from "@/utils/request";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { OrganizationRole, Role } from "@/types";
+import { useToast } from "@/context/toastContext";
+
 type Inputs = {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
+  roleId: string;
 };
 
-export default function AddUserModal({ reloadTable }: { reloadTable: () => Promise<void> }) {
+export default function AddUserModal() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const supabase = createClientComponentClient<Database>();
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [isSending, setIsSending] = useState<boolean>(false);
-  const [type, setType] = useState<"client" | "supplier" | "vendor">("client");
-  const [role, setRole] = useState<"admin" | "billing" | "viewer">("admin");
-  const router = useRouter();
-  const { user, selectedOrganization } = useContext(UserContext);
+  const { showToast } = useToast();
+  const { selectedOrganization } = useUserContext();
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<Inputs>();
+  const roleId = watch("roleId");
 
-  async function handleAddUser(data: Inputs) {
-    setIsSending(true);
-    try {
-      let response = await fetch("/api/send-invite-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        }),
+  const { data } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      const res = await request({
+        url: `/roles`,
+        method: "GET",
+        params: {
+          organizationType: "VALOREM"
+        },
+      })
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res.data.message);
+    },
+    enabled: Boolean(selectedOrganization?.organizationId)
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await request({
+        url: '/profiles',
+        method: 'POST',
+        data
       });
-      let resendResponse = await response.json();
-      await supabase
-        .from("user_organizations")
-        .insert([{ user: resendResponse.id, organization: selectedOrganization?.organizationId, type: type, role: type === "client" ? role : "viewer" }])
-        .select();
-      await reloadTable();
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res.data.message);
+    },
+    onSuccess: () => {
       setShowModal(false);
-    } catch (e) {
-      console.log(e);
+      showToast("Successfully added user", "success");
+      queryClient.refetchQueries({ queryKey: ["users"] });
+    },
+    onError: (error) => {
+      showToast(error.message, "error");
     }
-    setIsSending(false);
+  });
+  const roles: OrganizationRole[] = data?.roles || [];
+
+  async function handleAddUser(formData: Inputs) {
+    mutate({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      roleId: formData.roleId,
+      organizationType: "VALOREM",
+      marketIds: [],
+    });
   }
+
 
   return (
     <div ref={rootRef}>
@@ -67,58 +98,43 @@ export default function AddUserModal({ reloadTable }: { reloadTable: () => Promi
               <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add User</h3>
               <div className="flex flex-row gap-4">
                 <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">First Name</Label>
-                  <TextInput id="first name" required {...register("firstName")} />
+                  <Label htmlFor="firstName">First Name</Label>
+                  <TextInput id="firstName" required {...register("firstName")} />
                 </div>
                 <div className="flex flex-col flex-1">
-                  <Label htmlFor="email">Last Name</Label>
-                  <TextInput id="last name" required {...register("lastName")} />
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <TextInput id="lastName" required {...register("lastName")} />
                 </div>
               </div>
               <div>
-                <Label htmlFor="countries">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <TextInput id="email" type="email" required {...register("email")} />
               </div>
-              <div>
-                <Label htmlFor="countries">Role</Label>
-                <Button.Group id="type" className="w-full">
-                  <Button color={type === "client" ? undefined : "gray"} fullSized value="client" target="client" onClick={() => setType("client")}>
-                    Client
-                  </Button>
-                  <Button color={type === "supplier" ? undefined : "gray"} fullSized value="supplier" onClick={() => setType("supplier")}>
-                    Supplier
-                  </Button>
-                  <Button color={type === "vendor" ? undefined : "gray"} fullSized value="vendor" onClick={() => setType("vendor")}>
-                    Vendor
-                  </Button>
-                </Button.Group>
+
+              <div className="flex flex-col flex-1">
+                <Label htmlFor="password">Password</Label>
+                <TextInput id="password" type="password" {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })} />
+                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               </div>
-              {type === "client" && (
-                <div>
-                  <Label htmlFor="countries">Access</Label>
-                  <Button.Group id="type" className="w-full">
-                    <Button color={role === "admin" ? undefined : "gray"} fullSized value="admin" target="client" onClick={() => setRole("admin")}>
-                      Admin
-                    </Button>
-                    <Button color={role === "billing" ? undefined : "gray"} fullSized value="billing" onClick={() => setRole("billing")}>
-                      Billing
-                    </Button>
-                    <Button color={role === "viewer" ? undefined : "gray"} fullSized value="viewer" onClick={() => setRole("viewer")}>
-                      Viewer
-                    </Button>
-                  </Button.Group>
-                </div>
-              )}
+              <div>
+                <Label htmlFor="area">Role</Label>
+                <Select id="area" required value={roleId || ""} onChange={(e) => setValue("roleId", e.target.value)}>
+                  <option value="" disabled>Select an option...</option>
+                  {roles.map((option) => (
+                    <option key={option.roleId} value={option.roleId}>{option.roleName}</option>
+                  ))}
+                </Select>
+              </div>
 
               <div className="flex justify-end">
-                <Button type="submit" isProcessing={isSending}>
-                  Send Invitation
+                <Button type="submit" isProcessing={isPending}>
+                  Save
                 </Button>
               </div>
             </div>
           </form>
         </Modal.Body>
       </Modal>
-    </div>
+    </div >
   );
 }

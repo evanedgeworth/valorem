@@ -85,10 +85,10 @@ export default function ActiveOrder({
                         </Table.Cell>
                         <Table.Cell>{product.quantity}</Table.Cell>
                         <Table.Cell className="whitespace-nowrap">
-                          {"$" + numberWithCommas((parseCurrencyToNumber(product.categoryItem?.targetClientPrice) || 0))}
+                          {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0))}
                         </Table.Cell>
                         <Table.Cell className="whitespace-nowrap">
-                          {"$" + numberWithCommas((parseCurrencyToNumber(product.categoryItem?.targetClientPrice) || 0) * product.quantity)}
+                          {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0) * product.quantity)}
                         </Table.Cell>
                         {isEditing && (
                           <Table.Cell>

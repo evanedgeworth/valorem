@@ -24,15 +24,24 @@ export type Property = {
   backImages: { fileUrl: string }[];
   leftImages: { fileUrl: string }[];
   rightImages: { fileUrl: string }[];
+  assigneeId: string | null;
+  assignee: User | null;
 };
 
 export type Role = {
   createdAt: string;
   id: string;
   permissions: string[];
-  role: string;
   type: string;
   updatedAt: string;
+};
+
+export type OrganizationRole = {
+  roleName: string;
+  roleId: string;
+  organizationId: string;
+  permissions: string[];
+  organizationType: string;
 };
 
 export type Address = {
@@ -223,4 +232,16 @@ export type Session = {
   expiresIn: number;
   refreshToken: string;
   tokenType: string;
+};
+
+export type UserOrganization = {
+  createdAt: Date;
+  name: string;
+  organizationId: string;
+  role: OrganizationRole;
+  roleId: string;
+  type: string;
+  updatedAt: Date;
+  userId: string;
+  user?: User;
 };
