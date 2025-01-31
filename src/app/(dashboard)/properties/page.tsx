@@ -40,6 +40,8 @@ export default function Properties() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
+  const isAssignmentAllowed = role?.roleName === "SENIOR PROJECT MANAGER";
+
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
@@ -174,7 +176,7 @@ export default function Properties() {
             { label: "Address", key: "address", render: (value: Address) => parseAddress(value) },
             { label: "Created Date", key: "createdAt", render: (value: string) => moment(value).format("MMM DD, YYYY") },
             { label: "Type", key: "type", render: (value: string) => value.replaceAll('_', ' ') },
-            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} /> },
+            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} />, hidden: !isAssignmentAllowed },
             { label: "Orders", key: "orderCount" },
           ]}
           actions={actions}
