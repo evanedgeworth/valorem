@@ -78,7 +78,7 @@ export default function Settings({ order }: { order: Order }) {
             required
             value={trade}
             onChange={(e) => setTrade(e.target.value)}
-            disabled={currentOrganization?.type === "vendor" || currentOrganization?.type === "supplier"}
+            disabled={currentOrganization?.organizationType === "vendor" || currentOrganization?.organizationType === "supplier"}
           >
             <option disabled></option>
             <option>Exterior / Landscaping</option>
@@ -129,7 +129,7 @@ export default function Settings({ order }: { order: Order }) {
             type="number"
             value={size}
             onChange={(e) => setSize(e.target.valueAsNumber)}
-            disabled={currentOrganization?.type === "vendor" || currentOrganization?.type === "supplier"}
+            disabled={currentOrganization?.organizationType === "vendor" || currentOrganization?.organizationType === "supplier"}
           />
         </div>
         {/* <div>
@@ -152,7 +152,7 @@ export default function Settings({ order }: { order: Order }) {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            disabled={currentOrganization?.type === "vendor" || currentOrganization?.type === "supplier"}
+            disabled={currentOrganization?.organizationType === "vendor" || currentOrganization?.organizationType === "supplier"}
           />
         </div>
 

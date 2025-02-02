@@ -1,4 +1,4 @@
-import { Address, Role } from "@/types";
+import { Address, OrganizationRole, Role, User } from "@/types";
 import { Database } from "../../types/supabase";
 type Item = Database["public"]["Tables"]["line_items"]["Row"];
 type Product = Database["public"]["Tables"]["order_items"]["Row"] & {
@@ -229,9 +229,21 @@ export function parseAddress(address: Address | undefined) {
   return `${address?.address1}${(address?.address2 && " " + address?.address2) || ""}, ${address?.city || ''} ${address?.state || ''} ${address?.postalCode || ''}`
 }
 
-export function checkPermission(role: Role | undefined, key: string): boolean {
+export function checkPermission(role: OrganizationRole | undefined, key: string): boolean {
   if (!role?.permissions) {
     return false;
   }
   return role.permissions.includes(key);
+}
+
+export function getInitials(fullName?: string): string {
+  return fullName ? fullName
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('') : '';
+}
+
+export function getFullName(user?: User) {
+  return `${user?.firstName || ''} ${user?.lastName || ''}`
 }

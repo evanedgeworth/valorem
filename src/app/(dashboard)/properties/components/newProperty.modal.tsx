@@ -64,7 +64,7 @@ export default function NewPropertyModal({
       throw Error(res?.data?.message);
     } catch (error: any) {
       setIsLoading(false);
-      showToast(error.message);
+      showToast(error.message, "error");
     }
   }
 

@@ -5,6 +5,7 @@ import { useFormState } from "./formState";
 import request from "@/utils/request";
 import { useToast } from "@/context/toastContext";
 import { Market } from "@/types";
+import { clientRoleId, contractorRoleId } from "@/utils/constants";
 
 export type CompanyFormValues = {
   companyName: string;
@@ -22,8 +23,6 @@ export default function Confirmation() {
 
   const handleSignUp = async () => {
     setIsLoading(true);
-    const contractorRoleId = "f5878656-2927-4b56-bdee-2648bcf8dbb9";
-    const clientRoleId = "6af06eaa-3ba2-4aad-8021-1f7bb88dd6bb";
     const data: any = {
       firstName: formData.firstName,
       lastName: formData.lastName,

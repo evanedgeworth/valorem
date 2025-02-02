@@ -52,7 +52,7 @@ export default function NewProductModal({
       area: category || "",
       orderId: orderId,
       status: "new",
-      id: new Date().toTimeString(),
+      id: new Date().getTime().toString(),
     };
     addProduct(product);
     setShowModal(false);

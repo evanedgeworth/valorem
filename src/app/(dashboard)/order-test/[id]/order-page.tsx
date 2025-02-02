@@ -275,7 +275,7 @@ export default function OrderPage({ order }: { order: Order }) {
               </Accordion.Panel>
             </Accordion>
 
-            {currentOrganization?.type === "client" && order?.change_order && (
+            {currentOrganization?.organizationType === "client" && order?.change_order && (
               <div className="flex flex-row justify-end gap-4 mt-4">
                 <Button outline color="red" className="h-fit">
                   <MdClose size={20} />

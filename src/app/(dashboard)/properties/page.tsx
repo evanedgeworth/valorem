@@ -1,10 +1,9 @@
 "use client";
 
-import { Table, Dropdown, TextInput, Spinner, Label, Button } from "flowbite-react";
-import { useState, useRef, Fragment, useContext, useMemo } from "react";
+import { TextInput, Label, Button } from "flowbite-react";
+import { useState, useRef, useContext, useMemo } from "react";
 import moment from "moment";
 import Map from "./components/map";
-import { BiDotsVerticalRounded } from "react-icons/bi";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { UserContext } from "@/context/userContext";
@@ -14,13 +13,13 @@ import EditPropertyModal from "./components/editProperty.modal";
 import { FaList, FaMapMarkedAlt } from "react-icons/fa";
 import ViewPropertyModal from "./components/view-property.modal";
 import request from "@/utils/request";
-import { Property } from "@/types";
+import { Address, Property } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { checkPermission, parseAddress } from "@/utils/commonUtils";
 import { useToast } from "@/context/toastContext";
-import Link from "next/link";
 import ScopeRequestModal from "./components/scopeRequest.modal";
-import { BiPlus } from "react-icons/bi";
+import AssignProjectManager from "./components/assing-project-manager";
+import TableData, { TableAction } from "@/components/table-data";
 
 export default function Properties() {
   const pathname = usePathname();
@@ -40,6 +39,8 @@ export default function Properties() {
   const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+
+  const isAssignmentAllowed = role?.roleName === "SENIOR PROJECT MANAGER";
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
     queryKey: ['properties'],
@@ -66,14 +67,9 @@ export default function Properties() {
     return result.filter(item => searchInput ? item.name.toLowerCase().includes(searchInput.toLowerCase()) : true);
   }, [data?.properties, searchInput]);
 
-  const getProperties = async () => {
-    await refetch();
-  }
-
   function handleTabChange(selectedTab: string) {
     router.push(`${pathname}/?view=${selectedTab}`);
   }
-
 
   async function handleRemoveProperty() {
     let propertyId = selectedProperty.current?.id || "";
@@ -90,6 +86,59 @@ export default function Properties() {
       queryClient.setQueryData(['properties'], (old: any) => ({ ...old, properties: [...old.properties].filter(item => item.id !== propertyId) }))
     }
   }
+
+  const actions = useMemo(() => {
+    const result: TableAction<Property>[] = [];
+    if (checkPermission(role, "orders_create")) {
+      result.push({
+        label: "Request Scope",
+        onClick: (row) => {
+          selectedProperty.current = row;
+          setShowRequestModal(true);
+        }
+      });
+    }
+
+    if (checkPermission(role, "properties_view")) {
+      result.push({
+        label: "View",
+        onClick: (row) => {
+          selectedProperty.current = row;
+          setShowViewModal(true);
+        }
+      });
+    }
+
+    if (checkPermission(role, "properties_view")) {
+      result.push({
+        label: "Details",
+        link: (row) => `/properties/${encodeURIComponent(row.id)}`
+      });
+    }
+
+    if (checkPermission(role, "properties_update")) {
+      result.push({
+        label: "Edit",
+        onClick: (row) => {
+          selectedProperty.current = row;
+          setShowEditModal(true);
+        }
+      });
+    }
+
+    if (checkPermission(role, "properties_delete")) {
+      result.push({
+        label: "Delete",
+        onClick: (row) => {
+          selectedProperty.current = row;
+          setShowDeleteConfirmModal(true);
+        }
+      });
+    }
+
+    return result;
+
+  }, [role]);
 
   return (
     <section className="p-5 w-full">
@@ -117,110 +166,21 @@ export default function Properties() {
           </Button>
         </Button.Group>
       </div>
-
-      {selectedTab === "List" ? (
-        tableIsLoading ? (
-          <div className=" ml-auto mr-auto mt-72 text-center">
-            <Spinner size="xl" />
-          </div>
-        ) : properties.length !== 0 ? (
-          <Table striped className="w-full">
-            <Table.Head>
-              <Table.HeadCell>ID</Table.HeadCell>
-              <Table.HeadCell>Name</Table.HeadCell>
-              <Table.HeadCell>Address</Table.HeadCell>
-              <Table.HeadCell>Created Date</Table.HeadCell>
-              <Table.HeadCell>Type</Table.HeadCell>
-              <Table.HeadCell>Orders</Table.HeadCell>
-              <Table.HeadCell></Table.HeadCell>
-            </Table.Head>
-            <Table.Body className="divide-y">
-              {properties.map((property) => (
-                <Fragment key={property.id}>
-                  <Table.Row>
-                    <Table.Cell>{property.id}</Table.Cell>
-                    <Table.Cell>
-                      {property.name}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {parseAddress(property.address)}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {moment(property.createdAt).format("MMM DD, YYYY")}
-                    </Table.Cell>
-                    <Table.Cell>{property.type}</Table.Cell>
-                    <Table.Cell>
-                      {property?.orderCount}
-                    </Table.Cell>
-
-                    <Table.Cell>
-                      <div className="relative cursor-pointer">
-                        <Dropdown renderTrigger={() => <BiDotsVerticalRounded size={25} />} label="" className="!left-[-120px] !top-6">
-                          {checkPermission(role, "orders_create") && (
-                            <Dropdown.Item
-                              onClick={() => {
-                                selectedProperty.current = property;
-                                setShowRequestModal(true);
-                              }}
-                            >
-                              Request Scope
-                            </Dropdown.Item>
-                          )}
-                          {checkPermission(role, "properties_view") && (
-                            <Dropdown.Item
-                              onClick={() => {
-                                selectedProperty.current = property;
-                                setShowViewModal(true);
-                              }}
-                            >
-                              View
-                            </Dropdown.Item>
-                          )}
-                          {checkPermission(role, "properties_view") && (
-                            <Dropdown.Item
-                              as={Link}
-                              href={`/properties/${encodeURIComponent(property.id)}`}
-                            >
-                              Details
-                            </Dropdown.Item>
-                          )}
-                          {checkPermission(role, "properties_update") && (
-                            <Dropdown.Item
-                              onClick={() => {
-                                selectedProperty.current = property;
-                                setShowEditModal(true);
-                              }}
-                            >
-                              Edit
-                            </Dropdown.Item>
-                          )}
-                          {checkPermission(role, "properties_delete") && (
-                            <Dropdown.Item
-                              onClick={() => {
-                                setShowDeleteConfirmModal(true);
-                                selectedProperty.current = property;
-                              }}
-                              className="text-red-500"
-                            >
-                              Delete
-                            </Dropdown.Item>
-                          )}
-                        </Dropdown>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                </Fragment>
-              ))}
-            </Table.Body>
-          </Table>
-        ) : (
-          <div className="mx-auto my-24">
-            <h5 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white text-center">No Results</h5>
-            <p className="mb-2 text-sm text-gray-400 dark:text-white text-center">There are currently no products.</p>
-          </div>
-        )
-      ) : (
-        <></>
+      {selectedTab === "List" && (
+        <TableData
+          data={properties}
+          isLoading={tableIsLoading}
+          columns={[
+            { label: "ID", key: "id" },
+            { label: "Name", key: "name" },
+            { label: "Address", key: "address", render: (value: Address) => parseAddress(value) },
+            { label: "Created Date", key: "createdAt", render: (value: string) => moment(value).format("MMM DD, YYYY") },
+            { label: "Type", key: "type", render: (value: string) => value.replaceAll('_', ' ') },
+            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} />, hidden: !isAssignmentAllowed },
+            { label: "Orders", key: "orderCount" },
+          ]}
+          actions={actions}
+        />
       )}
       {selectedTab === "Map" && <Map properties={properties} />}
 

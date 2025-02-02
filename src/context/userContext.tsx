@@ -1,10 +1,10 @@
 "use client";
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 
 import { useRouter } from "next/navigation";
 import useLocalStorage, { localStorageKey } from "@/utils/useLocalStorage";
 import request from "@/utils/request";
-import { CategoryItem, Organization, Role, User } from "@/types";
+import { CategoryItem, Organization, OrganizationRole, Role, User } from "@/types";
 import Cookies from "js-cookie";
 
 type UserContext = {
@@ -15,7 +15,7 @@ type UserContext = {
   allOrganizations: Organization[];
   categoryItems: CategoryItem[];
   signOut: () => Promise<void>;
-  role: Role | undefined;
+  role: OrganizationRole | undefined;
 };
 
 export const UserContext = createContext<UserContext>({} as UserContext);
@@ -125,3 +125,5 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     <UserContext.Provider value={{ user, setUser, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems }}>{children}</UserContext.Provider>
   );
 }
+
+export const useUserContext = () => useContext(UserContext)
