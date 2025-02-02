@@ -46,7 +46,9 @@ export default function SetAvailabiltyModal({ showModal, setShowModal }: { showM
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>Set Availability</Button>
+      <Button onClick={() => setShowModal(true)} color={"gray"}>
+        Set Availability
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
@@ -65,7 +67,9 @@ export default function SetAvailabiltyModal({ showModal, setShowModal }: { showM
             ))}
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAvailability}>Save</Button>
+              <Button onClick={handleSaveAvailability} color={"gray"}>
+                Save
+              </Button>
             </div>
           </div>
         </Modal.Body>

@@ -13,7 +13,7 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
       <head>
         <ThemeModeScript />
       </head>
-      <body className="flex flex-col bg-gray-50 dark:bg-gray-900">
+      <body className="flex flex-col bg-gray-50 dark:bg-zinc-900">
         <QueryProvider>
           <ToastProvider>
             <UserProvider>

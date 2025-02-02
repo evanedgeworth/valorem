@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import { BiChevronRight } from "react-icons/bi";
 
 export default function Home() {
   return (
@@ -12,9 +13,9 @@ export default function Home() {
         <div className="mx-auto max-w-screen-xl py-8 px-4 text-center lg:py-16 lg:px-12">
           <a
             href="#"
-            className="mb-7 inline-flex items-center justify-between rounded-full bg-gray-100 py-1 px-1 pr-4 text-sm text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+            className="mb-7 inline-flex items-center justify-between rounded-full bg-zinc-100 py-1 px-1 pr-4 text-sm text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
           >
-            <span className="mr-3 rounded-full bg-primary-600 px-4 py-1.5 text-xs text-gray-900 dark:text-white">New</span>{" "}
+            <span className="mr-3 rounded-full bg-primary-600 px-4 py-1.5 text-xs text-zinc-900 dark:text-white">New</span>{" "}
             <span className="text-sm font-medium">Valorem is out! See what&apos;s new</span>
             <svg className="ml-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -24,22 +25,16 @@ export default function Home() {
               />
             </svg>
           </a>
-          <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl">
+          <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-zinc-900 dark:text-white md:text-5xl lg:text-6xl">
             Valorem simplifies property repairs and maintenance.
           </h1>
-          <p className="mb-8 text-lg font-normal text-gray-500 dark:text-gray-400 sm:px-16 lg:text-xl xl:px-48">
+          <p className="mb-8 text-lg font-normal text-zinc-500 dark:text-zinc-400 sm:px-16 lg:text-xl xl:px-48">
             Manage your rental investment properties and repair processes efficiently
           </p>
           <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4 lg:mb-16">
-            <Button href="/signup" size="lg">
+            <Button href="/signup" size="lg" color="light">
               Sign up
-              <svg className="ml-2 -mr-1 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <BiChevronRight size={25} />
             </Button>
             <Button color="gray" href="#" size="lg">
               <svg className="mr-2 -ml-1 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -57,13 +52,13 @@ export default function Home() {
             src="https://images.unsplash.com/photo-1587582423116-ec07293f0395?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80"
             alt="feature image"
           />
-          <div className="text-gray-500 dark:text-gray-400 sm:text-lg">
-            <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Designed for business teams</h2>
+          <div className="text-zinc-500 dark:text-zinc-400 sm:text-lg">
+            <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-zinc-900 dark:text-white">Designed for business teams</h2>
             <p className="mb-8 font-light lg:text-xl">
               Deliver great service experiences fast - without the complexity of traditional ITSM solutions.Accelerate critical development work,
               eliminate toil, and deploy changes with ease.
             </p>
-            <div className="py-8 mb-6 border-t border-b border-gray-200 dark:border-gray-700">
+            <div className="py-8 mb-6 border-t border-b border-zinc-200 dark:border-zinc-700">
               <div className="flex">
                 <div className="flex justify-center items-center mr-4 w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 shrink-0">
                   <svg
@@ -80,8 +75,8 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Private repos</h3>
-                  <p className="mb-2 font-light text-gray-500 dark:text-gray-400">
+                  <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">Private repos</h3>
+                  <p className="mb-2 font-light text-zinc-500 dark:text-zinc-400">
                     Host code that you don&apos;t want to share with the world in private GitHub repos only accessible to you and people you share
                     them with.
                   </p>
@@ -116,8 +111,8 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Dependency graph</h3>
-                  <p className="mb-2 font-light text-gray-500 dark:text-gray-400">
+                  <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">Dependency graph</h3>
+                  <p className="mb-2 font-light text-zinc-500 dark:text-zinc-400">
                     See the packages your project depends on, the repositories that depend on them, and any vulnerabilities detected.
                   </p>
                   <a
@@ -151,8 +146,8 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">Code scanning</h3>
-                  <p className="mb-2 font-light text-gray-500 dark:text-gray-400">
+                  <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">Code scanning</h3>
+                  <p className="mb-2 font-light text-zinc-500 dark:text-zinc-400">
                     Find vulnerabilities in custom code using static analysis. Prevent new vulnerabilities from being introduced by scanning every
                     pull request.
                   </p>

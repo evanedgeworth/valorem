@@ -31,11 +31,11 @@ export default function ConfirmationModal({
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">{title}</h3>
             <p>{description}</p>
             <div className="flex flex-row gap-4 justify-center items-center">
-              <Button color="gray" className="w-28" onClick={handleCancel}>
+              <Button color="gray" className="w-28" onClick={handleCancel} outline>
                 No
               </Button>
-              <Button disabled={isLoading} className="w-28" onClick={handleConfirm}>
-                { isLoading ? <Spinner size="sm" /> : "Yes" }
+              <Button disabled={isLoading} className="w-28" onClick={handleConfirm} color="gray">
+                {isLoading ? <Spinner size="sm" /> : "Yes"}
               </Button>
             </div>
           </div>

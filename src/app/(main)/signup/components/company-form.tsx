@@ -22,7 +22,7 @@ type CompanyFormValues = {
 
 export default function CompanyForm() {
   const { onHandleNext, setFormData, formData } = useFormState();
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [marketValue, setMarketValue] = useState<Market[]>([]);
 
   const debouncedSearch = useDebounce(inputValue, 500);
@@ -40,11 +40,11 @@ export default function CompanyForm() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['markets', debouncedSearch],
+    queryKey: ["markets", debouncedSearch],
     queryFn: async () => {
       const res = await request({
         url: `/markets?searchInput=${debouncedSearch}`,
-        method: 'GET',
+        method: "GET",
       });
 
       if (res?.status !== 200) {
@@ -52,7 +52,7 @@ export default function CompanyForm() {
       }
 
       return res.data;
-    }
+    },
   });
 
   const markets: Market[] = data?.markets || [];
@@ -67,10 +67,7 @@ export default function CompanyForm() {
               <div className="flex flex-row gap-4">
                 <div className="flex flex-col flex-1">
                   <Label htmlFor="companyName">Company Name*</Label>
-                  <TextInput
-                    id="companyName"
-                    {...register("companyName", { required: "Company Name is required" })}
-                  />
+                  <TextInput id="companyName" {...register("companyName", { required: "Company Name is required" })} />
                   {errors.companyName && <p className="text-red-500 text-sm">{errors.companyName.message}</p>}
                 </div>
 
@@ -95,10 +92,7 @@ export default function CompanyForm() {
               <div className="flex flex-row gap-4">
                 <div className="flex flex-col flex-1">
                   <Label htmlFor="companyAddress">Address</Label>
-                  <TextInput
-                    id="companyAddress"
-                    {...register("companyAddress", { required: "Company Address is required" })}
-                  />
+                  <TextInput id="companyAddress" {...register("companyAddress", { required: "Company Address is required" })} />
                   {errors.companyAddress && <p className="text-red-500 text-sm">{errors.companyAddress.message}</p>}
                 </div>
               </div>
@@ -126,7 +120,7 @@ export default function CompanyForm() {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 p-10"
                     inputProps={{
                       ...params.inputProps,
-                      style: { fontSize: '14px' }
+                      style: { fontSize: "14px" },
                     }}
                   />
                 )}
@@ -134,7 +128,7 @@ export default function CompanyForm() {
             </div>
 
             <div>
-              <Button className="w-full" type="submit">
+              <Button className="w-full" type="submit" color="gray">
                 Continue
               </Button>
             </div>

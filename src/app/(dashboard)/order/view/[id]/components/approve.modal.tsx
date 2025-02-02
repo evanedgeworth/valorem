@@ -41,10 +41,12 @@ export default function ApproveCOModal({
             <h3 className="text-xl font-medium text-gray-900 dark:text-white">Approve Change Order</h3>
             <p className="font-medium text-gray-900 dark:text-white">Are you sure you would like to approve this change order?</p>
             <div className="flex flex-row gap-4 justify-end">
-              <Button outline onClick={() => setShowModal(false)}>
+              <Button outline onClick={() => setShowModal(false)} color="gray">
                 Cancel
               </Button>
-              <Button onClick={handleApproveCO}>Approve</Button>
+              <Button onClick={handleApproveCO} color="gray">
+                Approve
+              </Button>
             </div>
           </div>
         </Modal.Body>

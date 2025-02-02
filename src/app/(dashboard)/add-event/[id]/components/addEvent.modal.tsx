@@ -43,7 +43,9 @@ export default function AddEventModal({ products, orderId }: { products: Product
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>Continue ({products.length})</Button>
+      <Button onClick={() => setShowModal(true)} color={"gray"}>
+        Continue ({products.length})
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
@@ -67,7 +69,9 @@ export default function AddEventModal({ products, orderId }: { products: Product
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={handleScheduleEvent}>Save</Button>
+              <Button onClick={handleScheduleEvent} color={"gray"}>
+                Save
+              </Button>
             </div>
           </div>
         </Modal.Body>

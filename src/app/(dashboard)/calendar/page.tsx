@@ -85,18 +85,20 @@ export default function Calenda() {
 
   function toolbar(props: ToolbarProps) {
     return (
-      <div className="flex justify-between items-center bg-gray-100 dark:bg-gray-900 p-4 border-[1px] rounded-t-lg">
+      <div className="flex justify-between items-center bg-gray-100 dark:bg-zinc-900 p-4 border-[1px] rounded-t-lg">
         <h5 className="text-xl font-medium text-gray-900 dark:text-white">{moment(props.date).format("MMMM YYYY")}</h5>
         <div className="flex">
-          <div className="flex items-center h-10 rounded-lg text-gray-900 bg-white border border-gray-200 enabled:hover:bg-gray-100 enabled:hover:text-cyan-700 :ring-cyan-700 focus:text-cyan-700 dark:bg-transparent dark:text-gray-400 dark:border-gray-600 dark:enabled:hover:text-white dark:enabled:hover:bg-gray-700 focus:ring-2">
+          <div className="flex items-center h-10 rounded-lg text-zinc-900 bg-white border border-gray-200 enabled:hover:bg-zinc-100 enabled:hover:text-zinc-700 :ring-cyan-700 focus:text-zinc-700 dark:bg-transparent dark:text-zinc-400 dark:border-zinc-600 dark:enabled:hover:text-white dark:enabled:hover:bg-zinc-700 focus:ring-2">
             <LuChevronLeft size={25} onClick={() => props.onNavigate(Navigate.PREVIOUS)} className="cursor-pointer" />
             <p className="mx-4 cursor-pointer" onClick={() => props.onNavigate(Navigate.TODAY)}>
               Today
             </p>
             <LuChevronRight size={25} onClick={() => props.onNavigate(Navigate.NEXT)} className="cursor-pointer" />
           </div>
-          <div className=" h-10 w-[1px] bg-gray-200 dark:bg-gray-200 mx-4" />
-          <Button onClick={() => router.push("add-event")}>Add Event</Button>
+          <div className=" h-10 w-[1px] bg-zinc-200 dark:bg-zinc-200 mx-4" />
+          <Button onClick={() => router.push("add-event")} color={"gray"}>
+            Add Event
+          </Button>
         </div>
       </div>
     );
@@ -104,7 +106,7 @@ export default function Calenda() {
 
   function event(props: EventProps) {
     return (
-      <div className="flex flex-1 justify-between flex-row bg-cyan-700 text-white rounded-md p-1">
+      <div className="flex flex-1 justify-between flex-row bg-zinc-700 text-white rounded-md p-1">
         <p className=" truncate">{props.title}</p>
         <p>{moment(props.slotStart).format("hh:mm a")}</p>
       </div>
@@ -152,7 +154,9 @@ export default function Calenda() {
                         {item.order_id?.address}
                       </div>
                     </div>
-                    <Button onClick={() => handleConfirmModal(item)}>Confirm</Button>
+                    <Button onClick={() => handleConfirmModal(item)} color={"gray"}>
+                      Confirm
+                    </Button>
                   </div>
                 </div>
               </div>

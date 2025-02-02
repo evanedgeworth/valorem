@@ -32,10 +32,10 @@ export default function EditOrderModal({
 
   useEffect(() => {
     if (order) {
-      setValue('projectName', order.projectName);
-      setValue('budget', order.budget);
-      setValue('additionalDetails', order.additionalDetails);
-      setValue('dueDate', order.dueDate ? new Date(order.dueDate) : new Date() );
+      setValue("projectName", order.projectName);
+      setValue("budget", order.budget);
+      setValue("additionalDetails", order.additionalDetails);
+      setValue("dueDate", order.dueDate ? new Date(order.dueDate) : new Date());
     }
   }, [order]);
 
@@ -43,10 +43,10 @@ export default function EditOrderModal({
     mutationFn: async (body: any) => {
       const res = await request({
         url: `/scope/${order?.id}`,
-        method: 'PUT',
+        method: "PUT",
         data: {
           ...body,
-        }
+        },
       });
 
       if (res?.status === 200) {
@@ -61,7 +61,6 @@ export default function EditOrderModal({
   });
 
   async function handleEditOrder(data: Inputs) {
-
     mutate({
       ...order,
       ...data,
@@ -84,12 +83,7 @@ export default function EditOrderModal({
 
               <div>
                 <Label>Due Date</Label>
-                <Datepicker
-                  {...register("dueDate")}
-                  required
-                  minDate={new Date()}
-                  onSelectedDateChanged={(date) => setValue('dueDate', date)}
-                />
+                <Datepicker {...register("dueDate")} required minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
               </div>
               <div>
                 <Label>Budget</Label>
@@ -102,7 +96,9 @@ export default function EditOrderModal({
               </div>
 
               <div className="flex justify-end">
-                <Button disabled={isPending} type="submit">{isPending ? <Spinner size="sm" /> : "Save"}</Button>
+                <Button disabled={isPending} type="submit" color="gray">
+                  {isPending ? <Spinner size="sm" /> : "Save"}
+                </Button>
               </div>
             </div>
           </form>

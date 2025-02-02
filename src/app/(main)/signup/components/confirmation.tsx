@@ -29,12 +29,12 @@ export default function Confirmation() {
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
-      roleId: formData.accountType === "client" ?  clientRoleId : contractorRoleId,
-      organizationType: formData.accountType === "client" ?  "CLIENT" : "CONTRACTOR",
-      marketIds: formData.markets ? formData.markets.map((item: Market) => item.id) : []
+      roleId: formData.accountType === "client" ? clientRoleId : contractorRoleId,
+      organizationType: formData.accountType === "client" ? "CLIENT" : "CONTRACTOR",
+      marketIds: formData.markets ? formData.markets.map((item: Market) => item.id) : [],
     };
 
-    if (formData.accountType === 'client') {
+    if (formData.accountType === "client") {
       data.companyName = formData.companyName;
       data.companyAddress = formData.address;
       data.organizationName = formData.companyName;
@@ -43,16 +43,16 @@ export default function Confirmation() {
       data.organizationName = "Valorem Organization";
     }
     const res = await request({
-      url: '/profiles',
-      method: 'POST',
-      data
+      url: "/profiles",
+      method: "POST",
+      data,
     });
 
     if (res?.status === 200) {
       onHandleNext();
     } else {
       setIsLoading(false);
-      showToast(res?.data?.message || 'Failed', 'error');
+      showToast(res?.data?.message || "Failed", "error");
     }
   };
 
@@ -100,13 +100,11 @@ export default function Confirmation() {
               </div>
               <div>
                 <p className="mb-2 leading-none">Company Address:</p>
-                <p className="font-medium sm:mb-5">
-                  {formData.companyAddress}
-                </p>
+                <p className="font-medium sm:mb-5">{formData.companyAddress}</p>
               </div>
             </>
           )}
-          <Button disabled={isLoading} className="w-full" onClick={onSubmit}>
+          <Button disabled={isLoading} className="w-full" onClick={onSubmit} color="gray">
             {isLoading ? <Spinner size="xs" /> : "Confirm Account"}
           </Button>
         </div>

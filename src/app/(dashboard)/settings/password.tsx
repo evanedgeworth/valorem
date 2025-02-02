@@ -51,7 +51,7 @@ export default function Password() {
             />
           </div>
         </div>
-        <Button className="w-full" onClick={handleSubmitChanges}>
+        <Button className="w-full" onClick={handleSubmitChanges} color="gray">
           Submit Changes
         </Button>
       </div>

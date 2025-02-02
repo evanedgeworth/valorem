@@ -5,11 +5,11 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const accessToken = req.cookies.get('accessToken');
+  const accessToken = req.cookies.get("accessToken");
 
   // if user is signed in and the current path is / redirect the user to /account
   if (accessToken && req.nextUrl.pathname === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/properties", req.url));
   }
 
   if (

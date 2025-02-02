@@ -51,7 +51,7 @@ export default function AuthForm() {
             </div>
           </div>
 
-          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading}>
+          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading} color="gray">
             {!isLoading && "Send Reset Password Email"}
           </Button>
         </form>

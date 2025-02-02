@@ -35,7 +35,7 @@ export const EmailTemplate = ({ message }: AirbnbReviewEmailProps) => {
                 <Text style={review}>"{message}"</Text> */}
                 <Text style={paragraph}>{message}</Text>
 
-                <Button style={button} href="https://airbnb.com/">
+                <Button style={button} href="https://valorempx.com/" color="gray">
                   Sign up
                 </Button>
               </Row>

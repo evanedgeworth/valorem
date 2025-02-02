@@ -60,20 +60,37 @@ export default function AuthForm() {
                 <TextInput
                   id="email"
                   type="email"
-                  {...register("email", { required: "Email is required", pattern: { value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/, message: "Invalid email format" } })}
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: { value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/, message: "Invalid email format" },
+                  })}
                 />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
               <div className="flex flex-col flex-1">
                 <Label htmlFor="phone">Phone</Label>
-                <TextInput id="phone" type="tel" {...register("phone", { minLength: { value: 6, message: "Phone number must be at least 6 characters" }, maxLength: { value: 12, message: "Phone number must be at most 12 characters" } })} />
+                <TextInput
+                  id="phone"
+                  type="tel"
+                  {...register("phone", {
+                    minLength: { value: 6, message: "Phone number must be at least 6 characters" },
+                    maxLength: { value: 12, message: "Phone number must be at most 12 characters" },
+                  })}
+                />
                 {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
               </div>
             </div>
             <div className="flex flex-row gap-4">
               <div className="flex flex-col flex-1">
                 <Label htmlFor="password">Password *</Label>
-                <TextInput id="password" type="password" {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })} />
+                <TextInput
+                  id="password"
+                  type="password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: { value: 6, message: "Password must be at least 6 characters" },
+                  })}
+                />
                 {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               </div>
               <div className="flex flex-col flex-1">
@@ -97,13 +114,11 @@ export default function AuthForm() {
               <Checkbox id="remember" required />
             </div>
             <div className="ml-3 text-sm">
-              <Label htmlFor="remember">
-                By signing up, you agree to our Terms of Use and Privacy Policy.
-              </Label>
+              <Label htmlFor="remember">By signing up, you agree to our Terms of Use and Privacy Policy.</Label>
             </div>
           </div>
         </div>
-        <Button className="w-full mt-8" type="submit">
+        <Button className="w-full mt-8" type="submit" color="gray">
           Continue
         </Button>
       </div>

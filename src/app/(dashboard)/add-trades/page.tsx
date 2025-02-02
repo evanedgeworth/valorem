@@ -175,7 +175,7 @@ export default function AddTrades() {
           })}
 
           <div className="flex justify-end">
-            <Button type="submit" isProcessing={isUploading}>
+            <Button type="submit" isProcessing={isUploading} color={"gray"}>
               Submit
             </Button>
           </div>

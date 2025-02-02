@@ -34,29 +34,29 @@ export default function AddUserModal() {
   const roleId = watch("roleId");
 
   const { data } = useQuery({
-    queryKey: ['roles'],
+    queryKey: ["roles"],
     queryFn: async () => {
       const res = await request({
         url: `/roles`,
         method: "GET",
         params: {
-          organizationType: "VALOREM"
+          organizationType: "VALOREM",
         },
-      })
+      });
       if (res?.status === 200) {
         return res.data;
       }
       throw Error(res.data.message);
     },
-    enabled: Boolean(selectedOrganization?.organizationId)
+    enabled: Boolean(selectedOrganization?.organizationId),
   });
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: any) => {
       const res = await request({
-        url: '/profiles',
-        method: 'POST',
-        data
+        url: "/profiles",
+        method: "POST",
+        data,
       });
       if (res?.status === 200) {
         return res.data;
@@ -70,7 +70,7 @@ export default function AddUserModal() {
     },
     onError: (error) => {
       showToast(error.message, "error");
-    }
+    },
   });
   const roles: OrganizationRole[] = data?.roles || [];
 
@@ -86,10 +86,11 @@ export default function AddUserModal() {
     });
   }
 
-
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add User</Button>
+      <Button onClick={() => setShowModal(true)} color="gray">
+        + Add User
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header></Modal.Header>
         <Modal.Body>
@@ -113,21 +114,32 @@ export default function AddUserModal() {
 
               <div className="flex flex-col flex-1">
                 <Label htmlFor="password">Password</Label>
-                <TextInput id="password" type="password" {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })} />
+                <TextInput
+                  id="password"
+                  type="password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: { value: 6, message: "Password must be at least 6 characters" },
+                  })}
+                />
                 {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               </div>
               <div>
                 <Label htmlFor="area">Role</Label>
                 <Select id="area" required value={roleId || ""} onChange={(e) => setValue("roleId", e.target.value)}>
-                  <option value="" disabled>Select an option...</option>
+                  <option value="" disabled>
+                    Select an option...
+                  </option>
                   {roles.map((option) => (
-                    <option key={option.roleId} value={option.roleId}>{option.roleName}</option>
+                    <option key={option.roleId} value={option.roleId}>
+                      {option.roleName}
+                    </option>
                   ))}
                 </Select>
               </div>
 
               <div className="flex justify-end">
-                <Button type="submit" isProcessing={isPending}>
+                <Button type="submit" isProcessing={isPending} color="gray">
                   Save
                 </Button>
               </div>
@@ -135,6 +147,6 @@ export default function AddUserModal() {
           </form>
         </Modal.Body>
       </Modal>
-    </div >
+    </div>
   );
 }

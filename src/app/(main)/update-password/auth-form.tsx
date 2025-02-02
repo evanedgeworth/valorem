@@ -74,7 +74,7 @@ export default function AuthForm() {
               Forgot password?
             </a>
           </div>
-          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading}>
+          <Button className="w-full" onClick={resetPassword} isProcessing={isLoading} color="gray">
             {!isLoading && "Sign in to your account"}
           </Button>
         </form>

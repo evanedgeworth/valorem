@@ -166,7 +166,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </div>
             {images.length !== 0 && (
               <div className="flex justify-end mt-4">
-                <Button onClick={handleUploadImages} isProcessing={isUploading}>
+                <Button onClick={handleUploadImages} isProcessing={isUploading} color="gray">
                   {!isUploading && <AiOutlineCloudUpload size={20} />}
                   {isUploading ? "Uploading" : "Upload Images"}
                 </Button>

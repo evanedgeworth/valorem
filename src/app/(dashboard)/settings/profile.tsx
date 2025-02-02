@@ -34,8 +34,8 @@ export default function Profile() {
         body.profileImage = {
           fileId: upload[0].key,
           fileUrl: upload[0].url,
-          fileType: "image/jpeg"
-        }
+          fileType: "image/jpeg",
+        };
       }
     }
 
@@ -45,11 +45,10 @@ export default function Profile() {
       data: body,
     });
 
-
     setIsloading(false);
     if (res.status === 200) {
       console.log(res.data);
-      showToast('Successfully updated profile', 'success');
+      showToast("Successfully updated profile", "success");
 
       const resProfile = await request({
         method: "GET",
@@ -60,7 +59,7 @@ export default function Profile() {
         setUser({ ...profile, id: profile });
       }
     } else {
-      showToast(res.data.message || 'Failed', 'error');
+      showToast(res.data.message || "Failed", "error");
     }
   };
 
@@ -93,18 +92,11 @@ export default function Profile() {
         <div className="grid gap-6 sm:grid-rows-2">
           <div className="flex items-center gap-6">
             <Avatar img={image?.url || user?.profileImage?.fileUrl} alt="User" rounded size="lg" />
-            <Button size="sm" onClick={handleButtonClick}>
+            <Button size="sm" onClick={handleButtonClick} color="gray">
               <FaUpload size={16} className="mr-1.5" />
               Upload
             </Button>
-            <input
-              type="file"
-              name="file_upload"
-              accept="image/*"
-              className="hidden"
-              onChange={selectImages}
-              ref={fileInputRef}
-            />
+            <input type="file" name="file_upload" accept="image/*" className="hidden" onChange={selectImages} ref={fileInputRef} />
           </div>
           <div className="flex flex-row gap-4">
             <div className="flex flex-col flex-1">
@@ -121,7 +113,7 @@ export default function Profile() {
             <TextInput id="phone" required value={phone} type="phone" onChange={(e) => setPhone(e.target.value)} />
           </div>
         </div>
-        <Button className="w-full" onClick={handleSubmitChanges} isProcessing={isLoading}>
+        <Button className="w-full" onClick={handleSubmitChanges} isProcessing={isLoading} color="gray">
           Save changes
         </Button>
       </div>

@@ -116,7 +116,9 @@ export default function NewWarrantyModal({
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add Warrenty</Button>
+      <Button onClick={() => setShowModal(true)} color="gray">
+        + Add Warrenty
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
@@ -230,7 +232,9 @@ export default function NewWarrantyModal({
             )}
 
             <div className="flex justify-end">
-              <Button onClick={handleCreateWarranty}>Submit</Button>
+              <Button onClick={handleCreateWarranty} color="gray">
+                Submit
+              </Button>
             </div>
           </div>
         </Modal.Body>

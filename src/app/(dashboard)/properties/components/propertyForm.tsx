@@ -8,7 +8,7 @@ import ImageInput from "./image-input";
 export type Image = {
   data: any;
   url: string;
-}
+};
 
 export type PropertyInput = {
   name: string;
@@ -35,7 +35,7 @@ type PropertyFormProps = {
   defaultValues?: Partial<PropertyInput>;
   onClose?: () => void;
   isEdit?: boolean;
-}
+};
 
 const propertyTypes = ["SINGLE_UNIT", "MULTI_UNIT", "COMMERCIAL"];
 const roomOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"];
@@ -49,11 +49,11 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
     formState: { errors },
   } = useForm<PropertyInput>({ defaultValues });
 
-  const address1 = watch('address1');
-  const frontImages = watch('frontImages');
-  const backImages = watch('backImages');
-  const leftImages = watch('leftImages');
-  const rightImages = watch('rightImages');
+  const address1 = watch("address1");
+  const frontImages = watch("frontImages");
+  const backImages = watch("backImages");
+  const leftImages = watch("leftImages");
+  const rightImages = watch("rightImages");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -63,11 +63,11 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           <AddressInput
             onChange={(place: any) => {
               const formattedAddress = formatGoogleAddressComponents(place);
-              setValue('address1', formattedAddress.addressLine1);
-              setValue('address2', formattedAddress.addressLine2);
-              setValue('city', formattedAddress.city);
-              setValue('postalCode', formattedAddress.zipCode);
-              setValue('state', formattedAddress.state);
+              setValue("address1", formattedAddress.addressLine1);
+              setValue("address2", formattedAddress.addressLine2);
+              setValue("city", formattedAddress.city);
+              setValue("postalCode", formattedAddress.zipCode);
+              setValue("state", formattedAddress.state);
             }}
             value={address1}
           />
@@ -105,7 +105,7 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           <Select id="type" required {...register("type")}>
             {propertyTypes.map((item) => (
               <option value={item} key={item}>
-                {item.replace('_', ' ')}
+                {item.replace("_", " ")}
               </option>
             ))}
           </Select>
@@ -139,37 +139,35 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
           <Label htmlFor="notes">Notes</Label>
           <Textarea id="notes" placeholder="" rows={4} {...register("notes")} />
         </div>
-        {
-          !isEdit && (
-            <>
-              <div>
-                <Label>Front Images</Label>
-                <ImageInput value={frontImages} onChange={(value) => setValue('frontImages', value)} />
-              </div>
-              <div>
-                <Label>Back Images</Label>
-                <ImageInput value={backImages} onChange={(value) => setValue('backImages', value)} />
-              </div>
-              <div>
-                <Label>Left Images</Label>
-                <ImageInput value={leftImages} onChange={(value) => setValue('leftImages', value)} />
-              </div>
-              <div>
-                <Label>Right Images</Label>
-                <ImageInput value={rightImages} onChange={(value) => setValue('rightImages', value)} />
-              </div>
-            </>
-          )
-        }
+        {!isEdit && (
+          <>
+            <div>
+              <Label>Front Images</Label>
+              <ImageInput value={frontImages} onChange={(value) => setValue("frontImages", value)} />
+            </div>
+            <div>
+              <Label>Back Images</Label>
+              <ImageInput value={backImages} onChange={(value) => setValue("backImages", value)} />
+            </div>
+            <div>
+              <Label>Left Images</Label>
+              <ImageInput value={leftImages} onChange={(value) => setValue("leftImages", value)} />
+            </div>
+            <div>
+              <Label>Right Images</Label>
+              <ImageInput value={rightImages} onChange={(value) => setValue("rightImages", value)} />
+            </div>
+          </>
+        )}
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="button" onClick={onClose} fullSized outline>
+        <Button type="button" onClick={onClose} fullSized outline color="gray">
           Close
         </Button>
-        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized>
+        <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized color="gray">
           {isEdit ? "Save" : "Create Property +"}
         </Button>
       </div>
     </form>
-  )
+  );
 }

@@ -94,7 +94,7 @@ export default function MissingProductModal({
             </div>
           </div>
           <div className="flex justify-end">
-            <Button>Submit</Button>
+            <Button color="gray">Submit</Button>
           </div>
         </Modal.Body>
       </Modal>

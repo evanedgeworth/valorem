@@ -36,11 +36,11 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
     mutationFn: async (body: any) => {
       const res = await request({
         url: `/scope`,
-        method: 'POST',
+        method: "POST",
         data: {
           ...body,
-          organizationId: selectedOrganization?.organizationId
-        }
+          organizationId: selectedOrganization?.organizationId,
+        },
       });
 
       if (res?.status === 200) {
@@ -58,13 +58,15 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
     mutate({
       ...data,
       budget: Number(data.budget),
-      organizationId: selectedOrganization?.organizationId
+      organizationId: selectedOrganization?.organizationId,
     });
   }
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)}>+ Add Order</Button>
+      <Button onClick={() => setShowModal(true)} color="gray">
+        + Add Order
+      </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header />
         <Modal.Body>
@@ -72,9 +74,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
             <div className="space-y-2">
               <h3 className="text-xl font-medium text-gray-900 dark:text-white">New Order</h3>
               <div>
-                <SelectProperty
-                  onChange={(v) => setValue("propertyId", v)}
-                />
+                <SelectProperty onChange={(v) => setValue("propertyId", v)} />
               </div>
               <div>
                 <Label>Project Name</Label>
@@ -83,12 +83,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
 
               <div>
                 <Label>Due Date</Label>
-                <Datepicker
-                  {...register("dueDate")}
-                  required
-                  minDate={new Date()}
-                  onSelectedDateChanged={(date) => setValue('dueDate', date)}
-                />
+                <Datepicker {...register("dueDate")} required minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
               </div>
               <div>
                 <Label>Budget</Label>
@@ -101,7 +96,9 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
               </div>
 
               <div className="flex justify-end">
-                <Button disabled={isPending} type="submit">Save</Button>
+                <Button disabled={isPending} type="submit" color="gray">
+                  Save
+                </Button>
               </div>
             </div>
           </form>

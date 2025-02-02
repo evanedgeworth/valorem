@@ -116,7 +116,9 @@ export default function Settings({ order }: { order: Order }) {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleCreateOrder}>Save</Button>
+        <Button onClick={handleCreateOrder} color="gray">
+          Save
+        </Button>
       </div>
     </section>
   );

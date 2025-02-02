@@ -14,16 +14,14 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
   const renderImage = (value: { fileUrl: string }[]) => {
     return (
       <div className="flex gap-2 mb-2">
-        {
-          value?.map((item: any) => (
-            <a key={item.fileUrl} target="_blank" href={item.fileUrl}>
-              <Avatar size="lg" img={item.fileUrl} />
-            </a>
-          ))
-        }
+        {value?.map((item: any) => (
+          <a key={item.fileUrl} target="_blank" href={item.fileUrl}>
+            <Avatar size="lg" img={item.fileUrl} />
+          </a>
+        ))}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div ref={rootRef}>
@@ -74,7 +72,7 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
               {renderImage(property?.rightImages || [])}
             </div>
             <div className="flex gap-4 pt-10">
-              <Button fullSized onClick={showEditModal}>
+              <Button fullSized onClick={showEditModal} color="gray">
                 Edit
               </Button>
               <Button type="button" onClick={() => setShowModal(false)} fullSized color={"light"}>

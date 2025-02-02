@@ -23,9 +23,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Order, Property, Scope, ScopeItem } from "@/types";
 
 export default function OrderDetails({ orderId }: { orderId: string }) {
-
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['order', 'detail', orderId],
+    queryKey: ["order", "detail", orderId],
     enabled: Boolean(orderId),
     queryFn: async () => {
       const res = await request({
@@ -36,14 +35,14 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         return res.data;
       }
       throw Error(res?.data?.message);
-    }
+    },
   });
 
   const order = data as Scope;
 
   const propertyId = order?.property?.id;
   const { data: propertyData } = useQuery({
-    queryKey: ['properties', 'detail', propertyId],
+    queryKey: ["properties", "detail", propertyId],
     enabled: Boolean(propertyId),
     queryFn: async () => {
       const res = await request({
@@ -71,7 +70,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const { user, categoryItems } = useContext(UserContext);
   const router = useRouter();
 
-
   async function getProducts() {
     refetch();
   }
@@ -84,10 +82,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     mutationFn: async (body: any) => {
       const res = await request({
         url: `/scope/${order.id}/populate`,
-        method: 'POST',
+        method: "POST",
         data: {
           ...body,
-        }
+        },
       });
 
       if (res?.status === 200) {
@@ -103,7 +101,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   });
 
   async function createChangeOrder() {
-    const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
+    const formattedScopeItems = [...addedProducts].filter((item) => item.status !== "removed");
     await mutate({
       sendForApproval: true,
       scopeItems: formattedScopeItems,
@@ -113,19 +111,20 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
   const allocatedAmount = useMemo(() => {
     let total = 0;
-    scopeItemRevision?.scopeItems?.forEach(item => {
+    scopeItemRevision?.scopeItems?.forEach((item) => {
       total += parseCurrencyToNumber(item.targetClientPrice) * item.quantity;
     });
     return total;
   }, [scopeItemRevision]);
 
-
   useEffect(() => {
     if (scopeItemRevision && categoryItems.length > 0) {
-      setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
-        ...item,
-        categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
-      })));
+      setAddedProducts(
+        scopeItemRevision.scopeItems.map((item) => ({
+          ...item,
+          categoryItem: categoryItems.find((c) => c.id === item.categoryItemId),
+        }))
+      );
     }
   }, [scopeItemRevision, categoryItems]);
 
@@ -134,7 +133,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       <div className="mx-auto mt-10">
         <Spinner />
       </div>
-    )
+    );
   }
   if (order && user)
     return (
@@ -219,9 +218,9 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             </p>
             <p className="mb-2 text-sm text-gray-900 dark:text-white">
               <b>Address: </b>
-              {`${property?.address?.address1}${
-                    (property?.address?.address2 && " " + property?.address?.address2) || ""
-                  }, ${property?.address?.city} ${property?.address?.state} ${property?.address?.postalCode || ''}`}
+              {`${property?.address?.address1}${(property?.address?.address2 && " " + property?.address?.address2) || ""}, ${
+                property?.address?.city
+              } ${property?.address?.state} ${property?.address?.postalCode || ""}`}
             </p>
 
             <Accordion className=" border-0">
@@ -248,8 +247,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               </Accordion.Panel>
             </Accordion>
 
-
-            {order.scopeStatus !== 'APPROVED' && (
+            {order.scopeStatus !== "APPROVED" && (
               <div className="flex justify-end mb-5 gap-4">
                 <NewProductModal
                   showModal={showModal}
@@ -260,7 +258,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   orderId={order.id}
                 />
                 {showSubmitButton && (
-                  <Button className="h-fit" onClick={() => setShowSubmitConfirmation(true)}>
+                  <Button className="h-fit" onClick={() => setShowSubmitConfirmation(true)} color="gray">
                     <MdCheck size={20} />
                     Submit Changes
                   </Button>
@@ -284,12 +282,12 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               <ActiveOrder
                 isEditing={showEditMenu}
                 remove={(newProduct) => {
-                  const filter = [...addedProducts].filter(item => item.id !== newProduct.id);
+                  const filter = [...addedProducts].filter((item) => item.id !== newProduct.id);
                   setAddedProducts([...filter, newProduct]);
                   setShowSubmitButton(true);
                 }}
                 edit={(newProduct) => {
-                  const data = [...addedProducts].map(item => item.id === newProduct.id ? newProduct : item);
+                  const data = [...addedProducts].map((item) => (item.id === newProduct.id ? newProduct : item));
                   setAddedProducts(data);
                   setShowSubmitButton(true);
                 }}
@@ -305,7 +303,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
         )}
 
         {selectedTab === "history" && <History order={order} seeAll />}
-        {selectedTab === "settings" && <Settings order={order} refetch={() => refetch()}  />}
+        {selectedTab === "settings" && <Settings order={order} refetch={() => refetch()} />}
       </section>
     );
 }

@@ -23,12 +23,7 @@ type TableDataProps<T> = {
   actions?: TableAction<T>[];
 };
 
-export default function TableData<T extends { id: string }>({
-  isLoading,
-  data,
-  columns,
-  actions = [],
-}: TableDataProps<T>) {
+export default function TableData<T extends { id: string }>({ isLoading, data, columns, actions = [] }: TableDataProps<T>) {
   return (
     <>
       {isLoading ? (
@@ -38,19 +33,21 @@ export default function TableData<T extends { id: string }>({
       ) : data.length !== 0 ? (
         <Table striped className="w-full">
           <Table.Head>
-            {columns.filter((item) => !item.hidden).map((col) => (
-              <Table.HeadCell key={col.key as string}>{col.label}</Table.HeadCell>
-            ))}
+            {columns
+              .filter((item) => !item.hidden)
+              .map((col) => (
+                <Table.HeadCell key={col.key as string}>{col.label}</Table.HeadCell>
+              ))}
             {actions.length > 0 && <Table.HeadCell></Table.HeadCell>}
           </Table.Head>
           <Table.Body className="divide-y">
             {data.map((row) => (
               <Table.Row key={row.id}>
-                {columns.filter((item) => !item.hidden).map((col) => (
-                  <Table.Cell key={col.key as string}>
-                    {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '')}
-                  </Table.Cell>
-                ))}
+                {columns
+                  .filter((item) => !item.hidden)
+                  .map((col) => (
+                    <Table.Cell key={col.key as string}>{col.render ? col.render(row[col.key], row) : String(row[col.key] ?? "")}</Table.Cell>
+                  ))}
                 {actions.length > 0 && (
                   <Table.Cell className="relative">
                     <Dropdown
@@ -58,19 +55,16 @@ export default function TableData<T extends { id: string }>({
                       label=""
                       className="!left-[-120px] !top-6"
                     >
-                      {actions.map(
-                        (action, index) =>
-                          (
-                            <Dropdown.Item
-                              key={index}
-                              onClick={() => action.onClick?.(row)}
-                              href={action.link ? action.link(row) : undefined}
-                              as={action.link ? Link : undefined}
-                            >
-                              {action.label}
-                            </Dropdown.Item>
-                          )
-                      )}
+                      {actions.map((action, index) => (
+                        <Dropdown.Item
+                          key={index}
+                          onClick={() => action.onClick?.(row)}
+                          href={action.link ? action.link(row) : undefined}
+                          as={action.link ? Link : undefined}
+                        >
+                          {action.label}
+                        </Dropdown.Item>
+                      ))}
                     </Dropdown>
                   </Table.Cell>
                 )}

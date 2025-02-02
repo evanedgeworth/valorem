@@ -108,7 +108,7 @@ export default function Inbox() {
           disabled={!selectedConversation}
         />
         <div className="mt-2 flex justify-end">
-          <Button onClick={handleSendMessage}>
+          <Button onClick={handleSendMessage} color="gray">
             Send
             <IoMdSend className="ml-2" />
           </Button>

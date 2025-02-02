@@ -220,7 +220,7 @@ export default function InvoiceTable({ user }: { user: User }) {
                     </Table.Cell>
                     <Table.Cell className="">
                       <Link href={"/invoices/" + invoice.id}>
-                        <Button>Pay Invoice</Button>
+                        <Button color="gray">Pay Invoice</Button>
                       </Link>
                     </Table.Cell>
                   </Table.Row>

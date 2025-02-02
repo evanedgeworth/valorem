@@ -124,7 +124,7 @@ const CSVSelector = ({
 
   return (
     <div ref={rootRef}>
-      <Button onClick={() => setShowModal(true)} outline>
+      <Button onClick={() => setShowModal(true)} outline color="gray">
         <AiOutlineCloudUpload size={22} color="rgb(75 85 99)" className="mr-3 text-gray-900 dark:text-white" />
         Upload
       </Button>
@@ -146,7 +146,9 @@ const CSVSelector = ({
             <div className="space-y-6">
               <DocumentTable />
               <div className="flex justify-end">
-                <Button onClick={handleAddProduct}>Add Products</Button>
+                <Button onClick={handleAddProduct} color="gray">
+                  Add Products
+                </Button>
               </div>
             </div>
           )}

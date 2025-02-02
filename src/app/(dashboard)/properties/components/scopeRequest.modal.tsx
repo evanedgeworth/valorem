@@ -25,7 +25,7 @@ type Props = {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   property: Property | null;
-}
+};
 
 export default function ScopeRequestModal({ showModal, setShowModal, property }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -44,8 +44,8 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
     mutationFn: async (body: any) => {
       const res = await request({
         url: `/scope`,
-        method: 'POST',
-        data: body
+        method: "POST",
+        data: body,
       });
 
       if (res?.status === 200) {
@@ -54,12 +54,17 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
       throw Error(res?.data?.message);
     },
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(['properties'], (old: any) => ({
-        ...old, properties: [...old.properties].map(item => property && item.id === property?.id ? {
-          ...item,
-          orderCount: item.orderCount + 1
-        } : item)
-      }))
+      queryClient.setQueryData(["properties"], (old: any) => ({
+        ...old,
+        properties: [...old.properties].map((item) =>
+          property && item.id === property?.id
+            ? {
+                ...item,
+                orderCount: item.orderCount + 1,
+              }
+            : item
+        ),
+      }));
 
       setShowModal(false);
     },
@@ -70,14 +75,12 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
       ...data,
       budget: Number(data.budget),
       organizationId: selectedOrganization?.organizationId,
-      propertyId: property?.id
+      propertyId: property?.id,
     });
   }
 
   if (!property) {
-    return (
-      <div></div>
-    );
+    return <div></div>;
   }
 
   return (
@@ -99,12 +102,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
               </div>
               <div>
                 <Label>Due Date</Label>
-                <Datepicker
-                  {...register("dueDate")}
-                  required
-                  minDate={new Date()}
-                  onSelectedDateChanged={(date) => setValue('dueDate', date)}
-                />
+                <Datepicker {...register("dueDate")} required minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
               </div>
               <div>
                 <Label>Estimated Budget</Label>
@@ -117,10 +115,12 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
               </div>
 
               <div className="flex flex-row gap-4 justify-end pt-4">
-                <Button outline fullSized onClick={() => setShowModal(false)}>
+                <Button outline fullSized onClick={() => setShowModal(false)} color="gray">
                   Cancel
                 </Button>
-                <Button disabled={isPending} isProcessing={isPending} fullSized type="submit">Save</Button>
+                <Button disabled={isPending} isProcessing={isPending} fullSized type="submit" color="gray">
+                  Save
+                </Button>
               </div>
             </div>
           </form>

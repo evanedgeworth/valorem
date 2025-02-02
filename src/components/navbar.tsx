@@ -26,7 +26,7 @@ export default function NavbarWithDropdown() {
 
   return (
     <header className="flex flex-col">
-      <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-900 dark:border-gray-800 order-1 border-b">
+      <nav className="bg-white border-zinc-200 px-4 lg:px-6 py-2.5 dark:bg-zinc-900 dark:border-zinc-800 order-1 border-b">
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
             <Link href="/" className="flex mr-6">
@@ -50,9 +50,9 @@ export default function NavbarWithDropdown() {
                           label=""
                           placement="bottom"
                           renderTrigger={() => (
-                            <span>
+                            <span className="min-w-[500px]">
                               <Button pill color="gray">
-                                {selectedOrganization?.name}
+                                {selectedOrganization?.name ? selectedOrganization?.name : selectedOrganization?.organizationId}
                               </Button>
                             </span>
                           )}
@@ -63,11 +63,15 @@ export default function NavbarWithDropdown() {
                           </Dropdown.Header>
                           {allOrganizations.length > 1 &&
                             allOrganizations.map((org) => (
-                              <Dropdown.Item onClick={() => {
-                                setSelectedOrganization(org);
-                                Cookies.set(localStorageKey.roleId, org.roleId);
-                              }} key={org.organizationId}>
-                                {org.name}
+                              <Dropdown.Item
+                                onClick={() => {
+                                  setSelectedOrganization(org);
+                                  Cookies.set(localStorageKey.roleId, org.roleId);
+                                }}
+                                className="min-w-[150px]"
+                                key={org.organizationId}
+                              >
+                                {org.name ? org.name : org.organizationId}
                               </Dropdown.Item>
                             ))}
                         </Dropdown>
@@ -75,7 +79,7 @@ export default function NavbarWithDropdown() {
                     </li>
                   )}
 
-                  <li className="block border-b dark:border-gray-700 md:inline md:border-b-0">
+                  <li className="block border-b dark:border-zinc-700 md:inline md:border-b-0">
                     <div className="block py-3 px-3 rounded-lg  cursor-pointer">
                       <Notifications />
                     </div>
@@ -83,12 +87,17 @@ export default function NavbarWithDropdown() {
                 </ul>
 
                 <div className="pl-2">
-                  <Dropdown inline label={<Avatar style={{ minWidth: 32 }} img={user?.profileImage?.fileUrl} alt="User settings" rounded size="sm" />}>
+                  <Dropdown
+                    inline
+                    label={<Avatar style={{ minWidth: 32 }} img={user?.profileImage?.fileUrl} alt="User settings" rounded size="sm" />}
+                  >
                     <Dropdown.Header>
                       {/* <span className="block text-sm">{user.first_name + " " + user.last_name}</span> */}
                       <span className="block truncate text-sm font-medium ">{user.email}</span>
                     </Dropdown.Header>
-                    <Dropdown.Item as={Link} href="/settings">Settings</Dropdown.Item>
+                    <Dropdown.Item as={Link} href="/settings">
+                      Settings
+                    </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={handleSignOut}>Sign out</Dropdown.Item>
                   </Dropdown>
@@ -96,10 +105,9 @@ export default function NavbarWithDropdown() {
               </>
             ) : (
               <Link href="/login">
-                <Button>Login</Button>
+                <Button color="gray">Login</Button>
               </Link>
             )}
-
           </div>
         </div>
       </nav>

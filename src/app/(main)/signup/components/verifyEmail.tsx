@@ -38,7 +38,7 @@ export default function VerifyEmail() {
             Click the link in the email to verify it&apos;s you.
           </p>
 
-          <Button className="w-full" onClick={onSubmit}>
+          <Button className="w-full" onClick={onSubmit} color="gray">
             Login
           </Button>
         </div>

@@ -110,7 +110,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 </Timeline.Item>
               </Timeline>
             </div>
-            <Button>Pay now</Button>
+            <Button color="gray">Pay now</Button>
           </Card>
         </div>
       </section>

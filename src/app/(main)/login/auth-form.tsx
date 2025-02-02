@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
 import request, { saveSession } from "@/utils/request";
 import { localStorageKey } from "@/utils/useLocalStorage";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import Link from "next/link";
@@ -19,13 +19,13 @@ export default function AuthForm() {
   const handleSignIn = async () => {
     setIsloading(true);
     const res = await request({
-      method: 'POST',
-      url: '/login',
+      method: "POST",
+      url: "/login",
       data: {
         email,
         password,
-        deviceToken: ''
-      }
+        deviceToken: "",
+      },
     });
 
     if (res?.status === 200) {
@@ -33,7 +33,7 @@ export default function AuthForm() {
       saveSession(res.data);
       router.push("/dashboard");
     } else {
-      showToast(res.data?.message || 'Failed!', 'error')
+      showToast(res.data?.message || "Failed!", "error");
       setIsloading(false);
     }
   };
@@ -81,7 +81,7 @@ export default function AuthForm() {
               Forgot password?
             </a>
           </div>
-          <Button className="w-full" onClick={handleSignIn}>
+          <Button className="w-full" onClick={handleSignIn} color="gray">
             {isLoading ? <Spinner /> : "Sign in to your account"}
           </Button>
         </form>
