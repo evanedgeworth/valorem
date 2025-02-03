@@ -66,7 +66,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
 
     const firstOrganization = res?.data?.userOrganizations?.[0];
-    if (!userOrganization && firstOrganization) {
+    if (!userOrganization?.organizationId && firstOrganization) {
       setSelectedOrganization(firstOrganization);
       setRole(firstOrganization.role);
       Cookies.set(localStorageKey.roleId, firstOrganization.roleId);

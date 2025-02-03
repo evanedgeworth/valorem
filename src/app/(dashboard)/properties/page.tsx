@@ -40,10 +40,10 @@ export default function Properties() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  const isAssignmentAllowed = role?.roleName === "SENIOR PROJECT MANAGER";
+  const isAssignmentAllowed = checkPermission(role, "properties_assign");
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
-    queryKey: ['properties'],
+    queryKey: ['properties', selectedOrganization?.organizationId],
     queryFn: async () => {
       const res = await request({
         url: `/properties`,
@@ -169,14 +169,14 @@ export default function Properties() {
       {selectedTab === "List" && (
         <TableData
           data={properties}
-          isLoading={tableIsLoading}
+          isLoading={tableIsLoading || !Boolean(selectedOrganization?.organizationId)}
           columns={[
             { label: "ID", key: "id" },
             { label: "Name", key: "name" },
             { label: "Address", key: "address", render: (value: Address) => parseAddress(value) },
             { label: "Created Date", key: "createdAt", render: (value: string) => moment(value).format("MMM DD, YYYY") },
             { label: "Type", key: "type", render: (value: string) => value.replaceAll('_', ' ') },
-            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} />, hidden: !isAssignmentAllowed },
+            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} isAssignmentAllowed={isAssignmentAllowed} /> },
             { label: "Orders", key: "orderCount" },
           ]}
           actions={actions}

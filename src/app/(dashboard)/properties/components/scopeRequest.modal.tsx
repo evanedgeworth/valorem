@@ -54,7 +54,9 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
       throw Error(res?.data?.message);
     },
     onSuccess(data, variables, context) {
-      queryClient.setQueryData(["properties"], (old: any) => ({
+      setShowModal(false);
+
+      queryClient.setQueryData(["properties", selectedOrganization?.organizationId], (old: any) => ({
         ...old,
         properties: [...old.properties].map((item) =>
           property && item.id === property?.id
@@ -66,7 +68,6 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
         ),
       }));
 
-      setShowModal(false);
     },
   });
 

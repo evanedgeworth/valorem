@@ -1,21 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useUserContext } from "@/context/userContext";
 import request from "@/utils/request";
 import { UserOrganization } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/context/toastContext";
 import TableData from "@/components/table-data";
 import AddUserModal from "./components/add-user-modal";
 
 export default function UserPage() {
   const { selectedOrganization, role } = useUserContext();
-  const { showToast } = useToast();
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['users', selectedOrganization?.organizationId],
     queryFn: async () => {
       const res = await request({
         url: `/user_organizations`,
@@ -48,7 +46,7 @@ export default function UserPage() {
       </div>
 
       <TableData
-        isLoading={tableIsLoading}
+        isLoading={tableIsLoading || !Boolean(selectedOrganization?.organizationId)}
         data={userOrganizations.map((item) => ({ ...item, id: `${item.organizationId}-${item.userId}-${item.roleId}` }))}
         columns={[
           {

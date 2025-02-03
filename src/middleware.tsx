@@ -18,7 +18,8 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname !== "/login" &&
     req.nextUrl.pathname !== "/signup" &&
     req.nextUrl.pathname !== "/forgot" &&
-    req.nextUrl.pathname !== "/update-password"
+    req.nextUrl.pathname !== "/update-password" &&
+    req.nextUrl.pathname !== "/email-confirmation"
   ) {
     return NextResponse.redirect(new URL("/", req.url));
   }
