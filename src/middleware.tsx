@@ -12,17 +12,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/properties", req.url));
   }
 
-  // if (
-  //   !accessToken &&
-  //   req.nextUrl.pathname !== "/" &&
-  //   req.nextUrl.pathname !== "/login" &&
-  //   req.nextUrl.pathname !== "/signup" &&
-  //   req.nextUrl.pathname !== "/forgot" &&
-  //   req.nextUrl.pathname !== "/update-password" &&
-  //   req.nextUrl.pathname !== "/email-confirmation"
-  // ) {
-  //   return NextResponse.redirect(new URL("/", req.url));
-  // }
+  if (
+    !accessToken &&
+    req.nextUrl.pathname !== "/" &&
+    req.nextUrl.pathname !== "/login" &&
+    req.nextUrl.pathname !== "/signup" &&
+    req.nextUrl.pathname !== "/forgot" &&
+    req.nextUrl.pathname !== "/update-password" &&
+    req.nextUrl.pathname !== "/email-confirmation"
+  ) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
 
   return res;
 }

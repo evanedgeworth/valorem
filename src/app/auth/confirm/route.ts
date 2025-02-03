@@ -16,11 +16,10 @@ export async function GET(request: NextRequest) {
       type,
       token_hash,
     });
-    console.log("supabase error", error);
-    console.log("supabase next", next);
+
     if (!error) {
-      // redirect user to specified redirect URL or root of app
-      redirect(next);
+      // redirect user to email confirmation page
+      redirect("/email-confirmation");
     }
   }
 
