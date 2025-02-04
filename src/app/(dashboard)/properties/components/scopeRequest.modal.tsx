@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import request from "@/utils/request";
 import { Property } from "@/types";
 import { parseAddress } from "@/utils/commonUtils";
+import { useToast } from "@/context/toastContext";
 
 type Inputs = {
   trade: string;
@@ -39,6 +40,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
     formState: { errors },
   } = useForm<Inputs>();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (body: any) => {
@@ -55,7 +57,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
     },
     onSuccess(data, variables, context) {
       setShowModal(false);
-
+      showToast('Successfully request scope.', 'success');
       queryClient.setQueryData(["properties", selectedOrganization?.organizationId], (old: any) => ({
         ...old,
         properties: [...old.properties].map((item) =>
@@ -67,8 +69,10 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
             : item
         ),
       }));
-
     },
+    onError: (error) => {
+      showToast(error?.message || "Failed", "error");
+    }
   });
 
   async function handleCreateOrder(data: Inputs) {

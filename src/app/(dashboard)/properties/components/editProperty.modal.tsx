@@ -49,7 +49,7 @@ export default function EditPropertyModal({ showModal, setShowModal, property }:
         setIsLoading(false);
         setShowModal(false);
         showToast('Successfully updated the property.', 'success');
-        queryClient.setQueryData(['properties'], (old: any) => ({ ...old, properties: [...old.properties].map(item => item.id === res.data.id ? res.data : item) }))
+        queryClient.setQueryData(['properties', selectedOrganization?.organizationId], (old: any) => ({ ...old, properties: [...old.properties].map(item => item.id === res.data.id ? res.data : item) }))
         return res.data;
       }
       throw Error(res?.data?.message);
