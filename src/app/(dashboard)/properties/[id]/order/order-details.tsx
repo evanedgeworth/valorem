@@ -9,16 +9,18 @@ import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useMemo, useState } from "react";
 import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 import ActiveOrder from "@/app/(dashboard)/order/[id]/components/activeOrder";
-import { UserContext } from "@/context/userContext";
+import { UserContext, useUserContext } from "@/context/userContext";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
 
+type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
+
 export default function OrderDetails({ propertyId, orderId }: { propertyId: string, orderId: string }) {
   const router = useRouter()
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
-  const { categoryItems } = useContext(UserContext);
-  const [showSubmitButton, setShowSubmitButton] = useState<boolean>(false);
+  const { categoryItems, role } = useUserContext();
+  const [isEdited, setIsEdited] = useState<boolean>(false);
   const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "SCHEDULED" | null>(null);
   const { showToast } = useToast();
 
@@ -65,7 +67,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       const res = await request({
         url: `/scope/${orderId}/populate`,
         params: {
-          sendForApproval: true,
+          sendForApproval: false,
         },
         method: 'POST',
         data: body
@@ -78,7 +80,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     },
     onSuccess: () => {
       showToast('Successfully updated data.');
-      setShowSubmitButton(false);
+      setIsEdited(false);
       refetch();
     },
     onError: (error) => {
@@ -114,7 +116,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
 
   const { mutate: mutateInitiate, isPending: isPendingInitiate } = useMutation({
     mutationFn: async (body: {
-      scopeStatus: "SCHEDULED",
+      scopeStatus: ScopeStatus,
       reason: string
     }) => {
       const res = await request({
@@ -167,28 +169,38 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             </button>
             <h3 className="font-semibold text-xl">{order.projectName}</h3>
           </div>
-          <div className="flex gap-4">
-            {
-              scopeStatus === "REQUESTED" ? (
-                <Button onClick={() => setActionModal("SCHEDULED")}>Scheduled</Button>
-              ) : (
-                <>
-                  <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                  {
-                    showSubmitButton ? (
-                      <Button disabled={isPendingPopulate} onClick={populateOrder}>
-                        {isPendingPopulate && <Spinner size="xs" />} Send for review
+          {
+            isEdited ? (
+              <div className="flex gap-4">
+                <Button isProcessing={isPendingPopulate} onClick={populateOrder}>
+                  Save
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-4">
+                {
+                  scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button onClick={() => setActionModal("REVISION_REQUESTED")}>
+                        Request Changes
                       </Button>
-                    ) : (
+                    </>
+                  )
+                }
+                {
+                  scopeStatus === "SUBMITTED" && ["CLIENT", "SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button onClick={() => setActionModal("APPROVE")}>
-                        Approve
+                        Accept
                       </Button>
-                    )
-                  }
-                </>
-              )
-            }
-          </div>
+                    </>
+                  )
+                }
+              </div>
+            )
+          }
         </div>
         <div className="flex justify-between font-semibold border-t border-t-gray-200 border-b border-b-gray-200 py-3">
           <div>
@@ -205,17 +217,16 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
-          setShowSubmitButton(true);
+          setIsEdited(true);
         }}
         edit={(newProduct) => {
-          console.log(newProduct);
           const data = [...addedProducts].map(item => item.id === newProduct.id ? newProduct : item);
           setAddedProducts(data);
-          setShowSubmitButton(true);
+          setIsEdited(true);
         }}
         add={(product) => {
           setAddedProducts([...addedProducts, product]);
-          setShowSubmitButton(true);
+          setIsEdited(true);
         }}
         products={[...addedProducts]}
         orderId={orderId}
@@ -226,12 +237,20 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             showModal={Boolean(actionModal)}
             isLoading={isPendingReview || isPendingInitiate}
             handleCancel={() => setActionModal(null)}
-            title={`Are you sure you want to ${actionModal?.toLowerCase()}?`}
+            title={`Are you sure you want to ${actionModal?.replaceAll('_', ' ').toLowerCase()}?`}
             handleConfirm={(note) => {
-              if (actionModal === "SCHEDULED") {
-                mutateInitiate({ scopeStatus: "SCHEDULED", reason: note });
-              } else {
-                mutateReview({ action: actionModal, note });
+              if (scopeStatus === "REQUESTED") {
+                if (actionModal === "REJECT") {
+                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                } else if (actionModal === "REVISION_REQUESTED") {
+                  mutateReview({ action: "REVISION_REQUESTED", note });
+                }
+              } else if (scopeStatus === "SUBMITTED") {
+                if (actionModal === "REJECT") {
+                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                } else if (actionModal === "APPROVE") {
+                  mutateReview({ action: "APPROVE", note });
+                }
               }
             }}
           />
