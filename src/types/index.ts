@@ -107,12 +107,7 @@ export interface Scope {
   createdAt: string;
   updatedAt: string;
   id: string;
-  property: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    address: Address;
-  };
+  property: Property;
   scopeStatus: string;
   approvalChain: {
     level: number;

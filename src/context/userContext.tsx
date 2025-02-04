@@ -88,9 +88,6 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
         includeMarkets: true
       }
     });
-
-
-
   }
 
   async function handleGetCategory() {

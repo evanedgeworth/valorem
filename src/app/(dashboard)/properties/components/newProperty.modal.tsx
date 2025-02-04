@@ -52,7 +52,8 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
       if (res?.status === 200) {
         setIsLoading(false);
         setShowModal(false);
-        queryClient.setQueryData(["properties"], (old: any) => ({ ...old, properties: [...old.properties, res.data] }));
+        showToast('Successfully create property.', 'success');
+        queryClient.setQueryData(["properties", selectedOrganization?.organizationId], (old: any) => ({ ...old, properties: [...old.properties, res.data] }));
         return res.data;
       }
       throw Error(res?.data?.message);

@@ -21,7 +21,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
   const { categoryItems, role } = useUserContext();
   const [isEdited, setIsEdited] = useState<boolean>(false);
-  const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "SCHEDULED" | null>(null);
+  const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "REQUEST_REVIEW" | null>(null);
   const { showToast } = useToast();
 
   const { data, isLoading, refetch } = useQuery({
@@ -38,9 +38,10 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       throw Error(res?.data?.message);
     }
   });
-
+  
   const order = data as Scope;
   const scopeStatus = order?.scopeStatus;
+  const assigneeId = order?.property?.assigneeId;
 
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
 
@@ -67,7 +68,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       const res = await request({
         url: `/scope/${orderId}/populate`,
         params: {
-          sendForApproval: false,
+          sendForApproval: body.sendForApproval ?? false,
         },
         method: 'POST',
         data: body
@@ -81,6 +82,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     onSuccess: () => {
       showToast('Successfully updated data.');
       setIsEdited(false);
+      setActionModal(null);
       refetch();
     },
     onError: (error) => {
@@ -140,7 +142,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  async function populateOrder() {
+  async function populateOrder(sendForApproval: boolean) {
     const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
     await mutate({
       scopeItems: formattedScopeItems.map(item => ({
@@ -148,6 +150,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         "area": item.area,
         "quantity": item.quantity,
       })),
+      sendForApproval
     });
   }
 
@@ -158,6 +161,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       </div>
     )
   }
+
+  console.log('========', order);
 
   return (
     <div className="w-full p-5">
@@ -172,18 +177,31 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           {
             isEdited ? (
               <div className="flex gap-4">
-                <Button isProcessing={isPendingPopulate} onClick={populateOrder}>
+                <Button isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
                   Save
                 </Button>
               </div>
             ) : (
               <div className="flex gap-4">
                 {
+                  scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                  )
+                }
+                {
+                  scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                  )
+                }
+                {
                   scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button onClick={() => setActionModal("REVISION_REQUESTED")}>
                         Request Changes
+                      </Button>
+                      <Button onClick={() => setActionModal("REQUEST_REVIEW")}>
+                        Request Review
                       </Button>
                     </>
                   )
@@ -235,15 +253,19 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         actionModal && (
           <ReviewModal
             showModal={Boolean(actionModal)}
-            isLoading={isPendingReview || isPendingInitiate}
+            isLoading={isPendingReview || isPendingInitiate || isPendingPopulate}
             handleCancel={() => setActionModal(null)}
             title={`Are you sure you want to ${actionModal?.replaceAll('_', ' ').toLowerCase()}?`}
             handleConfirm={(note) => {
               if (scopeStatus === "REQUESTED") {
+                mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+              } else if (scopeStatus === "SCHEDULED") {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
                 } else if (actionModal === "REVISION_REQUESTED") {
                   mutateReview({ action: "REVISION_REQUESTED", note });
+                } else if (actionModal === "REQUEST_REVIEW") {
+                  populateOrder(true);
                 }
               } else if (scopeStatus === "SUBMITTED") {
                 if (actionModal === "REJECT") {
