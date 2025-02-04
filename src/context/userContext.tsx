@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import useLocalStorage, { localStorageKey } from "@/utils/useLocalStorage";
 import request from "@/utils/request";
-import { CategoryItem, Organization, OrganizationRole, Role, User } from "@/types";
+import { CategoryItem, Organization, OrganizationRole, Role, User, UserOrganization } from "@/types";
 import Cookies from "js-cookie";
 
 type UserContext = {
@@ -50,7 +50,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
   }
 
-  async function handleGetOrganizations(user: any, userOrganization: Organization | null) {
+  async function handleGetOrganizations(user: any, userOrganization: UserOrganization | null) {
     const userId = user.id;
     const res = await request({
       url: `/user_organizations`,
@@ -66,7 +66,11 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
 
     const firstOrganization = res?.data?.userOrganizations?.[0];
-    if (!userOrganization && firstOrganization) {
+    if (userOrganization?.organizationId) {
+      setSelectedOrganization(userOrganization);
+      setRole(userOrganization.role);
+      Cookies.set(localStorageKey.roleId, userOrganization.roleId);
+    } else if(firstOrganization) {
       setSelectedOrganization(firstOrganization);
       setRole(firstOrganization.role);
       Cookies.set(localStorageKey.roleId, firstOrganization.roleId);

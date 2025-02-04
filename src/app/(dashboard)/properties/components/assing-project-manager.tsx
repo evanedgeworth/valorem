@@ -44,12 +44,10 @@ function ListUser({ property, close }: { property: Property, close: () => void }
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: { assigneeId: string }) => {
       const res = await request({
-        url: `/properties/${property.id}`,
-        method: 'PUT',
+        url: `/properties/${property.id}/assign`,
+        method: 'PATCH',
         data: {
-          ...property,
           assigneeId: data.assigneeId,
-          assignee: undefined,
         }
       });
       if (res?.status === 200) {
@@ -71,12 +69,11 @@ function ListUser({ property, close }: { property: Property, close: () => void }
     <div className="p-4">
       <TextInput placeholder="Search" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} className="w-60" />
       <div className="mt-2">
-        {(isLoading || isPending) && (
+        {(isLoading || isPending) ? (
           <div className="flex justify-center">
             <Spinner />
           </div>
-        )}
-        {
+        ) : (
           items.map(item => (
             <div
               className="flex gap-1 items-center cursor-pointer py-1 hover:bg-gray-100 focus:bg-gray-100" key={`${item.organizationId}-${item.userId}-${item.roleId}`}
@@ -88,7 +85,7 @@ function ListUser({ property, close }: { property: Property, close: () => void }
               <p>{getFullName(item.user)}</p>
             </div>
           ))
-        }
+        )}
       </div>
     </div>
   )
@@ -96,9 +93,10 @@ function ListUser({ property, close }: { property: Property, close: () => void }
 
 type AssignProjectManagerProps = {
   property: Property;
+  isAssignmentAllowed?: boolean;
 }
 
-export default function AssignProjectManager({ property }: AssignProjectManagerProps) {
+export default function AssignProjectManager({ property, isAssignmentAllowed }: AssignProjectManagerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -119,22 +117,25 @@ export default function AssignProjectManager({ property }: AssignProjectManagerP
           <div>
             <Avatar
               rounded size="md"
-              className="-mr-3 z-10"
+              className="-mr-3"
               placeholderInitials={getInitials(getFullName(property.assignee))}
             />
           </div>
         </Popover>
-
       )}
-      <Popover
-        content={<ListUser property={property} close={() => setOpen(false)} />}
-        open={open}
-        onOpenChange={setOpen}
-      >
-        <button className={classNames("bg-gray-300 z-20 h-8 w-8 rounded-full flex items-center justify-center")}>
-          <TiUserAddOutline size={22} />
-        </button>
-      </Popover>
+      {
+        isAssignmentAllowed && (
+          <Popover
+            content={<ListUser property={property} close={() => setOpen(false)} />}
+            open={open}
+            onOpenChange={setOpen}
+          >
+            <button className={classNames("bg-gray-300 z-[1] h-8 w-8 rounded-full flex items-center justify-center")}>
+              <TiUserAddOutline size={22} />
+            </button>
+          </Popover>
+        )
+      }
     </div>
   )
 }

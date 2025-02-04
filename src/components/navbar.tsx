@@ -10,6 +10,8 @@ import Link from "next/link";
 import Notifications from "./notifications";
 import Cookies from "js-cookie";
 import { localStorageKey } from "@/utils/useLocalStorage";
+import { Organization } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function NavbarWithDropdown() {
   const router = useRouter();
@@ -22,6 +24,11 @@ export default function NavbarWithDropdown() {
 
   async function handleSignOut() {
     signOut();
+  }
+
+  const handleChangeOrganization = (org: Organization) => {
+    setSelectedOrganization(org);
+    Cookies.set(localStorageKey.roleId, org.roleId);
   }
 
   return (
@@ -65,8 +72,7 @@ export default function NavbarWithDropdown() {
                             allOrganizations.map((org) => (
                               <Dropdown.Item
                                 onClick={() => {
-                                  setSelectedOrganization(org);
-                                  Cookies.set(localStorageKey.roleId, org.roleId);
+                                  handleChangeOrganization(org);
                                 }}
                                 className="min-w-[150px]"
                                 key={org.organizationId}
