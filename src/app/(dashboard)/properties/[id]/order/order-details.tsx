@@ -162,8 +162,6 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     )
   }
 
-  console.log('========', order);
-
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
@@ -198,10 +196,10 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                     <>
                       <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button onClick={() => setActionModal("REVISION_REQUESTED")}>
-                        Request Changes
+                        Request changes
                       </Button>
                       <Button onClick={() => setActionModal("REQUEST_REVIEW")}>
-                        Request Review
+                        Send for review
                       </Button>
                     </>
                   )
@@ -231,7 +229,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         </div>
       </Card>
       <ActiveOrder
-        isEditing={true}
+        isEditing={scopeStatus !== "APPROVED"}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
