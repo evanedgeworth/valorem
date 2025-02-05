@@ -42,29 +42,42 @@ export default function Properties() {
 
   const isAssignmentAllowed = checkPermission(role, "properties_assign");
 
-  const { data, isLoading: tableIsLoading, refetch } = useQuery({
-    queryKey: ['properties', selectedOrganization?.organizationId],
+  const {
+    data,
+    isLoading: tableIsLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["properties", selectedOrganization?.organizationId],
     queryFn: async () => {
-      const res = await request({
-        url: `/properties`,
-        method: "GET",
-        params: {
+      let params;
+      if (isAssignmentAllowed) {
+        params = {
+          assigneeId: "UNASSIGNED",
+          all: true,
+        };
+      } else {
+        params = {
           organizationId: selectedOrganization?.organizationId,
           includeOrdersCount: true,
           includeAssignee: true,
-        },
-      })
+        };
+      }
+      const res = await request({
+        url: `/properties`,
+        method: "GET",
+        params,
+      });
       if (res?.status === 200) {
         return res.data;
       }
       throw Error(res.data.message);
     },
-    enabled: Boolean(selectedOrganization?.organizationId)
+    enabled: Boolean(selectedOrganization?.organizationId),
   });
 
   const properties: Property[] = useMemo(() => {
     const result: Property[] = data?.properties || [];
-    return result.filter(item => searchInput ? item.name.toLowerCase().includes(searchInput.toLowerCase()) : true);
+    return result.filter((item) => (searchInput ? item.name.toLowerCase().includes(searchInput.toLowerCase()) : true));
   }, [data?.properties, searchInput]);
 
   function handleTabChange(selectedTab: string) {
@@ -82,8 +95,8 @@ export default function Properties() {
     setIsLoadingDelete(false);
     setShowDeleteConfirmModal(false);
     if (res?.status === 200) {
-      showToast(res.data.message, 'success');
-      queryClient.setQueryData(['properties'], (old: any) => ({ ...old, properties: [...old.properties].filter(item => item.id !== propertyId) }))
+      showToast(res.data.message, "success");
+      queryClient.setQueryData(["properties"], (old: any) => ({ ...old, properties: [...old.properties].filter((item) => item.id !== propertyId) }));
     }
   }
 
@@ -95,7 +108,7 @@ export default function Properties() {
         onClick: (row) => {
           selectedProperty.current = row;
           setShowRequestModal(true);
-        }
+        },
       });
     }
 
@@ -105,14 +118,14 @@ export default function Properties() {
         onClick: (row) => {
           selectedProperty.current = row;
           setShowViewModal(true);
-        }
+        },
       });
     }
 
     if (checkPermission(role, "properties_view")) {
       result.push({
         label: "Details",
-        link: (row) => `/properties/${encodeURIComponent(row.id)}`
+        link: (row) => `/properties/${encodeURIComponent(row.id)}`,
       });
     }
 
@@ -122,7 +135,7 @@ export default function Properties() {
         onClick: (row) => {
           selectedProperty.current = row;
           setShowEditModal(true);
-        }
+        },
       });
     }
 
@@ -132,12 +145,11 @@ export default function Properties() {
         onClick: (row) => {
           selectedProperty.current = row;
           setShowDeleteConfirmModal(true);
-        }
+        },
       });
     }
 
     return result;
-
   }, [role]);
 
   return (
@@ -175,8 +187,12 @@ export default function Properties() {
             { label: "Name", key: "name" },
             { label: "Address", key: "address", render: (value: Address) => parseAddress(value) },
             { label: "Created Date", key: "createdAt", render: (value: string) => moment(value).format("MMM DD, YYYY") },
-            { label: "Type", key: "type", render: (value: string) => value.replaceAll('_', ' ') },
-            { label: "PM", key: "id", render: (value: string, row: Property) => <AssignProjectManager property={row} isAssignmentAllowed={isAssignmentAllowed} /> },
+            { label: "Type", key: "type", render: (value: string) => value?.replaceAll("_", " ") },
+            {
+              label: "PM",
+              key: "id",
+              render: (value: string, row: Property) => <AssignProjectManager property={row} isAssignmentAllowed={isAssignmentAllowed} />,
+            },
             { label: "Orders", key: "orderCount" },
           ]}
           actions={actions}
@@ -203,11 +219,7 @@ export default function Properties() {
         handleConfirm={handleRemoveProperty}
         isLoading={isLoadingDelete}
       />
-      <ScopeRequestModal
-        setShowModal={setShowRequestModal}
-        showModal={showRequestModal}
-        property={selectedProperty.current}
-      />
+      <ScopeRequestModal setShowModal={setShowRequestModal} showModal={showRequestModal} property={selectedProperty.current} />
     </section>
   );
 }
