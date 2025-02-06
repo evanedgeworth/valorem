@@ -26,6 +26,7 @@ function ListUser({ property, close }: { property: Property; close: () => void }
           filterType: "user",
           includeRoles: true,
           includeUsers: true,
+          pageSize: 500
         },
       });
       if (res?.status === 200) {
