@@ -13,6 +13,7 @@ import { UserContext, useUserContext } from "@/context/userContext";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
+import ImportModal from "@/components/import.modal";
 
 type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -23,6 +24,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "REQUEST_REVIEW" | null>(null);
   const { showToast } = useToast();
+  const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['order', 'detail', orderId],
@@ -38,7 +40,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       throw Error(res?.data?.message);
     }
   });
-  
+
   const order = data as Scope;
   const scopeStatus = order?.scopeStatus;
   const assigneeId = order?.property?.assigneeId;
@@ -181,6 +183,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               </div>
             ) : (
               <div className="flex gap-4">
+                <Button
+                  onClick={() => setIsOpenImport(true)}
+                >
+                  Import
+                </Button>
                 {
                   scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
@@ -276,6 +283,23 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           />
         )
       }
+      <ImportModal
+        showModal={isOpenImport}
+        setShowModal={(v) => setIsOpenImport(v)}
+        onSubmit={(data) => {
+          setAddedProducts(data.map(item => ({
+            quantity: item.quantity,
+            area: item.area,
+            categoryItem: {
+              lineItem: item.productName,
+              targetClientPrice: item.price,
+              taskDescription: item.productDescription
+            },
+            id: `${item.aren}-${item.product}`
+          } as any)));
+          setIsOpenImport(false);
+        }}
+      />
     </div>
   )
 }

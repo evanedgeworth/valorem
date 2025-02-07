@@ -113,12 +113,10 @@ export default function NewProductModal({
                     ))}
                   </Select>
                 </div>
-
                 <div>
                   <Label>Quantity</Label>
                   <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
                 </div>
-
                 <div className="flex justify-end">
                   <Button onClick={handleAddProduct}>Save</Button>
                 </div>

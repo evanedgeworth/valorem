@@ -1,23 +1,27 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button, FileInput, Label, Modal, Radio, Select, Table, TextInput } from "flowbite-react";
 import Papa from "papaparse";
 import { FaArrowRightLong } from "react-icons/fa6";
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { toTitleCase } from "@/utils/commonUtils";
 
 export default function ImportModal({
   showModal,
   setShowModal,
+  onSubmit,
 }: {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
+  onSubmit: (data: any[]) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState('upload');
   const [data, setData] = useState<string[][]>([]);
   const [header, setHeader] = useState('yes');
   const [activeIndex, setActiveIndex] = useState(1);
+  const [mapping, setMapping] = useState<{ [key:string]: string }>({});
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -27,6 +31,7 @@ export default function ImportModal({
       complete: (result) => {
         setData(result.data as string[][]);
       },
+      skipEmptyLines: true
     });
   };
 
@@ -38,13 +43,44 @@ export default function ImportModal({
 
   const isHeader = header === 'yes';
   const total = data.length;
-  console.log(data);
 
-  const options = ["Product", "Area", "Quantity"]
+  const options = ["productName", "productDescription", "price", "area", "quantity"];
+  const isValidImport = useMemo(() => options.every((key) => key in mapping), [mapping]);
+
+  const getOptionValue = (value: string) => {
+    let result = "";
+    Object.keys(mapping).forEach(item => {
+      if (mapping[item] === value) {
+        result = item;
+      }
+    });
+    return result;
+  }
+
+  const handleImport = () => {
+    const items: any[] = [];
+    data.forEach((item, i) => {
+      if (i === 0 && header === 'yes') {
+        return;
+      }
+    
+      const product: { [key: string]: string | number } = {};
+      options.forEach(option => {
+        const index = parseInt(mapping[option], 10);
+        if (!isNaN(index) && index >= 0 && index < item.length) {
+          product[option] = option === "quantity" ? Number(item[index]) : item[index];
+        }
+      });
+    
+      items.push(product);
+    });
+
+    onSubmit(items);
+  }
 
   return (
     <div ref={rootRef}>
-      <Modal show={showModal} size="2xl" onClose={handleCancel} root={rootRef.current ?? undefined}>
+      <Modal show={showModal} size="4xl" onClose={handleCancel} root={rootRef.current ?? undefined}>
         <Modal.Header>
           Import CSV
         </Modal.Header>
@@ -147,7 +183,7 @@ export default function ImportModal({
             {
               step === "mapping" && (
                 <div>
-                  <div className="border-b pb-2 flex justify-between">
+                  <div className="border-b py-1 flex justify-between">
                     <h4 className="text-2xl">Field configuration</h4>
                     <div className="flex gap-1 items-center">
                       <p className="mr-2">Displaying item {activeIndex + 1} of {total}</p>
@@ -167,28 +203,41 @@ export default function ImportModal({
                   </div>
                   <div className="mt-2">
                     {
-                      data[0]?.map((item, index) => (
-                        <div className="mt-1" key={index}>
-                          <p className="font-semibold mb-1">{isHeader ? item : `Index ${index}`}</p>
-                          <div className="grid grid-cols-[3fr_80px_2fr] gap-2">
-                            <TextInput
-                              disabled
-                              value={data[activeIndex][index]}
-                            />
-                            <div className="items-center gap-2 flex">
-                              <FaArrowRightLong /> Map to
+                      data[0]?.map((item, index) => {
+                        const value = getOptionValue(index.toString());
+                        return (
+                          <div className="mt-1" key={index}>
+                            <p className="font-semibold mb-1">{isHeader ? item : `Index ${index}`}</p>
+                            <div className="grid grid-cols-[3fr_80px_2fr] gap-2">
+                              <TextInput
+                                disabled
+                                value={data[activeIndex][index]}
+                                color={value ? "success" : undefined}
+                              />
+                              <div className="items-center gap-2 flex">
+                                <FaArrowRightLong /> map to
+                              </div>
+                              <Select
+                                onChange={(e) => {
+                                  setMapping({
+                                    ...mapping,
+                                    [e.target.value]: index.toString()
+                                  });
+                                }}
+                                value={value}
+                                color={value ? "success" : undefined}
+                              >
+                                <option value="">Select field...</option>
+                                {
+                                  options.map(option => (
+                                    <option value={option}>{toTitleCase(option)}</option>
+                                  ))
+                                }
+                              </Select>
                             </div>
-                            <Select>
-                              <option disabled value="">Select field...</option>
-                              {
-                                options.map(option => (
-                                  <option>{option}</option>
-                                ))
-                              }
-                            </Select>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     }
                   </div>
                 </div>
@@ -199,7 +248,7 @@ export default function ImportModal({
         {
           step === "mapping" && (
             <Modal.Footer className="flex justify-end gap-2">
-              <Button>Import {isHeader ? total - 1 : total} data</Button>
+              <Button disabled={!isValidImport} onClick={handleImport}>Import {isHeader ? total - 1 : total} data</Button>
             </Modal.Footer>
           )
         }

@@ -8,8 +8,6 @@ import { useRef, useState } from "react";
 import NewProductModal from "./newProduct.modal";
 import EditProductModal from "./editProduct.modal";
 import { DeleteIcon, EditIcon } from "@/components/icon";
-import ImportModal from "@/components/import.modal";
-
 
 export default function ActiveOrder({
   remove,
@@ -49,7 +47,6 @@ export default function ActiveOrder({
                 {
                   isEditing && (
                     <div>
-                      
                       <NewProductModal
                         showModal={showAddModal}
                         setShowModal={setShowAddModal}
@@ -159,10 +156,6 @@ export default function ActiveOrder({
         }}
         orderId={orderId}
         product={selectedProduct.current}
-      />
-      <ImportModal
-        showModal={false}
-        setShowModal={() => {}}
       />
     </div>
   );
