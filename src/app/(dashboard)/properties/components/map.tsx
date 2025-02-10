@@ -1,21 +1,17 @@
 import { setKey, fromAddress } from "react-geocode";
-import { Database } from "../../../../../types/supabase";
 import { useState, useEffect } from "react";
-import { useJsApiLoader } from "@react-google-maps/api";
 import React from "react";
-import { APIProvider, AdvancedMarker, InfoWindow, Map, Marker, Pin, useAdvancedMarkerRef, useMap } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, useMap } from "@vis.gl/react-google-maps";
 import { lightStyle, darkStyle } from "./map-style";
 import CustomMarker from "./custom-marker";
-import { useThemeMode } from "flowbite-react";
-import DarkModeBrowserPref from "@/utils/useDarkMode";
 import type { Property } from "@/types";
+import { parseAddress } from "@/utils/commonUtils";
 
-// type Property = Database["public"]["Tables"]["properties"]["Row"];
 type Props = {
   properties: Property[];
 };
 
-type MarkerProps = { address: string; coordinates: { lat: number; lng: number } };
+type MarkerProps = { property: Property, address: string; coordinates: { lat: number; lng: number } };
 
 // Function to calculate geographic midpoint
 const calculateCenter = (locations: MarkerProps[]) => {
@@ -55,15 +51,12 @@ export default function MapPage({ properties }: Props) {
   useEffect(() => {
     if (properties.length > 0) {
       const promises = properties.map((property) =>
-        fromAddress(
-          `${property.address?.address1}${(property.address?.address2 && " " + property.address?.address2) || ""}, ${property.address?.city} ${property.address?.city} ${property.address?.postalCode
-          }`
-        )
+        fromAddress(parseAddress(property.address))
           .then(({ results }) => {
             const { lat, lng } = results[0].geometry.location;
             return {
-              address: `${property.address?.address1}${(property.address?.address2 && " " + property.address?.address2) || ""}, ${property.address?.city} ${property.address?.city} ${property.address?.postalCode
-                }`,
+              property,
+              address: parseAddress(property.address),
               coordinates: { lat, lng },
             };
           })
@@ -76,6 +69,7 @@ export default function MapPage({ properties }: Props) {
       Promise.all(promises)
         .then((coordinates) => {
           const validCoordinates = coordinates.filter((coord) => coord?.coordinates !== null) as {
+            property: Property,
             address: string;
             coordinates: { lat: number; lng: number };
           }[];
@@ -105,24 +99,17 @@ export default function MapPage({ properties }: Props) {
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ""}>
       <Map
         style={{ width: "100%" }}
-        // zoom={6}
         center={center}
+        onCenterChanged={(e) => setCenter(e.detail.center)}
         defaultZoom={6}
         gestureHandling={"greedy"}
         disableDefaultUI={true}
-        // mapId={"49ae42fed52588c3"}
         mapTypeId={"roadmap"}
         styles={prefersDarkMode ? darkStyle : lightStyle}
       >
         {propertyLocations.map((markerLocation, index) => (
           <CustomMarker key={index} markerLocation={markerLocation} />
         ))}
-        {/* {propertyLocations.map((markerLocation, index) => (
-          <>
-            <InfoWindow position={markerLocation.coordinates}>The content of the info window is here.</InfoWindow>
-            <Marker position={markerLocation.coordinates} />
-          </>
-        ))} */}
       </Map>
     </APIProvider>
   );
