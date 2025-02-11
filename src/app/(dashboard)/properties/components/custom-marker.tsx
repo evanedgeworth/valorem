@@ -18,12 +18,12 @@ function CustomMarker({ markerLocation }: { markerLocation: MarkerProps }) {
       <Marker onClick={() => setInfowindowOpen(true)} position={markerLocation.coordinates} />
       {infowindowOpen && (
         <InfoWindow position={markerLocation.coordinates} onClose={() => setInfowindowOpen(false)}>
-          <div>
+          <div className="text-black">
             <p className="text-xl font-bold">{markerLocation.property.name}</p>
             <p>
               <b>Address: </b>{markerLocation.address}
             </p>
-            <div className="mt-2 flex justify-end">
+            <div className="mt-4 flex justify-end">
               <Link href={`/properties/${markerLocation.property?.id}`}>
                 <Button size="sm">
                   Open
