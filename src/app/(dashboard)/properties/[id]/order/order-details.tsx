@@ -165,7 +165,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
-        <div className="flex justify-between border-t border-t-gray-200 border-b border-b-gray-200 py-3 mb-3">
+        <div className="flex justify-between border-t border-t-gray-200 border-b border-b-gray-200 py-3 mb-3 dark:border-b-gray-700 dark:border-t-gray-700">
           <div className="flex gap-1 items-center">
             <button onClick={router.back}>
               <HiOutlineArrowSmLeft size={22} />
@@ -175,7 +175,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           {
             isEdited ? (
               <div className="flex gap-4">
-                <Button isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
+                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
                   Save
                 </Button>
               </div>
@@ -183,22 +183,22 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               <div className="flex gap-4">
                 {
                   scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                   )
                 }
                 {
                   scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                   )
                 }
                 {
                   scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
-                      <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                      <Button onClick={() => setActionModal("REVISION_REQUESTED")}>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
                         Request changes
                       </Button>
-                      <Button onClick={() => setActionModal("REQUEST_REVIEW")}>
+                      <Button color="gray" onClick={() => setActionModal("REQUEST_REVIEW")}>
                         Send for review
                       </Button>
                     </>
@@ -207,8 +207,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                 {
                   scopeStatus === "SUBMITTED" && ["CLIENT", "SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
-                      <Button outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                      <Button onClick={() => setActionModal("APPROVE")}>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
                         Accept
                       </Button>
                     </>
@@ -218,7 +218,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             )
           }
         </div>
-        <div className="flex justify-between font-semibold border-t border-t-gray-200 border-b border-b-gray-200 py-3">
+        <div className="flex justify-between font-semibold border-t border-t-gray-200 border-b border-b-gray-200 py-3 dark:border-b-gray-700 dark:border-t-gray-700">
           <div>
             <p className="text-xl">Scope estimate as of {moment(order.dueDate).format('l')}</p>
           </div>
