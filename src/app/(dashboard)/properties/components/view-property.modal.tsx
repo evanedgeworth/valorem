@@ -75,7 +75,7 @@ export default function ViewPropertyModal({ showModal, setShowModal, property, s
               <Button fullSized onClick={showEditModal} color="gray">
                 Edit
               </Button>
-              <Button type="button" onClick={() => setShowModal(false)} fullSized color={"light"}>
+              <Button type="button" onClick={() => setShowModal(false)} fullSized color={"gray"} outline>
                 Close
               </Button>
             </div>

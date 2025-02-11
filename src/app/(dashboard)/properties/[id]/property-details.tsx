@@ -38,7 +38,6 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
         url: `/scope`,
         method: "GET",
         params: {
-          organizationId: selectedOrganization?.organizationId,
           includeProperty: false,
           propertyId: propertyId
         },
@@ -67,32 +66,32 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
     <section className="p-5 w-full">
       <div>
         <Card>
-          <div className="border-b border-b-gray-200 pb-2">
+          <div className="border-b border-b-gray-200 pb-2 dark:border-b-gray-600">
             <h1 className="text-2xl font-bold">{property.name}</h1>
           </div>
           <div>
             <p className="mb-2">
               <b>Address: </b>
-              {parseAddress(property.address)}
+              <span className="dark:text-gray-400">{parseAddress(property.address)}</span>
             </p>
             <p className="mb-2">
               <b>Date Created: </b>
-              {moment(property.createdAt).format("l")}
+              <span className="dark:text-gray-400">{moment(property.createdAt).format("l")}</span>
             </p>
             <p className="mb-2 font-semibold text-base">
               Details
             </p>
             <p className="mb-2">
               <b>Access Instructions: </b>
-              {property.accessInstructions}
+              <span className="dark:text-gray-400">{property.accessInstructions}</span>
             </p>
             <p className="mb-2">
               <b>Notes: </b>
-              {property.notes}
+              <span className="dark:text-gray-400">{property.notes}</span>
             </p>
           </div>
         </Card>
-        <Card className="mt-4">
+        <div className="mt-4">
           <Table striped>
             <Table.Head>
               <Table.HeadCell>ID</Table.HeadCell>
@@ -115,9 +114,9 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
                       <Table.Row key={item.id}>
                         <Table.Cell>{item.id}</Table.Cell>
                         <Table.Cell>{item.projectName}</Table.Cell>
-                        <Table.Cell>{moment(item.createdAt).format("ll")}</Table.Cell>
+                        <Table.Cell className="dark:text-gray-400">{moment(item.createdAt).format("ll")}</Table.Cell>
                         <Table.Cell>
-                          <OrderStatus status={item.scopeStatus} />
+                          <div className="flex"><OrderStatus status={item.scopeStatus} /></div>
                         </Table.Cell>
                         <Table.Cell>
                           <Link href={`/properties/${propertyId}/order?orderId=${item.id}`}>
@@ -131,7 +130,7 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
               )
             }
           </Table>
-          </Card>
+          </div>
       </div>
     </section>
   )

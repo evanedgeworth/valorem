@@ -75,7 +75,7 @@ export default function ActiveOrder({
                     <Table.Body className="divide-y" key={product.id}>
                       <Table.Row
                         className={
-                          `border-t-gray-200 border-t ` +
+                          `border-t-gray-200 border-t dark:border-t-gray-600 ` +
                           ((product.status === "updated" && ` bg-amber-200 dark:bg-amber-800`) ||
                             (product.status === "removed" && ` bg-red-200 dark:bg-red-800`) ||
                             (product.status === "new" && ` bg-green-200 dark:bg-green-800`))

@@ -19,8 +19,11 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     },
   },
   modal: {
+    header: {
+      base: "flex justify-between rounded-t dark:border-gray-800 dark:bg-gray-800 border-b-0 p-2 items-center px-6 pt-4",
+    },
     body: {
-      base: "space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8",
+      base: "space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8 dark:bg-gray-800",
     },
   },
   button: {
@@ -30,7 +33,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
       dark: "border border-transparent bg-zinc-800 text-white focus:ring-4 focus:ring-zinc-300 enabled:hover:bg-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:focus:ring-zinc-800 dark:enabled:hover:bg-zinc-700",
       failure:
         "border border-transparent bg-red-700 text-white focus:ring-4 focus:ring-red-300 enabled:hover:bg-red-800 dark:bg-red-600 dark:focus:ring-red-900 dark:enabled:hover:bg-red-700",
-      gray: ":ring-zinc-700 border border-zinc-200 bg-white text-gray-900 focus:text-cyan-700 focus:ring-4 enabled:hover:bg-zinc-100 enabled:hover:text-zinc-700 dark:border-zinc-600 dark:bg-transparent dark:text-zinc-400 dark:enabled:hover:bg-zinc-700 dark:enabled:hover:text-white",
+      gray: ":ring-zinc-700 border border-zinc-200 bg-white text-gray-900 focus:text-cyan-700 focus:ring-4 enabled:hover:bg-zinc-100 enabled:hover:text-zinc-700 dark:border-zinc-600 dark:bg-white dark:text-gray-900 dark:enabled:hover:bg-zinc-100 dark:enabled:hover:text-gray-900",
       info: "border border-transparent bg-cyan-700 text-white focus:ring-4 focus:ring-cyan-300 enabled:hover:bg-cyan-800 dark:bg-cyan-600 dark:focus:ring-cyan-800 dark:enabled:hover:bg-cyan-700",
       light:
         "border border-gray-300 bg-white text-gray-900 focus:ring-4 focus:ring-zinc-300 enabled:hover:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-600 dark:text-white dark:focus:ring-zinc-700 dark:enabled:hover:border-zinc-700 dark:enabled:hover:bg-zinc-700",
@@ -112,12 +115,12 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     label: "ml-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-cyan-200 text-xs font-semibold text-cyan-800",
     outline: {
       color: {
-        gray: "border border-gray-900 dark:border-white",
+        gray: "border border-gray-900 dark:border-white dark:bg-transparent",
         default: "border-0",
         light: "",
       },
       off: "",
-      on: "flex w-full justify-center bg-white text-gray-900 transition-all duration-75 ease-in group-enabled:group-hover:bg-opacity-0 group-enabled:group-hover:text-inherit dark:bg-gray-900 dark:text-white",
+      on: "flex w-full justify-center bg-white text-gray-900 transition-all duration-75 ease-in group-enabled:group-hover:bg-opacity-0 group-enabled:group-hover:text-inherit dark:bg-transparent dark:text-white",
       pill: {
         off: "rounded-md",
         on: "rounded-full",
@@ -151,7 +154,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
         on: "w-16",
         off: "w-64",
       },
-      inner: "h-full overflow-y-auto overflow-x-hidden rounded bg-zinc-50 px-3 py-4 dark:bg-zinc-800",
+      inner: "h-full overflow-y-auto overflow-x-hidden rounded bg-zinc-50 px-3 py-4 dark:bg-gray-800",
     },
     collapse: {
       button:
@@ -225,7 +228,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
   },
   table: {
     root: {
-      base: "w-full text-left text-sm text-zinc-500 dark:text-zinc-400",
+      base: "w-full text-left text-sm text-zinc-500 dark:text-white",
       shadow: "absolute left-0 top-0 -z-10 h-full w-full rounded-lg bg-white drop-shadow-md dark:bg-black",
       wrapper: "relative",
     },
@@ -236,21 +239,21 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
       },
     },
     head: {
-      base: "group/head text-xs uppercase text-zinc-700 dark:text-zinc-400",
+      base: "group/head text-xs uppercase text-zinc-700 dark:text-white",
       cell: {
-        base: "bg-zinc-50 px-6 py-3 group-first/head:first:rounded-tl-lg group-first/head:last:rounded-tr-lg dark:bg-zinc-700",
+        base: "bg-zinc-50 px-6 py-3 group-first/head:first:rounded-tl-lg group-first/head:last:rounded-tr-lg dark:bg-gray-700",
       },
     },
     row: {
-      base: "group/row",
+      base: "group/row dark:border-gray-600",
       hovered: "hover:bg-zinc-50 dark:hover:bg-zinc-600",
-      striped: "odd:bg-white even:bg-zinc-50 odd:dark:bg-zinc-800 even:dark:bg-zinc-700",
+      striped: "odd:bg-white even:bg-zinc-50 odd:dark:bg-gray-800 even:dark:bg-gray-700",
     },
   },
   textInput: {
     base: "flex",
     addon:
-      "inline-flex items-center rounded-l-md border border-r-0 border-zinc-300 bg-zinc-200 px-3 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-600 dark:text-zinc-400",
+      "inline-flex items-center rounded-l-md border border-r-0 border-zinc-300 bg-zinc-200 px-3 text-sm text-zinc-900 dark:border-gray-600 dark:bg-gray-700 dark:text-zinc-400",
     field: {
       base: "relative w-full",
       icon: {
@@ -269,7 +272,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
           lg: "p-4 sm:text-base",
         },
         colors: {
-          gray: "border-zinc-300 bg-zinc-50 text-zinc-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white dark:placeholder-zinc-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500",
+          gray: "border-zinc-300 bg-zinc-50 text-zinc-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-zinc-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500",
           info: "border-cyan-500 bg-cyan-50 text-cyan-900 placeholder-cyan-700 focus:border-cyan-500 focus:ring-cyan-500 dark:border-cyan-400 dark:bg-cyan-100 dark:focus:border-cyan-500 dark:focus:ring-cyan-500",
           failure:
             "border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100 dark:focus:border-red-500 dark:focus:ring-red-500",

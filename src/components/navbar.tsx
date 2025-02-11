@@ -33,7 +33,7 @@ export default function NavbarWithDropdown() {
 
   return (
     <header className="flex flex-col">
-      <nav className="bg-white border-zinc-200 px-4 lg:px-6 py-2.5 dark:bg-zinc-900 dark:border-zinc-800 order-1 border-b">
+      <nav className="bg-white border-zinc-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 dark:border-gray-700 order-1 border-b dark:text-white">
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
             <Link href="/" className="flex mr-6">
