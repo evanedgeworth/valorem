@@ -56,6 +56,7 @@ export default function Properties() {
           params = {
             organizationId: selectedOrganization?.organizationId,
             includeOrdersCount: true,
+            includeAssignee: true,
             all: true,
           };
           break;
@@ -63,12 +64,14 @@ export default function Properties() {
         case "SENIOR_PROJECT_MANAGER":
           params = {
             includeOrdersCount: true,
+            includeAssignee: true,
             all: true,
           };
           break;
         default:
           params = {
             includeOrdersCount: true,
+            includeAssignee: true,
             assigneeId: selectedOrganization?.userId,
             all: true,
           };
