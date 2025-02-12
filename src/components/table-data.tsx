@@ -38,22 +38,22 @@ export default function TableData<T extends { id: string }>({ isLoading, data, c
               .map((col) => (
                 <Table.HeadCell key={col.key as string}>{col.label}</Table.HeadCell>
               ))}
-            {actions.length > 0 && <Table.HeadCell></Table.HeadCell>}
+            {actions.length > 0 && <Table.HeadCell className="w-9"></Table.HeadCell>}
           </Table.Head>
           <Table.Body className="divide-y">
             {data.map((row) => (
-              <Table.Row key={row.id}>
+            <Table.Row key={row.id}>
                 {columns
                   .filter((item) => !item.hidden)
                   .map((col) => (
                     <Table.Cell key={col.key as string}>{col.render ? col.render(row[col.key], row) : String(row[col.key] ?? "")}</Table.Cell>
                   ))}
                 {actions.length > 0 && (
-                  <Table.Cell className="relative">
+                  <Table.Cell className="relative w-9">
                     <Dropdown
                       renderTrigger={() => <BiDotsVerticalRounded size={25} className="cursor-pointer" />}
                       label=""
-                      className="!left-[-120px] !top-6"
+                      className="!left-[-120px] min-w-[120px] !top-6 border-none"
                     >
                       {actions.map((action, index) => (
                         <Dropdown.Item
@@ -61,6 +61,7 @@ export default function TableData<T extends { id: string }>({ isLoading, data, c
                           onClick={() => action.onClick?.(row)}
                           href={action.link ? action.link(row) : undefined}
                           as={action.link ? Link : undefined}
+                          className="dark:text-white"
                         >
                           {action.label}
                         </Dropdown.Item>

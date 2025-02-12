@@ -4,15 +4,15 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import useLocalStorage, { localStorageKey } from "@/utils/useLocalStorage";
 import request from "@/utils/request";
-import { CategoryItem, Organization, OrganizationRole, Role, User, UserOrganization } from "@/types";
+import { CategoryItem, OrganizationRole, Role, User, UserOrganization } from "@/types";
 import Cookies from "js-cookie";
 
 type UserContext = {
   user: User | undefined;
-  selectedOrganization: Organization | undefined;
-  setSelectedOrganization: (value: Organization) => void;
+  selectedOrganization: UserOrganization | undefined;
+  setSelectedOrganization: (value: UserOrganization) => void;
   setUser: (value: User) => void;
-  allOrganizations: Organization[];
+  allOrganizations: UserOrganization[];
   categoryItems: CategoryItem[];
   signOut: () => Promise<void>;
   role: OrganizationRole | undefined;
@@ -22,12 +22,12 @@ export const UserContext = createContext<UserContext>({} as UserContext);
 
 export default function UserProvider({ children }: { children: JSX.Element[] }) {
   const [user, setUser] = useLocalStorage(localStorageKey.user, {} as User);
-  const [selectedOrganization, setSelectedOrganization] = useLocalStorage(localStorageKey.organization, {} as Organization);
+  const [selectedOrganization, setSelectedOrganization] = useLocalStorage(localStorageKey.organization, {} as UserOrganization);
   const [role, setRole] = useLocalStorage("currentRole", {} as Role);
 
   const [categoryItems, setCategoryItems] = useLocalStorage("categoryItems", [] as CategoryItem[]);
 
-  const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
+  const [allOrganizations, setAllOrganizations] = useState<UserOrganization[]>([]);
   const router = useRouter();
 
   async function signOut() {

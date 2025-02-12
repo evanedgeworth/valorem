@@ -300,4 +300,5 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
       },
     },
   },
+
 };
