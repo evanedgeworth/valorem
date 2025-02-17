@@ -15,16 +15,16 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
   return (
     <html lang="en">
       <head>
-        <ThemeModeScript />
+        <ThemeModeScript mode="dark" />
       </head>
-      <body className="flex flex-col dark:bg-zinc-900">
+      <body className="flex flex-col dark:bg-gray-900 dark:text-white">
         <QueryProvider>
           <UserProvider>
             <div className="fixed top-0 w-full z-10">
               <NavbarWithDropdown />
             </div>
-            <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-zinc-900 mt-[67px] flex">
-              <Flowbite theme={{ theme: flowbiteTheme }}>
+            <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
+              <Flowbite theme={{ mode: "dark", theme: flowbiteTheme }}>
                 <ToastProvider>
                   <SidebarProvider>
                     <SidebarNav />

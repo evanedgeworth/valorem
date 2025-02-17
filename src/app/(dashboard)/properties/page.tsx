@@ -49,19 +49,35 @@ export default function Properties() {
   } = useQuery({
     queryKey: ["properties", selectedOrganization?.organizationId],
     queryFn: async () => {
+
       let params;
-      if (isAssignmentAllowed) {
-        params = {
-          assigneeId: "UNASSIGNED",
-          all: true,
-        };
-      } else {
-        params = {
-          organizationId: selectedOrganization?.organizationId,
-          includeOrdersCount: true,
-          includeAssignee: true,
-        };
+      switch (role?.roleName) {
+        case "CLIENT":
+          params = {
+            organizationId: selectedOrganization?.organizationId,
+            includeOrdersCount: true,
+            includeAssignee: true,
+            all: true,
+          };
+          break;
+        case "SENIOR PROJECT MANAGER":
+        case "SENIOR_PROJECT_MANAGER":
+          params = {
+            includeOrdersCount: true,
+            includeAssignee: true,
+            all: true,
+          };
+          break;
+        default:
+          params = {
+            includeOrdersCount: true,
+            includeAssignee: true,
+            assigneeId: selectedOrganization?.userId,
+            all: true,
+          };
+          break;
       }
+
       const res = await request({
         url: `/properties`,
         method: "GET",
@@ -72,7 +88,7 @@ export default function Properties() {
       }
       throw Error(res.data.message);
     },
-    enabled: Boolean(selectedOrganization?.organizationId),
+    enabled: Boolean(selectedOrganization?.organizationId && role),
   });
 
   const properties: Property[] = useMemo(() => {

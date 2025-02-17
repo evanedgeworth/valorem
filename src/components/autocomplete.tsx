@@ -35,13 +35,13 @@ const Autocomplete = <T,>({ options, onOptionSelect, getOptionLabel, isLoading, 
         placeholder="Search..."
         {...props}
       />
-      {isLoading && <div className="absolute top[100%] left-0 w[100%] bg-slate-50 p-4 text-center">Loading...</div>}
+      {isLoading && <div className="absolute top[100%] left-0 w[100%] bg-slate-50 p-4 text-center dark:bg-gray-800">Loading...</div>}
       {!isLoading && isFocused && filteredOptions.length > 0 && (
-        <ul className="list-none p-0 m-0 absolute w-full top-full left-0 bg-white border border-gray-300 shadow-md max-h-56 overflow-y-auto z-50">
+        <ul className="list-none p-0 m-0 absolute w-full top-full left-0 bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600 shadow-md max-h-56 overflow-y-auto z-50">
           {filteredOptions.map((option, index) => (
             <li
               key={index}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
+              className="p-2 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-900"
               onMouseDown={() => {
                 setInputValue(getOptionLabel(option));
                 onOptionSelect(option);

@@ -7,7 +7,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: "media",
+  darkMode: "class",
   theme: {
     colors: {
       ...colors,

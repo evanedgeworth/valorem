@@ -84,7 +84,7 @@ export default function NewProductModal({
 
   return (
     <div ref={rootRef}>
-      <Button size="sm" onClick={() => setShowModal(true)}>
+      <Button size="sm" onClick={() => setShowModal(true)} color="gray">
         + Add Product
       </Button>
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
@@ -118,7 +118,7 @@ export default function NewProductModal({
                   <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={handleAddProduct}>Save</Button>
+                  <Button color="gray" onClick={handleAddProduct}>Save</Button>
                 </div>
               </>
             )}
