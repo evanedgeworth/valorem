@@ -10,23 +10,38 @@ import TableData, { TableAction } from "@/components/table-data";
 import AddUserModal from "./components/add-user-modal";
 import { checkPermission } from "@/utils/commonUtils";
 import { ViewUserModal } from "./components/view-user.modal";
+import UserRole from "./components/user-role";
+import { Button, Label, TextInput } from "flowbite-react";
+import { FaFilter } from "react-icons/fa";
+import FilterUserModal from "./components/filter-user-modal";
+import { Pagination } from "flowbite-react";
 
 export default function UserPage() {
   const { selectedOrganization, role } = useUserContext();
   const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
+
+  const [searchInput, setSearchInput] = useState<string>("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [previousTokens, setPreviousTokens] = useState<string[]>([]);
+  const nextToken = previousTokens[currentPage - 2] || null;
+
+  console.log(previousTokens, currentPage);
 
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
-    queryKey: ['users', selectedOrganization?.organizationId],
+    queryKey: ['users', selectedOrganization?.organizationId, nextToken],
     queryFn: async () => {
       const res = await request({
         url: `/user_organizations`,
         method: "GET",
         params: {
           id: selectedOrganization?.type === "VALOREM" ? undefined : selectedOrganization?.organizationId,
-          filterType: "organization",
+          filterType: selectedOrganization?.type === "VALOREM" ? undefined : "organization",
           includeRoles: true,
           includeUsers: true,
-          pageSize: 20
+          pageSize: 10,
+          nextToken
         },
       })
       if (res?.status === 200) {
@@ -36,6 +51,13 @@ export default function UserPage() {
     },
     enabled: Boolean(selectedOrganization?.organizationId)
   });
+
+  const onPageChange = (page: number) => {
+    if (page > currentPage && data?.nextToken) {
+      setPreviousTokens((prev) => [...prev, data.nextToken]);
+    }
+    setCurrentPage(page);
+  };
 
   const userOrganizations: UserOrganization[] = useMemo(() => {
     const result: UserOrganization[] = data?.userOrganizations || [];
@@ -64,9 +86,24 @@ export default function UserPage() {
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Users</h5>
-        <AddUserModal />
+        {
+          selectedOrganization?.type === "VALOREM" && (
+            <AddUserModal />
+          )
+        }
       </div>
-
+      <div className="flex gap-4 mb-4 justify-between">
+        <div className="max-w-md">
+          <TextInput placeholder="Search for user" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} className="w-60" />
+        </div>
+        <div className="flex gap-2 items-end">
+          <Button outline color="gray" size="sm" onClick={() => setShowFilterModal(true)}>
+            <div className="flex items-center gap-1">
+              <FaFilter /> Filter
+            </div>
+          </Button>
+        </div>
+      </div>
       <TableData
         isLoading={tableIsLoading || !Boolean(selectedOrganization?.organizationId)}
         data={userOrganizations.map((item) => ({ ...item, id: `${item.organizationId}-${item.userId}-${item.roleId}` }))}
@@ -79,7 +116,7 @@ export default function UserPage() {
           {
             label: "USER ROLE",
             key: "role",
-            render: (value) => value?.roleName
+            render: (value) => <div className="flex"><UserRole role={value?.roleName} /></div>
           },
           {
             label: "EMAIL",
@@ -89,10 +126,27 @@ export default function UserPage() {
         ]}
         actions={actions}
       />
+      {
+        (previousTokens.length > 0 || data?.nextToken) && (
+          <div className="flex justify-end">
+            <Pagination
+              layout="navigation"
+              currentPage={currentPage}
+              totalPages={data?.nextToken ? currentPage + 1 : currentPage}
+              onPageChange={onPageChange}
+              showIcons
+            />
+          </div>
+        )
+      }
       <ViewUserModal
         onClose={() => setShowViewModal(false)}
         open={showViewModal}
         userOrganization={selectedUserOrganization.current}
+      />
+      <FilterUserModal
+        onClose={() => setShowFilterModal(false)}
+        open={showFilterModal}
       />
     </section>
   );

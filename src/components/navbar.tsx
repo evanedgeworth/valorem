@@ -11,7 +11,6 @@ import Notifications from "./notifications";
 import Cookies from "js-cookie";
 import { localStorageKey } from "@/utils/useLocalStorage";
 import { Organization } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function NavbarWithDropdown() {
   const router = useRouter();

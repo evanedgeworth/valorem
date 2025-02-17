@@ -121,6 +121,7 @@ export default function CompanyForm() {
                     inputProps={{
                       ...params.inputProps,
                       style: { fontSize: "14px" },
+                      className: "dark:text-white"
                     }}
                   />
                 )}

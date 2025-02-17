@@ -25,6 +25,9 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     body: {
       base: "space-y-6 px-6 pb-4 sm:pb-6 lg:px-8 xl:pb-8 dark:bg-gray-800",
     },
+    footer: {
+      base: "flex items-center space-x-2 rounded-b border-none p-6 dark:bg-gray-800"
+    }
   },
   button: {
     base: "group relative flex items-stretch justify-center p-0.5 text-center font-medium transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow] focus:z-10 focus:outline-none",
@@ -300,5 +303,13 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
       },
     },
   },
-
+  dropdown: {
+    floating: {
+      base: "border-none rounded-lg",
+      item: {
+        base: "flex w-full cursor-pointer items-center justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-white dark:hover:bg-gray-600 dark:hover:text-white dark:focus:bg-gray-600 dark:focus:text-white"
+      },
+      header: "flex w-full items-center justify-start px-4 py-2 text-sm text-gray-700 dark:text-white  border-b-gray-200 dark:border-b-gray-400 border-b"
+    }
+  }
 };
