@@ -6,17 +6,25 @@ import Papa from "papaparse";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { toTitleCase } from "@/utils/commonUtils";
-import request from "@/utils/request";
-import { useUserContext } from "@/context/userContext";
+import downloadCSV from "@/utils/downloadCSV";
+import { IoCloseCircle } from "react-icons/io5";
 
 export default function ImportModal({
   showModal,
   setShowModal,
   onSubmit,
+  options,
+  requiredOptions,
+  isLoading,
+  errors
 }: {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   onSubmit: (data: any[]) => void;
+  options: string[];
+  requiredOptions: string[];
+  isLoading?: boolean;
+  errors: any[];
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState('upload');
@@ -24,8 +32,6 @@ export default function ImportModal({
   const [header, setHeader] = useState('yes');
   const [activeIndex, setActiveIndex] = useState(1);
   const [mapping, setMapping] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const { selectedOrganization } = useUserContext();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -43,16 +49,13 @@ export default function ImportModal({
   const handleCancel = () => {
     setShowModal(false);
     setStep('upload');
+    setMapping({});
   }
 
   const isHeader = header === 'yes';
   const total = data.length;
 
-  const options = ["lineItem", "taskDescription", "targetClientPrice", "costCategory", "costCode", "options", "notes", "uom", "originalMaterialId", "targetVendorPrice", "equipmentUsageRental", "area", "quantity"];
-  const requiredOptions = ["lineItem", "taskDescription", "targetClientPrice", "area", "quantity"];
-
   const isValidImport = useMemo(() => requiredOptions.every((key) => key in mapping), [mapping]);
-  const missingOptions = useMemo(() => options.filter((key) => !(key in mapping)), [mapping]);
 
   const getOptionValue = (value: string) => {
     let result = "";
@@ -70,44 +73,23 @@ export default function ImportModal({
       if (i === 0 && header === 'yes') {
         return;
       }
-  
-      const product: { [key: string]: string | number } = { materialId: '' };
+
+      const product: { [key: string]: string | number } = {};
       options.forEach(option => {
         const index = parseInt(mapping[option], 10);
         if (!isNaN(index) && index >= 0 && index < item.length) {
-          product[option] = option === "quantity" ? Number(item[index]) : item[index];
+          product[option] = item[index];
         }
       });
-  
+
       items.push(product);
     });
-  
 
-    const batchSize = 10;
-    const batches = [];
-    for (let i = 0; i < items.length; i += batchSize) {
-      batches.push(items.slice(i, i + batchSize));
-    }
-
-    setIsLoading(true);
-    for (const batch of batches) {
-      try {
-        const res = await request({
-          url: `/custom-catalogs`,
-          method: 'POST',
-          data: {
-            organizationId: selectedOrganization?.organizationId,
-            newCategoryItems: batch
-          }
-        });
-        console.log("Response:", res);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    }
-    setIsLoading(false);
+    onSubmit(items);
   };
-  
+
+  console.log('======', options
+    .filter(option => !Object.values(mapping).includes(option)), mapping)
 
   return (
     <div ref={rootRef}>
@@ -248,23 +230,39 @@ export default function ImportModal({
                               <div className="items-center gap-2 flex">
                                 <FaArrowRightLong /> map to
                               </div>
-                              <Select
-                                onChange={(e) => {
-                                  setMapping({
-                                    ...mapping,
-                                    [e.target.value]: index.toString()
-                                  });
-                                }}
-                                value={value}
-                                color={value ? "success" : undefined}
-                              >
-                                <option value="">Select field...</option>
+                              <div className="flex gap-1 items-center">
+                                <Select
+                                  onChange={(e) => {
+                                    setMapping({
+                                      ...mapping,
+                                      [e.target.value]: index.toString()
+                                    });
+                                  }}
+                                  value={value}
+                                  color={value ? "success" : undefined}
+                                  className="flex-1"
+                                >
+                                  <option value="">Select field...</option>
+                                  {
+                                    options
+                                      .map((option, index) => Object.keys(mapping).includes(option) && option !== value ? null : (
+                                        <option value={option}>{toTitleCase(option)}</option>
+                                      ))
+                                  }
+                                </Select>
                                 {
-                                  options.map(option => (
-                                    <option value={option}>{toTitleCase(option)}</option>
-                                  ))
+                                  value && (
+                                    <IoCloseCircle
+                                      className="cursor-pointer" size={24}
+                                      onClick={() => {
+                                        const data = {...mapping}
+                                        delete data[value];
+                                        setMapping(data);
+                                      }}
+                                    />
+                                  )
                                 }
-                              </Select>
+                              </div>
                             </div>
                           </div>
                         );
@@ -278,25 +276,21 @@ export default function ImportModal({
         </Modal.Body>
         {
           step === "mapping" && (
-            <Modal.Footer>
+            <Modal.Footer className="pt-0 pb-4">
               <div className="flex-1">
                 {
-                  !isValidImport && (
-                    <div>
-                      <p>Please map the fields</p>
-                      <div className="flex flex-wrap gap-1">
-                        {
-                          missingOptions.map(item => (
-                            <Badge key={item}>{toTitleCase(item)}</Badge>
-                          ))
-                        }
-                      </div>
+                  errors?.length > 0 ? (
+                    <div className="flex justify-end gap-2 mt-2 items-center">
+                      <p className="text-red-700 mb-2 dark:text-red-400">Failed imported data</p>
+                      <Button onClick={() => downloadCSV(errors)}>Download</Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end gap-2 mt-2">
+                      <Button isProcessing={isLoading} disabled={!isValidImport} onClick={handleImport}>Import {isHeader ? total - 1 : total} data</Button>
                     </div>
                   )
                 }
-                <div className="flex justify-end gap-2 mt-2">
-                  <Button isProcessing={isLoading} disabled={!isValidImport} onClick={handleImport}>Import {isHeader ? total - 1 : total} data</Button>
-                </div>
+
               </div>
             </Modal.Footer>
           )

@@ -1,6 +1,6 @@
 "use client";
 
-import { TextInput, Label, Button } from "flowbite-react";
+import { TextInput, Label, Button, Spinner } from "flowbite-react";
 import { useState, useRef, useContext, useMemo } from "react";
 import moment from "moment";
 import Map from "./components/map";
@@ -20,6 +20,7 @@ import { useToast } from "@/context/toastContext";
 import ScopeRequestModal from "./components/scopeRequest.modal";
 import AssignProjectManager from "./components/assing-project-manager";
 import TableData, { TableAction } from "@/components/table-data";
+import ImportModal from "@/components/import.modal";
 
 export default function Properties() {
   const pathname = usePathname();
@@ -39,6 +40,9 @@ export default function Properties() {
   const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
+  const [isLoadingImport, setIsLoadingImport] = useState<boolean>(false);
+  const [errorImport, setErrorImport] = useState<any[]>([]);
 
   const isAssignmentAllowed = checkPermission(role, "properties_assign");
 
@@ -46,6 +50,7 @@ export default function Properties() {
     data,
     isLoading: tableIsLoading,
     refetch,
+    isFetching,
   } = useQuery({
     queryKey: ["properties", selectedOrganization?.organizationId],
     queryFn: async () => {
@@ -168,11 +173,56 @@ export default function Properties() {
     return result;
   }, [role]);
 
+  const handleImport = async (items: any[]) => {
+    const errorItem = [];
+    setIsLoadingImport(true);
+    for (const item of items) {
+      const res = await request({
+        url: `/properties`,
+        method: 'POST',
+        data: {
+          name: item.name,
+          organizationId: selectedOrganization?.organizationId,
+          accessInstructions: item.accessInstructions,
+          notes: item.notes,
+          type: item.type,
+          noOfRooms: Number(item.noOfRooms),
+          noOfBathrooms: Number(item.noOfBathrooms),
+          address: {
+            address1: item.address1,
+            address2: item.address2,
+            city: item.city,
+            state: item.state,
+            postalCode: item.postalCode,
+          },
+        }
+      });
+
+      if (res?.status === 200) {
+        errorItem.push({
+          ...item,
+          error: res?.data?.message
+        });
+      }
+    }
+    setIsLoadingImport(false);
+    refetch();
+    if (errorItem.length === 0) {
+      setIsOpenImport(false);
+      showToast("Successfully imported data.", "success");
+    } else {
+      setErrorImport(errorItem);
+    }
+  }
+
   return (
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
-        {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
+        <div className="flex gap-2">
+          {checkPermission(role, "properties_create") && <Button outline color="gray" onClick={() => setIsOpenImport(true)}>Import</Button>}
+          {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
+        </div>
       </div>
 
       <div className="flex gap-4 mb-4 items-end">
@@ -236,6 +286,17 @@ export default function Properties() {
         isLoading={isLoadingDelete}
       />
       <ScopeRequestModal setShowModal={setShowRequestModal} showModal={showRequestModal} property={selectedProperty.current} />
+      <ImportModal
+        showModal={isOpenImport}
+        setShowModal={(v) => setIsOpenImport(v)}
+        onSubmit={(data) => {
+          handleImport(data);
+        }}
+        options={["name", "accessInstructions", "notes", "type", "noOfRooms", "noOfBathrooms", "address1", "address2", "city", "state", "postalCode"]}
+        requiredOptions={["name", "accessInstructions", "notes", "type", "noOfRooms", "noOfBathrooms", "address1", "city", "state", "postalCode"]}
+        isLoading={isLoadingImport}
+        errors={errorImport}
+      />
     </section>
   );
 }
