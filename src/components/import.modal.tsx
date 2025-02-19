@@ -159,8 +159,8 @@ export default function ImportModal({
                       <Table className="divide-x divide-y border">
                         <Table.Head className="">
                           {
-                            data[0]?.map(item => (
-                              <Table.HeadCell className="truncate border max-w-[150px] p-2 normal-case">{item}</Table.HeadCell>
+                            data[0]?.map((item, index) => (
+                              <Table.HeadCell key={index} className="truncate border max-w-[150px] p-2 normal-case">{item}</Table.HeadCell>
                             ))
                           }
                         </Table.Head>
@@ -168,8 +168,8 @@ export default function ImportModal({
                           {
                             data.slice(1, 6).map((item, index) => (
                               <Table.Row key={index} className="divide-x">
-                                {item.map(row => (
-                                  <Table.Cell className="truncate max-w-[150px] p-2">{row}</Table.Cell>
+                                {item.map((row, index) => (
+                                  <Table.Cell key={index} className="truncate max-w-[150px] p-2">{row}</Table.Cell>
                                 ))}
                               </Table.Row>
                             ))
@@ -246,7 +246,7 @@ export default function ImportModal({
                                   {
                                     options
                                       .map((option, index) => Object.keys(mapping).includes(option) && option !== value ? null : (
-                                        <option value={option}>{toTitleCase(option)}</option>
+                                        <option key={option} value={option}>{toTitleCase(option)}</option>
                                       ))
                                   }
                                 </Select>
