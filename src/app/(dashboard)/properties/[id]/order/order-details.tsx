@@ -246,7 +246,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     showToast("Successfully imported data.", "success");
   }
 
-  const isEditAllowed = scopeStatus !== "APPROVED";
+  const isEditAllowed = !["APPROVED", "REQUESTED"].includes(scopeStatus);
 
   return (
     <div className="w-full p-5">
@@ -279,12 +279,22 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                 }
                 {
                   scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
                   )
                 }
                 {
                   scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
                   )
                 }
                 {
@@ -352,7 +362,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             title={`Are you sure you want to ${actionModal?.replaceAll('_', ' ').toLowerCase()}?`}
             handleConfirm={(note) => {
               if (scopeStatus === "REQUESTED") {
-                mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                if (actionModal === "APPROVE") {
+                  mutateInitiate({ scopeStatus: "SCHEDULED", reason: note });
+                } else {
+                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                }
               } else if (scopeStatus === "SCHEDULED") {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
