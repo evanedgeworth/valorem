@@ -6,10 +6,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Card, Spinner } from "flowbite-react";
 import { HiOutlineArrowSmLeft } from "react-icons/hi";
 import { useRouter } from 'next/navigation'
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 import ActiveOrder from "@/app/(dashboard)/order/[id]/components/activeOrder";
-import { UserContext, useUserContext } from "@/context/userContext";
+import { useUserContext } from "@/context/userContext";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
@@ -38,7 +38,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       throw Error(res?.data?.message);
     }
   });
-  
+
   const order = data as Scope;
   const scopeStatus = order?.scopeStatus;
   const assigneeId = order?.property?.assigneeId;
@@ -183,12 +183,22 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               <div className="flex gap-4">
                 {
                   scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
                   )
                 }
                 {
                   scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
                   )
                 }
                 {
@@ -229,7 +239,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         </div>
       </Card>
       <ActiveOrder
-        isEditing={scopeStatus !== "APPROVED"}
+        isEditing={!["APPROVED", "REQUESTED"].includes(scopeStatus)}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
@@ -256,7 +266,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             title={`Are you sure you want to ${actionModal?.replaceAll('_', ' ').toLowerCase()}?`}
             handleConfirm={(note) => {
               if (scopeStatus === "REQUESTED") {
-                mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                if (actionModal === "APPROVE") {
+                  mutateInitiate({ scopeStatus: "SCHEDULED", reason: note });
+                } else {
+                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                }
               } else if (scopeStatus === "SCHEDULED") {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });

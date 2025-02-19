@@ -131,10 +131,10 @@ export default function ActiveOrder({
         ) : (
           <div className="mx-auto my-24">
             <h5 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">No products added</h5>
-            <p className="mb-2 text-sm text-gray-400 dark:text-white">{`Click 'Add Product' to get started.`}</p>
-            <div>
-              {
-                isEditing && (
+            {
+              isEditing && (
+                <div>
+                  <p className="mb-2 text-sm text-gray-400 dark:text-white">{`Click 'Add Product' to get started.`}</p>
                   <NewProductModal
                     showModal={showAddModal}
                     setShowModal={setShowAddModal}
@@ -143,9 +143,9 @@ export default function ActiveOrder({
                     }}
                     orderId={orderId}
                   />
-                )
-              }
-            </div>
+                </div>
+              )
+            }
           </div>
         )}
       </div>
