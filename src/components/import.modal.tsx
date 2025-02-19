@@ -140,7 +140,7 @@ export default function ImportModal({
                   <div className="grid grid-cols-2">
                     <div className="relative">
                       <fieldset onChange={(e: any) => setHeader(e.target.value)} defaultValue={header} className="flex max-w-md flex-col gap-4 relative">
-                        <legend className="mb-4">Is this your CSV's header row?</legend>
+                        <legend className="mb-4">Is this your CSV header row?</legend>
                         <div className="flex items-center gap-2">
                           <Radio id="united-state" name="header" value="yes" defaultChecked />
                           <Label htmlFor="united-state">Yes, this is the header</Label>
