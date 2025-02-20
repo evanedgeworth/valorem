@@ -21,7 +21,7 @@ const RootLayout: FC<PropsWithChildren> = function ({ children }) {
         <QueryProvider>
           <UserProvider>
             <div className="fixed top-0 w-full z-10">
-              <NavbarWithDropdown />
+              <NavbarWithDropdown homeLink="/properties" />
             </div>
             <main className="min-h-[calc(100vh-67px)] bg-gray-50 dark:bg-gray-900 mt-[67px] flex">
               <Flowbite theme={{ mode: "dark", theme: flowbiteTheme }}>

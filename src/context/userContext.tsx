@@ -30,7 +30,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const router = useRouter();
 
-  async function signOut() {
+  async function signOut(page?:string) {
     await request({
       url: '/logout'
     });
@@ -38,7 +38,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     Cookies.remove(localStorageKey.accessToken);
     Cookies.remove(localStorageKey.refreshToken);
     Cookies.remove(localStorageKey.roleId);
-    router.replace('/login');
+    router.replace(page || '/login');
   }
 
   async function handleGetRole(roleId: string) {
@@ -62,7 +62,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     });
 
     if (res?.status === 403) {
-      signOut();
+      signOut('/signup');
     }
 
     const firstOrganization = res?.data?.userOrganizations?.[0];
@@ -119,7 +119,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       localStorage.clear();
       setSelectedOrganization(null);
       setUser(null);
-      signOut();
+      signOut('/signup');
     }
   }, []);
 

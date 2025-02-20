@@ -175,7 +175,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           {
             isEdited ? (
               <div className="flex gap-4">
-                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
+                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(true)}>
                   Save
                 </Button>
               </div>

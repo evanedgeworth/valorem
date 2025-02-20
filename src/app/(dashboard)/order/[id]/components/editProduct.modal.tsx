@@ -95,8 +95,8 @@ export default function EditProductModal({
           </div>
 
           <div className="flex gap-4">
-            <Button fullSized outline onClick={() => setShowModal(false)}>Close</Button>
-            <Button fullSized onClick={handleSubmit}>Submit</Button>
+            <Button fullSized color="gray" outline onClick={() => setShowModal(false)}>Close</Button>
+            <Button fullSized color="gray" onClick={handleSubmit}>Submit</Button>
           </div>
 
         </div>
