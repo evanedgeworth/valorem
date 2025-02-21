@@ -5,6 +5,7 @@ import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
 import { CategoryItem } from "@/types";
 import Autocomplete from "@/components/autocomplete";
 import { useUserContext } from "@/context/userContext";
+import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 
 export const areaOptions = [
   "Exterior",
@@ -65,12 +66,17 @@ export default function NewProductModal({
     setQuantity(1);
   }
 
+  function handleClose () {
+    setShowModal(false);
+    setSelectedCatalog(undefined)
+  }
+
   return (
     <div ref={rootRef}>
       <Button size="sm" onClick={() => setShowModal(true)} color="gray">
         + Add Product
       </Button>
-      <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
+      <Modal show={showModal} size="2xl" popup onClose={handleClose} root={rootRef.current ?? undefined}>
         <Modal.Header>
           <h3 className="text-xl font-medium px-5 pt-3">Add product</h3>
         </Modal.Header>
@@ -87,6 +93,10 @@ export default function NewProductModal({
             </div>
             {selectedCatalog && (
               <>
+                <div className="mt-1">
+                  <p className="text-xl font-medium">Description</p>
+                  <p>{selectedCatalog?.taskDescription}</p>
+                </div>
                 <div>
                   <Label htmlFor="area">Room / Area</Label>
                   <Select id="area" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
@@ -96,12 +106,24 @@ export default function NewProductModal({
                     ))}
                   </Select>
                 </div>
-                <div>
-                  <Label>Quantity</Label>
-                  <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
+                <div className="grid gap-4 grid-cols-12">
+                  <div className="col-span-6">
+                    <Label>Quantity</Label>
+                    <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
+                  </div>
+                  <div className="col-span-3">
+                    <p className="text-sm mt-1">Price per item</p>
+                    <p className="mt-3">{selectedCatalog?.targetClientPrice}</p>
+                  </div>
+                  <div className="col-span-3">
+                    <p className="text-sm mt-1">Price total</p>
+                    <p className="mt-3">$ {numberWithCommas(parseCurrencyToNumber(selectedCatalog?.targetClientPrice || "0") * (isNaN(quantity) ? 0 : quantity))}</p>
+                  </div>
                 </div>
-                <div className="flex justify-end">
-                  <Button color="gray" onClick={handleAddProduct}>Save</Button>
+
+                <div className="flex gap-4">
+                  <Button fullSized color="gray" outline onClick={handleClose}>Close</Button>
+                  <Button fullSized color="gray" onClick={handleAddProduct}>Save</Button>
                 </div>
               </>
             )}
