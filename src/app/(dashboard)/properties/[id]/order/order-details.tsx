@@ -7,7 +7,7 @@ import { Button, Card, Spinner } from "flowbite-react";
 import { HiOutlineArrowSmLeft } from "react-icons/hi";
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from "react";
-import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
+import { generateUUID, numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 import ActiveOrder from "@/app/(dashboard)/order/[id]/components/activeOrder";
 import { useUserContext } from "@/context/userContext";
 import moment from "moment";
@@ -63,6 +63,14 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   }, [scopeItemRevision, categoryItems]);
 
+  function cancelEdit() {
+    setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+      ...item,
+      categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+    })));
+    setIsEdited(false);
+  }
+
   const { mutate, isPending: isPendingPopulate } = useMutation({
     mutationFn: async (body: any) => {
       const res = await request({
@@ -116,6 +124,29 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
+  const { mutate: mutateUpdate, isPending: isPendingUpdate } = useMutation({
+    mutationFn: async (body: any) => {
+      const res = await request({
+        url: `/scope/${orderId}`,
+        method: 'PUT',
+        data: body
+      });
+
+      if (res?.status === 200) {
+        return res.data;
+      }
+      throw Error(res?.data?.message);
+    },
+    onSuccess: () => {
+      showToast('Successfully updated data.');
+      setActionModal(null);
+      refetch();
+    },
+    onError: (error) => {
+      showToast(error.message, 'error');
+    }
+  });
+
   const { mutate: mutateInitiate, isPending: isPendingInitiate } = useMutation({
     mutationFn: async (body: {
       scopeStatus: ScopeStatus,
@@ -142,16 +173,50 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  async function populateOrder(sendForApproval: boolean) {
+  async function updateOrder() {
     const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
-    await mutate({
-      scopeItems: formattedScopeItems.map(item => ({
-        "categoryItemId": item.categoryItemId,
-        "area": item.area,
-        "quantity": item.quantity,
-      })),
-      sendForApproval
-    });
+    const now = new Date();
+    const body: Scope = {
+      ...order,
+      scopeItemRevisions: [...order.scopeItemRevisions.map(item => ({ ...item, status: 'REVISED' })), {
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        status: 'PENDING',
+        revision: order.scopeItemRevisions.length + 1,
+        internalRevision: true,
+        scopeItems: formattedScopeItems.map(item => ({
+          id: generateUUID(),
+          updatedAt: now.toISOString(),
+          createdAt: now.toISOString(),
+          categoryItemId: item.categoryItemId,
+          isCustomized: false,
+          area: item.area,
+          quantity: item.quantity,
+          targetClientPrice: item.targetClientPrice,
+          scopeItemImages: item.scopeItemImages,
+          internalComments: item.internalComments,
+          externalComments: item.externalComments
+        })),
+      }]
+    }
+
+    mutateUpdate(body);
+  }
+
+  async function populateOrder(sendForApproval: boolean) {
+    if (role?.roleName === 'CLIENT') {
+      updateOrder();
+    } else {
+      const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
+      await mutate({
+        scopeItems: formattedScopeItems.map(item => ({
+          "categoryItemId": item.categoryItemId,
+          "area": item.area,
+          "quantity": item.quantity,
+        })),
+        sendForApproval
+      });
+    }
   }
 
   if (isLoading) {
@@ -175,7 +240,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           {
             isEdited ? (
               <div className="flex gap-4">
-                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(true)}>
+                <Button color="gray" outline onClick={cancelEdit}>Cancel</Button>
+                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
                   Save
                 </Button>
               </div>
@@ -217,6 +283,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                 {
                   scopeStatus === "SUBMITTED" && ["CLIENT", "SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
+                      <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
+                        Request changes
+                      </Button>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
                         Accept
@@ -240,6 +309,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       </Card>
       <ActiveOrder
         isEditing={!["APPROVED", "REQUESTED"].includes(scopeStatus)}
+        isAdding={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
+        isDeleting={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
@@ -282,6 +353,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               } else if (scopeStatus === "SUBMITTED") {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                } else if (actionModal === "REVISION_REQUESTED") {
+                  mutateReview({ action: "REVISION_REQUESTED", note });
                 } else if (actionModal === "APPROVE") {
                   mutateReview({ action: "APPROVE", note });
                 }

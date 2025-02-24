@@ -125,7 +125,7 @@ export interface ScopeItem {
   categoryItemId: string;
   categoryItem?: CategoryItem;
   area: string;
-  status: string;
+  status?: string;
   scopeItemImages: {
     fileId: string;
     fileUrl: string;

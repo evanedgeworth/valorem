@@ -15,13 +15,17 @@ export default function ActiveOrder({
   add,
   edit,
   isEditing,
+  isAdding,
+  isDeleting,
   products,
   orderId,
 }: {
   remove: (product: ScopeItem) => void;
   add: (product: ScopeItem) => void;
   edit: (product: ScopeItem) => void;
-  isEditing: boolean;
+  isEditing?: boolean;
+  isAdding?: boolean;
+  isDeleting?: boolean;
   products: ScopeItem[] | null;
   orderId: string;
 }) {
@@ -46,7 +50,7 @@ export default function ActiveOrder({
               <div className="flex justify-between">
                 <h5 className="mb-2 text-2xl text-left font-bold">{item[0].area}</h5>
                 {
-                  isEditing && (
+                  isAdding && (
                     <div>
                       <NewProductModal
                         showModal={showAddModal}
@@ -68,7 +72,7 @@ export default function ActiveOrder({
                   <Table.HeadCell>Price</Table.HeadCell>
                   <Table.HeadCell>Total Price</Table.HeadCell>
 
-                  {isEditing && <Table.HeadCell>Action</Table.HeadCell>}
+                  {(isEditing || isDeleting) && <Table.HeadCell>Action</Table.HeadCell>}
                 </Table.Head>
                 {item
                   .map((product, index) => (
@@ -98,26 +102,32 @@ export default function ActiveOrder({
                           <Table.Cell>
                             <div className="relative cursor-pointer">
                               <Dropdown renderTrigger={() => <BiDotsHorizontalRounded size={25} />} label="" className="!left-[-50px] !top-6">
-                                <Dropdown.Item
-                                  onClick={() => {
-                                    selectedProduct.current = product;
-                                    setShowEditModal(true);
-                                  }}
-                                  icon={EditIcon}
-                                >
-                                  Edit
-                                </Dropdown.Item>
+                                {
+                                  isEditing && (
+                                    <Dropdown.Item
+                                      onClick={() => {
+                                        selectedProduct.current = product;
+                                        setShowEditModal(true);
+                                      }}
+                                    >
+                                      Edit
+                                    </Dropdown.Item>
+                                  )
+                                }
 
-                                <Dropdown.Item
-                                  onClick={() => {
-                                    selectedProduct.current = product;
-                                    handleRemoveProduct(product);
-                                  }}
-                                  icon={DeleteIcon}
-                                  className="text-red-500"
-                                >
-                                  Delete
-                                </Dropdown.Item>
+                                {
+                                  isDeleting && (
+                                    <Dropdown.Item
+                                      onClick={() => {
+                                        selectedProduct.current = product;
+                                        handleRemoveProduct(product);
+                                      }}
+                                      className="text-red-500"
+                                    >
+                                      Delete
+                                    </Dropdown.Item>
+                                  )
+                                }
                               </Dropdown>
                             </div>
                           </Table.Cell>
@@ -132,7 +142,7 @@ export default function ActiveOrder({
           <div className="mx-auto my-24">
             <h5 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">No products added</h5>
             {
-              isEditing && (
+              isAdding && (
                 <div>
                   <p className="mb-2 text-sm text-gray-400 dark:text-white">{`Click 'Add Product' to get started.`}</p>
                   <NewProductModal
