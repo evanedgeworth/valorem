@@ -42,7 +42,7 @@ export default function Properties() {
   const { showToast } = useToast();
   const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
   const [isLoadingImport, setIsLoadingImport] = useState<boolean>(false);
-  const [errorImport, setErrorImport] = useState<any[]>([]);
+  const [errorImport, setErrorImport] = useState<(Property & { error: string })[]>([]);
 
   const isAssignmentAllowed = checkPermission(role, "properties_assign");
 
@@ -54,7 +54,6 @@ export default function Properties() {
   } = useQuery({
     queryKey: ["properties", selectedOrganization?.organizationId],
     queryFn: async () => {
-
       let params;
       switch (role?.roleName) {
         case "CLIENT":
@@ -174,12 +173,13 @@ export default function Properties() {
   }, [role]);
 
   const handleImport = async (items: any[]) => {
-    const errorItem = [];
+    const errorItem: (Property & { error: string })[] = [];
     setIsLoadingImport(true);
+
     for (const item of items) {
       const res = await request({
         url: `/properties`,
-        method: 'POST',
+        method: "POST",
         data: {
           name: item.name,
           organizationId: selectedOrganization?.organizationId,
@@ -195,13 +195,13 @@ export default function Properties() {
             state: item.state,
             postalCode: item.postalCode,
           },
-        }
+        },
       });
 
       if (res?.status === 200) {
         errorItem.push({
           ...item,
-          error: res?.data?.message
+          error: res?.data?.message,
         });
       }
     }
@@ -213,14 +213,18 @@ export default function Properties() {
     } else {
       setErrorImport(errorItem);
     }
-  }
+  };
 
   return (
     <section className="p-5 w-full">
       <div className="flex justify-between mb-4">
         <h5 className="text-4xl font-bold text-gray-900 dark:text-white">Properties</h5>
         <div className="flex gap-2">
-          {checkPermission(role, "properties_create") && <Button outline color="gray" onClick={() => setIsOpenImport(true)}>Import</Button>}
+          {checkPermission(role, "properties_create") && (
+            <Button outline color="gray" onClick={() => setIsOpenImport(true)}>
+              Import
+            </Button>
+          )}
           {checkPermission(role, "properties_create") && <NewPropertyModal showModal={showModal} setShowModal={setShowModal} />}
         </div>
       </div>
