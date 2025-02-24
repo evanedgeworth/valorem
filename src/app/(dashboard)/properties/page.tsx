@@ -173,7 +173,7 @@ export default function Properties() {
     return result;
   }, [role]);
 
-  const handleImport = async (items: any[]) => {
+  const handleImport = async (items: Record<string, string>[]) => {
     const errorItem = [];
     setIsLoadingImport(true);
     for (const item of items) {

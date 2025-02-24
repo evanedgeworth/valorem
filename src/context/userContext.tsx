@@ -17,7 +17,7 @@ type UserContext = {
   customCategoryItems: CategoryItem[];
   signOut: () => Promise<void>;
   role: OrganizationRole | undefined;
-  handleGetCustomCategory: (organizationId: string) => Promise<CategoryItem[]>;
+  handleGetCustomCatalog: (organizationId: string) => Promise<CategoryItem[]>;
 };
 
 export const UserContext = createContext<UserContext>({} as UserContext);
@@ -65,13 +65,13 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       setRole(userOrganization.role);
       Cookies.set(localStorageKey.roleId, userOrganization.roleId);
 
-      handleGetCustomCategory(userOrganization.organizationId);
+      handleGetCustomCatalog(userOrganization.organizationId);
     } else if(firstOrganization) {
       setSelectedOrganization(firstOrganization);
       setRole(firstOrganization.role);
       Cookies.set(localStorageKey.roleId, firstOrganization.roleId);
 
-      handleGetCustomCategory(firstOrganization.organizationId);
+      handleGetCustomCatalog(firstOrganization.organizationId);
     }
 
     setAllOrganizations(res.data?.userOrganizations || []);
@@ -102,7 +102,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
   }
 
-  async function handleGetCustomCategory(organizationId: string) {
+  async function handleGetCustomCatalog(organizationId: string) {
     const res = await request({
       url: `/category-items`,
       params: {
@@ -142,7 +142,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     <UserContext.Provider
       value={{
         user, setUser, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems, customCategoryItems,
-        handleGetCustomCategory
+        handleGetCustomCatalog
       }}>{children}</UserContext.Provider>
   );
 }

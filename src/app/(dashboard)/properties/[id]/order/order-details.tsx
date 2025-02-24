@@ -20,7 +20,7 @@ type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPR
 export default function OrderDetails({ propertyId, orderId }: { propertyId: string, orderId: string }) {
   const router = useRouter()
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
-  const { categoryItems, role, selectedOrganization, handleGetCustomCategory, customCategoryItems } = useUserContext();
+  const { categoryItems, role, selectedOrganization, handleGetCustomCatalog, customCategoryItems } = useUserContext();
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "REQUEST_REVIEW" | null>(null);
   const { showToast } = useToast();
@@ -217,7 +217,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       ;
     }
 
-    const resCategoryItems = newItems.length === 0 ? customCategoryItems : await handleGetCustomCategory(selectedOrganization?.organizationId ?? "");
+    const resCategoryItems = newItems.length === 0 ? customCategoryItems : await handleGetCustomCatalog(selectedOrganization?.organizationId ?? "");
 
     const categoryItemMap = new Map([...categoryItems, ...resCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
     const products: any[] = [];

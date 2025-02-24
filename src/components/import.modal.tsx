@@ -20,11 +20,11 @@ export default function ImportModal({
 }: {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
-  onSubmit: (data: any[]) => void;
+  onSubmit: (data: Record<string, string>[]) => void;
   options: string[];
   requiredOptions: string[];
   isLoading?: boolean;
-  errors: any[];
+  errors: Record<string, string>[][];
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState('upload');
@@ -87,9 +87,6 @@ export default function ImportModal({
 
     onSubmit(items);
   };
-
-  console.log('======', options
-    .filter(option => !Object.values(mapping).includes(option)), mapping)
 
   return (
     <div ref={rootRef}>
