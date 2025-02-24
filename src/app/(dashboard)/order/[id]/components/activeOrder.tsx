@@ -9,7 +9,6 @@ import NewProductModal from "./newProduct.modal";
 import EditProductModal from "./editProduct.modal";
 import { DeleteIcon, EditIcon } from "@/components/icon";
 
-
 export default function ActiveOrder({
   remove,
   add,

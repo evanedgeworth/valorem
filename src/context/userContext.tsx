@@ -14,8 +14,10 @@ type UserContext = {
   setUser: (value: User) => void;
   allOrganizations: Organization[];
   categoryItems: CategoryItem[];
+  customCategoryItems: CategoryItem[];
   signOut: () => Promise<void>;
   role: OrganizationRole | undefined;
+  handleGetCustomCatalog: (organizationId: string) => Promise<CategoryItem[]>;
 };
 
 export const UserContext = createContext<UserContext>({} as UserContext);
@@ -26,6 +28,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   const [role, setRole] = useLocalStorage("currentRole", {} as Role);
 
   const [categoryItems, setCategoryItems] = useLocalStorage("categoryItems", [] as CategoryItem[]);
+  const [customCategoryItems, setCustomCategoryItems] = useLocalStorage("customCategoryItems", [] as CategoryItem[]);
 
   const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
   const router = useRouter();
@@ -39,15 +42,6 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     Cookies.remove(localStorageKey.refreshToken);
     Cookies.remove(localStorageKey.roleId);
     router.replace(page || '/login');
-  }
-
-  async function handleGetRole(roleId: string) {
-    const role = await request({
-      url: `/roles/${roleId}`
-    });
-    if (role?.data) {
-      setRole(role.data);
-    }
   }
 
   async function handleGetOrganizations(user: any, userOrganization: UserOrganization | null) {
@@ -70,10 +64,14 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       setSelectedOrganization(userOrganization);
       setRole(userOrganization.role);
       Cookies.set(localStorageKey.roleId, userOrganization.roleId);
+
+      handleGetCustomCatalog(userOrganization.organizationId);
     } else if(firstOrganization) {
       setSelectedOrganization(firstOrganization);
       setRole(firstOrganization.role);
       Cookies.set(localStorageKey.roleId, firstOrganization.roleId);
+
+      handleGetCustomCatalog(firstOrganization.organizationId);
     }
 
     setAllOrganizations(res.data?.userOrganizations || []);
@@ -104,6 +102,22 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
     }
   }
 
+  async function handleGetCustomCatalog(organizationId: string) {
+    const res = await request({
+      url: `/category-items`,
+      params: {
+        all: true,
+        organizationId
+      }
+    });
+
+    if (res?.data?.categoryItems) {
+      setCustomCategoryItems(res.data.categoryItems);
+    }
+
+    return res?.data?.categoryItems || [];
+  }
+
   useEffect(() => {
     const token = Cookies.get(localStorageKey.accessToken);
     const user = localStorage.getItem(localStorageKey.user);
@@ -115,6 +129,7 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       handleGetOrganizations(userData, organization);
       handleGetProfile(userData);
       handleGetCategory();
+
     } else {
       localStorage.clear();
       setSelectedOrganization(null);
@@ -124,7 +139,11 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems }}>{children}</UserContext.Provider>
+    <UserContext.Provider
+      value={{
+        user, setUser, selectedOrganization, setSelectedOrganization, allOrganizations, signOut, role, categoryItems, customCategoryItems,
+        handleGetCustomCatalog
+      }}>{children}</UserContext.Provider>
   );
 }
 

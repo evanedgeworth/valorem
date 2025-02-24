@@ -247,3 +247,11 @@ export function getInitials(fullName?: string): string {
 export function getFullName(user?: User) {
   return `${user?.firstName || ''} ${user?.lastName || ''}`
 }
+
+export function toTitleCase(input: string): string {
+  return input
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}

@@ -2,10 +2,9 @@
 
 import { useState, useRef } from "react";
 import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
-import request from "@/utils/request";
-import { useQuery } from "@tanstack/react-query";
 import { CategoryItem } from "@/types";
 import Autocomplete from "@/components/autocomplete";
+import { useUserContext } from "@/context/userContext";
 import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 
 export const areaOptions = [
@@ -44,7 +43,7 @@ export default function NewProductModal({
   const [category, setCategory] = useState<string | null>("");
   const [quantity, setQuantity] = useState<number>(0);
   const [selectedCatalog, setSelectedCatalog] = useState<CategoryItem>();
-
+  const { categoryItems, customCategoryItems } = useUserContext();
   function handleAddProduct() {
     let product = {
       categoryItemId: selectedCatalog?.id,
@@ -58,25 +57,9 @@ export default function NewProductModal({
     addProduct(product);
     setShowModal(false);
   }
-  const { data, isLoading } = useQuery({
-    queryKey: ["category-items"],
-    queryFn: async () => {
-      const res = await request({
-        url: `/category-items`,
-        method: "GET",
-        params: {
-          all: true,
-        },
-      });
-      if (res?.status === 200) {
-        return res.data;
-      }
-      throw Error(res?.data?.message);
-    },
-  });
 
-  const catalog: CategoryItem[] = data?.categoryItems || [];
-  const loading = isLoading;
+  const catalog = [...categoryItems, ...customCategoryItems];
+  const loading = false;
 
   function handleSelectCatalogItem(value: CategoryItem) {
     setSelectedCatalog(value);
