@@ -13,7 +13,7 @@ import { localStorageKey } from "@/utils/useLocalStorage";
 import { Organization } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function NavbarWithDropdown({ homeLink }: { homeLink?: string }) {
+export default function NavbarWithDropdown() {
   const router = useRouter();
   const { user, selectedOrganization, setSelectedOrganization, allOrganizations, signOut } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +36,7 @@ export default function NavbarWithDropdown({ homeLink }: { homeLink?: string }) 
       <nav className="bg-white border-zinc-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 dark:border-gray-700 order-1 border-b dark:text-white">
         <div className="flex justify-between items-center">
           <div className="flex flex-shrink-0 justify-start items-center">
-            <Link href={homeLink || "/"} className="flex mr-6">
+            <Link href={user?.id ? "/properties" : "/"} className="flex mr-6">
               <Image alt="Valorem logo" height="40" src={Valorem} width="40" className="invert dark:filter-none" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Valorem</span>
             </Link>

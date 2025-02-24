@@ -38,10 +38,13 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       url: '/logout'
     });
     localStorage.clear();
+    setSelectedOrganization(null);
+    setUser(null);
+    setRole(null);
     Cookies.remove(localStorageKey.accessToken);
     Cookies.remove(localStorageKey.refreshToken);
     Cookies.remove(localStorageKey.roleId);
-    router.replace(page || '/login');
+    router.replace(page || '/signup');
   }
 
   async function handleGetOrganizations(user: any, userOrganization: UserOrganization | null) {
