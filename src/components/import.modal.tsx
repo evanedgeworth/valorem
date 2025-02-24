@@ -24,7 +24,7 @@ export default function ImportModal({
   options: string[];
   requiredOptions: string[];
   isLoading?: boolean;
-  errors: Record<string, string>[][];
+  errors: Record<string, string>[];
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState('upload');
