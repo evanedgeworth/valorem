@@ -97,7 +97,7 @@ export default function Properties() {
 
   const properties: Property[] = useMemo(() => {
     const result: Property[] = data?.properties || [];
-    return result.filter((item) => (searchInput ? item.name.toLowerCase().includes(searchInput.toLowerCase()) : true));
+    return result.filter((item) => (searchInput ? item.name?.toLowerCase().includes(searchInput.toLowerCase()) : true));
   }, [data?.properties, searchInput]);
 
   function handleTabChange(selectedTab: string) {
