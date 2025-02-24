@@ -13,16 +13,20 @@ import { useUserContext } from "@/context/userContext";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
+import ImportModal from "@/components/import.modal";
 
 type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
 
 export default function OrderDetails({ propertyId, orderId }: { propertyId: string, orderId: string }) {
   const router = useRouter()
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
-  const { categoryItems, role } = useUserContext();
+  const { categoryItems, role, selectedOrganization, handleGetCustomCatalog, customCategoryItems } = useUserContext();
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "REQUEST_REVIEW" | null>(null);
   const { showToast } = useToast();
+  const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
+  const [isLoadingImport, setIsLoadingImport] = useState<boolean>(false);
+  const [errorImport, setErrorImport] = useState<any[]>([]);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['order', 'detail', orderId],
@@ -227,6 +231,88 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     )
   }
 
+  const handleImport = async (data: any[]) => {
+    const items = data.map(item => ({
+      ...item,
+      materialId: item.materialId || "",
+      quantity: Number(item.quantity)
+    }));
+
+    const categoryMap = new Map([...categoryItems, ...customCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
+
+    const foundItems: any[] = [];
+    const newItems: any[] = [];
+
+    items.forEach(item => {
+      if (categoryMap.has(item.lineItem.toLowerCase())) {
+        foundItems.push(item);
+      } else {
+        newItems.push(item);
+      }
+    });
+
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < newItems.length; i += batchSize) {
+      batches.push(newItems.slice(i, i + batchSize));
+    }
+
+    setIsLoadingImport(true);
+    const errorItem: any[] = [];
+    for (const batch of batches) {
+      const res = await request({
+        url: `/custom-catalogs`,
+        method: 'POST',
+        data: {
+          organizationId: selectedOrganization?.organizationId,
+          newCategoryItems: batch
+        }
+      });
+      if (res && res?.status !== 200) {
+        errorItem.push(...batch.map(item => ({ ...item, error: res?.data?.message })));
+      }
+    }
+
+    if (errorItem.length > 0) {
+      setErrorImport(errorItem);
+      return;
+    }
+
+    if (selectedOrganization?.organizationId) {
+      ;
+    }
+
+    const resCategoryItems = newItems.length === 0 ? customCategoryItems : await handleGetCustomCatalog(selectedOrganization?.organizationId ?? "");
+
+    const categoryItemMap = new Map([...categoryItems, ...resCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
+    const products: any[] = [];
+    [...foundItems, ...newItems].forEach((item) => {
+      const categoryItem = categoryItemMap.get(item.lineItem.toLowerCase());
+
+      if (categoryItem) {
+        products.push({
+          categoryItemId: categoryItem.id,
+          categoryItem,
+          quantity: item.quantity,
+          area: item.area,
+          orderId,
+          status: "new",
+          id: categoryItem.id + item.area,
+        })
+      }
+    });
+
+    setAddedProducts([...addedProducts, ...products]);
+
+    setIsLoadingImport(false);
+    setIsOpenImport(false);
+    setIsEdited(true);
+
+    showToast("Successfully imported data.", "success");
+  }
+
+  const isEditAllowed = !["APPROVED", "REQUESTED"].includes(scopeStatus) && role?.roleName !== 'CLIENT';
+
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
@@ -237,6 +323,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             </button>
             <h3 className="font-semibold text-xl">{order.projectName}</h3>
           </div>
+
           {
             isEdited ? (
               <div className="flex gap-4">
@@ -247,6 +334,15 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               </div>
             ) : (
               <div className="flex gap-4">
+                {
+                  isEditAllowed && (
+                    <Button
+                      onClick={() => setIsOpenImport(true)}
+                    >
+                      Import
+                    </Button>
+                  )
+                }
                 {
                   scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
@@ -308,9 +404,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
         </div>
       </Card>
       <ActiveOrder
-        isEditing={!["APPROVED", "REQUESTED"].includes(scopeStatus)}
         isAdding={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
         isDeleting={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
+        isEditing={isEditAllowed}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
@@ -363,6 +459,17 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           />
         )
       }
+      <ImportModal
+        showModal={isOpenImport}
+        setShowModal={(v) => setIsOpenImport(v)}
+        onSubmit={(data) => {
+          handleImport(data);
+        }}
+        options={["area", "quantity", "lineItem", "taskDescription", "targetClientPrice", "costCategory", "costCode", "options", "notes", "uom", "originalMaterialId", "materialId", "targetVendorPrice", "equipmentUsageRental"]}
+        requiredOptions={["lineItem", "taskDescription", "targetClientPrice", "area", "quantity"]}
+        errors={errorImport}
+        isLoading={isLoadingImport}
+      />
     </div>
   )
 }
