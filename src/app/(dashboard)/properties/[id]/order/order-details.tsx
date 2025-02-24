@@ -14,6 +14,8 @@ import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
 import ImportModal from "@/components/import.modal";
+import OrderStatus from "@/app/(dashboard)/order/orderStatus";
+import { roleMapper } from "@/utils/constants";
 
 type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
 
@@ -128,29 +130,6 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  const { mutate: mutateUpdate, isPending: isPendingUpdate } = useMutation({
-    mutationFn: async (body: any) => {
-      const res = await request({
-        url: `/scope/${orderId}`,
-        method: 'PUT',
-        data: body
-      });
-
-      if (res?.status === 200) {
-        return res.data;
-      }
-      throw Error(res?.data?.message);
-    },
-    onSuccess: () => {
-      showToast('Successfully updated data.');
-      setActionModal(null);
-      refetch();
-    },
-    onError: (error) => {
-      showToast(error.message, 'error');
-    }
-  });
-
   const { mutate: mutateInitiate, isPending: isPendingInitiate } = useMutation({
     mutationFn: async (body: {
       scopeStatus: ScopeStatus,
@@ -177,50 +156,17 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  async function updateOrder() {
-    const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
-    const now = new Date();
-    const body: Scope = {
-      ...order,
-      scopeItemRevisions: [...order.scopeItemRevisions.map(item => ({ ...item, status: 'REVISED' })), {
-        createdAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        status: 'PENDING',
-        revision: order.scopeItemRevisions.length + 1,
-        internalRevision: true,
-        scopeItems: formattedScopeItems.map(item => ({
-          id: generateUUID(),
-          updatedAt: now.toISOString(),
-          createdAt: now.toISOString(),
-          categoryItemId: item.categoryItemId,
-          isCustomized: false,
-          area: item.area,
-          quantity: item.quantity,
-          targetClientPrice: item.targetClientPrice,
-          scopeItemImages: item.scopeItemImages,
-          internalComments: item.internalComments,
-          externalComments: item.externalComments
-        })),
-      }]
-    }
-
-    mutateUpdate(body);
-  }
 
   async function populateOrder(sendForApproval: boolean) {
-    if (role?.roleName === 'CLIENT') {
-      updateOrder();
-    } else {
-      const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
-      await mutate({
-        scopeItems: formattedScopeItems.map(item => ({
-          "categoryItemId": item.categoryItemId,
-          "area": item.area,
-          "quantity": item.quantity,
-        })),
-        sendForApproval
-      });
-    }
+    const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
+    await mutate({
+      scopeItems: formattedScopeItems.map(item => ({
+        "categoryItemId": item.categoryItemId,
+        "area": item.area,
+        "quantity": item.quantity,
+      })),
+      sendForApproval
+    });
   }
 
   if (isLoading) {
@@ -278,10 +224,6 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       return;
     }
 
-    if (selectedOrganization?.organizationId) {
-      ;
-    }
-
     const resCategoryItems = newItems.length === 0 ? customCategoryItems : await handleGetCustomCatalog(selectedOrganization?.organizationId ?? "");
 
     const categoryItemMap = new Map([...categoryItems, ...resCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
@@ -311,7 +253,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     showToast("Successfully imported data.", "success");
   }
 
-  const isEditAllowed = !["APPROVED", "REQUESTED"].includes(scopeStatus) && role?.roleName !== 'CLIENT';
+  const isEditing = !["APPROVED", "REQUESTED"].includes(scopeStatus) && role?.roleName !== 'CLIENT';
+  const isAdding = role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus);
+  const isDeleting = isAdding;
 
   return (
     <div className="w-full p-5">
@@ -328,14 +272,14 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             isEdited ? (
               <div className="flex gap-4">
                 <Button color="gray" outline onClick={cancelEdit}>Cancel</Button>
-                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
+                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(true)}>
                   Save
                 </Button>
               </div>
             ) : (
               <div className="flex gap-4">
                 {
-                  isEditAllowed && (
+                  isAdding && (
                     <Button
                       onClick={() => setIsOpenImport(true)}
                     >
@@ -377,7 +321,17 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "SUBMITTED" && ["CLIENT", "SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  scopeStatus === "SUBMITTED" && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
+                  )
+                }
+                {
+                  scopeStatus === "SUBMITTED" && ["CLIENT"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
                         Request changes
@@ -402,11 +356,30 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             <p>$ {numberWithCommas(totalAmount)}</p>
           </div>
         </div>
+        <div>
+          <p className="text-lg font-bold">Approval:</p>
+          {
+            order.approvalChain?.map(item => (
+              <div key={item.role} className="border-b border-b-gray-200 dark:border-b-gray-700 py-1">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p>{roleMapper[item.role] || item.role}</p>
+                    {item.note && <p>
+                      <b>Note: </b>
+                      <span className="dark:text-gray-400">{item.note}</span>
+                    </p>}
+                  </div>
+                  <OrderStatus status={item.status} />
+                </div>
+              </div>
+            ))
+          }
+        </div>
       </Card>
       <ActiveOrder
-        isAdding={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
-        isDeleting={role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus)}
-        isEditing={isEditAllowed}
+        isAdding={isAdding}
+        isDeleting={isDeleting}
+        isEditing={isEditing}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
