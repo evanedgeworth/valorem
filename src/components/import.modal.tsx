@@ -8,6 +8,7 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { toTitleCase } from "@/utils/commonUtils";
 import downloadCSV from "@/utils/downloadCSV";
 import { IoCloseCircle } from "react-icons/io5";
+import { FiUpload } from "react-icons/fi";
 
 export default function ImportModal({
   showModal,
@@ -45,6 +46,23 @@ export default function ImportModal({
     });
   };
 
+  const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    if (droppedFile) {
+      setStep("header");
+      Papa.parse(droppedFile, {
+        complete: (result) => {
+          setData(result.data as string[][]);
+        },
+        skipEmptyLines: true
+      });
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+  };
 
   const handleCancel = () => {
     setShowModal(false);
@@ -102,23 +120,11 @@ export default function ImportModal({
                   <Label
                     htmlFor="dropzone-file"
                     className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
                   >
                     <div className="flex flex-col items-center justify-center pb-6 pt-5">
-                      <svg
-                        className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 16"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                        />
-                      </svg>
+                      <FiUpload size={22} className="text-gray-500 dark:text-gray-400 mb-2" />
                       <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
                         <span className="font-semibold">Click to upload</span> or drag and drop CSV
                       </p>
@@ -252,7 +258,7 @@ export default function ImportModal({
                                     <IoCloseCircle
                                       className="cursor-pointer" size={24}
                                       onClick={() => {
-                                        const data = {...mapping}
+                                        const data = { ...mapping }
                                         delete data[value];
                                         setMapping(data);
                                       }}
