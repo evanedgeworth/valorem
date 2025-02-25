@@ -123,7 +123,28 @@ export default function PropertyForm({ onSubmit, isLoading, defaultValues, isEdi
         <div>
           <Label htmlFor="noOfBathrooms">Number of Bathrooms</Label>
           <Select id="noOfBathrooms" required {...register("noOfBathrooms")}>
-            {roomOptions.map((item) => (
+            {[
+              "1",
+              "1 1/2",
+              "2",
+              "2 1/2",
+              "3",
+              "3 1/2",
+              "4",
+              "4 1/2",
+              "5",
+              "5 1/2",
+              "6",
+              "6 1/2",
+              "7",
+              "7 1/2",
+              "8",
+              "8 1/2",
+              "9",
+              "9 1/2",
+              "10",
+              "10 1/2",
+            ].map((item) => (
               <option value={item} key={item}>
                 {item}
               </option>

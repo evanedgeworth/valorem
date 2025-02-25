@@ -253,7 +253,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     showToast("Successfully imported data.", "success");
   }
 
-  const isEditing = !["APPROVED", "REQUESTED"].includes(scopeStatus) && role?.roleName !== 'CLIENT';
+
+  const approval = order.approvalChain.find(item => (roleMapper[item.role] === role?.roleName) || (role?.roleName === 'SENIOR PROJECT MANAGER' ? ['PM'].includes(item.role) : false));
+  const isApproved = approval?.status === 'APPROVED';
+
+  const isEditing = !["APPROVED", "REQUESTED"].includes(scopeStatus);
   const isAdding = role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus);
   const isDeleting = isAdding;
 
@@ -273,13 +277,13 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
               <div className="flex gap-4">
                 <Button color="gray" outline onClick={cancelEdit}>Cancel</Button>
                 <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(true)}>
-                  Save
+                  Send for review
                 </Button>
               </div>
             ) : (
               <div className="flex gap-4">
                 {
-                  isAdding && (
+                  order?.scopeItemRevisions?.length === 0 && isAdding && (
                     <Button
                       onClick={() => setIsOpenImport(true)}
                     >
@@ -288,7 +292,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
@@ -298,7 +302,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
@@ -308,7 +312,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
@@ -321,7 +325,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "SUBMITTED" && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "SUBMITTED" && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
@@ -331,11 +335,8 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "SUBMITTED" && ["CLIENT"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "SUBMITTED" && ["CLIENT"].includes(role?.roleName || "") && (
                     <>
-                      <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
-                        Request changes
-                      </Button>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
                         Accept
@@ -354,6 +355,14 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
           <div className="flex gap-8 text-lg">
             <p>Order total</p>
             <p>$ {numberWithCommas(totalAmount)}</p>
+          </div>
+        </div>
+        <div className="flex justify-between border-b border-b-gray-200 pb-3 dark:border-b-gray-700">
+          <div>
+            <p className="text-base">Scope Status</p>
+          </div>
+          <div className="flex gap-8 text-lg">
+            <OrderStatus status={order.scopeStatus} />
           </div>
         </div>
         <div>

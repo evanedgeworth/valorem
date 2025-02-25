@@ -63,10 +63,9 @@ export default function NewProductModal({
 
   function handleSelectCatalogItem(value: CategoryItem) {
     setSelectedCatalog(value);
-    setQuantity(1);
   }
 
-  function handleClose () {
+  function handleClose() {
     setShowModal(false);
     setSelectedCatalog(undefined)
   }
@@ -89,20 +88,32 @@ export default function NewProductModal({
                 isLoading={loading}
                 getOptionLabel={(option) => option.lineItem || ""}
                 onOptionSelect={handleSelectCatalogItem}
+                placeholder="Search for a product"
               />
             </div>
             {selectedCatalog && (
-              <>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddProduct();
+                }}
+                className="space-y-6"
+              >
                 <div className="mt-1">
                   <p className="text-xl font-medium">Description</p>
-                  <p>{selectedCatalog?.taskDescription}</p>
+                  <p className="dark:text-gray-400">{selectedCatalog?.taskDescription || '-'}</p>
                 </div>
                 <div>
                   <Label htmlFor="area">Room / Area</Label>
-                  <Select id="area" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
-                    <option>{category}</option>
+                  <Select id="area"
+                    required
+                    value={category || ""}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="Select an area"
+                  >
+                    <option value="">{'Select an area'}</option>
                     {areaOptions.map((option) => (
-                      <option key={option}>{option}</option>
+                      <option value={option} key={option}>{option}</option>
                     ))}
                   </Select>
                 </div>
@@ -123,9 +134,9 @@ export default function NewProductModal({
 
                 <div className="flex gap-4">
                   <Button fullSized color="gray" outline onClick={handleClose}>Close</Button>
-                  <Button fullSized color="gray" onClick={handleAddProduct}>Save</Button>
+                  <Button type="submit" fullSized color="gray">Save</Button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </Modal.Body>

@@ -38,7 +38,11 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
     setValue,
     watch,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: {
+      dueDate: new Date()
+    }
+  });
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -64,7 +68,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
           property && item.id === property?.id
             ? {
                 ...item,
-                orderCount: item.orderCount + 1,
+                orderCount: (item.orderCount || 0) + 1,
               }
             : item
         ),
@@ -78,6 +82,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
   async function handleCreateOrder(data: Inputs) {
     mutate({
       ...data,
+      projectName: data.projectName ? data.projectName : parseAddress(property?.address),
       budget: Number(data.budget),
       organizationId: selectedOrganization?.organizationId,
       propertyId: property?.id,
@@ -103,20 +108,20 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
               </div>
               <div>
                 <Label>Project Name</Label>
-                <TextInput color="gray" placeholder="Enter a name" {...register("projectName")} required />
+                <TextInput color="gray" placeholder="Enter a name" {...register("projectName")} />
               </div>
               <div>
                 <Label>Due Date</Label>
-                <Datepicker {...register("dueDate")} required minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
+                <Datepicker {...register("dueDate")} minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
               </div>
               <div>
-                <Label>Estimated Budget</Label>
-                <TextInput type="number" {...register("budget")} required />
+                <Label>Estimated budget (optional)</Label>
+                <TextInput type="number" {...register("budget")} />
               </div>
 
               <div className="max-w-md" id="textarea">
                 <Label htmlFor="comment">Additional details</Label>
-                <Textarea placeholder="Please give a detailed description..." rows={4} {...register("additionalDetails")} required />
+                <Textarea placeholder="Please give a detailed description..." rows={4} {...register("additionalDetails")} />
               </div>
 
               <div className="flex flex-row gap-4 justify-end pt-4">

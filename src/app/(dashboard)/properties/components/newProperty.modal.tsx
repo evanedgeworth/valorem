@@ -20,6 +20,11 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
     try {
       setIsLoading(true);
 
+      const numberOfBathroomsTextFormatted = data.noOfBathrooms.replace(" 1/2", "").trim();
+      const numberOfBathrooms = data.noOfBathrooms.toString().includes("1/2")
+        ? Number(numberOfBathroomsTextFormatted) + 1
+        : Number(numberOfBathroomsTextFormatted);
+
       const frontImages = data.frontImages ? await uploadFiles(data.frontImages.map((item) => item.data)) : [];
       const backImages = data.backImages ? await uploadFiles(data.backImages.map((item) => item.data)) : [];
       const leftImages = data.leftImages ? await uploadFiles(data.leftImages.map((item) => item.data)) : [];
@@ -35,7 +40,7 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
           notes: data.notes,
           type: data.type,
           noOfRooms: Number(data.noOfRooms),
-          noOfBathrooms: Number(data.noOfBathrooms),
+          noOfBathrooms: numberOfBathrooms,
           address: {
             address1: data.address1,
             address2: data.address2,
