@@ -50,6 +50,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
   const assigneeId = order?.property?.assigneeId;
 
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
+  const scopeItemRevisionByPM = order?.scopeItemRevisions[order.scopeItemRevisions.length - 2];
 
   const totalAmount = useMemo(() => {
     let total = 0;
@@ -59,12 +60,12 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     return total;
   }, [addedProducts]);
 
-
   useEffect(() => {
     if (scopeItemRevision && categoryItems.length > 0) {
-      setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+      setAddedProducts(scopeItemRevision.scopeItems.map((item, index) => ({
         ...item,
-        categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+        categoryItem: categoryItems.find(c => c.id === item.categoryItemId),
+        before: scopeItemRevision.status !== "APPROVED" ? scopeItemRevisionByPM?.scopeItems?.[index] : undefined
       })));
     }
   }, [scopeItemRevision, categoryItems]);
@@ -104,10 +105,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  const { mutate: mutateReview, isPending: isPendingReview } = useMutation({
+  const { mutate: mutateReview, mutateAsync: mutateAsyncReview, isPending: isPendingReview } = useMutation({
     mutationFn: async (body: {
       action: "APPROVE" | "REJECT" | "REVISION_REQUESTED",
-      note: string
+      note: string,
+      shouldSkipNotif?: boolean,
     }) => {
       const res = await request({
         url: `/scope/${orderId}/review`,
@@ -120,10 +122,12 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       }
       throw Error(res?.data?.message);
     },
-    onSuccess: () => {
-      showToast('Successfully updated data.');
-      setActionModal(null);
-      refetch();
+    onSuccess: (res, body) => {
+      if (!body.shouldSkipNotif) {
+        showToast('Successfully updated data.');
+        setActionModal(null);
+        refetch();
+      }
     },
     onError: (error) => {
       showToast(error.message, 'error');
@@ -158,6 +162,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
 
 
   async function populateOrder(sendForApproval: boolean) {
+    if (role?.roleName === 'CLIENT') {
+      await mutateAsyncReview({ action: 'REVISION_REQUESTED', note: '', shouldSkipNotif: true });
+    }
     const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
     await mutate({
       scopeItems: formattedScopeItems.map(item => ({
@@ -276,7 +283,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             isEdited ? (
               <div className="flex gap-4">
                 <Button color="gray" outline onClick={cancelEdit}>Cancel</Button>
-                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(true)}>
+                <Button color="gray" isProcessing={isPendingPopulate || isPendingReview} onClick={() => populateOrder(true)}>
                   Send for review
                 </Button>
               </div>
@@ -312,12 +319,9 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  !isApproved && scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && ["SCHEDULED", "IN_REVIEW"].includes(scopeStatus) && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                      <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
-                        Request changes
-                      </Button>
                       <Button color="gray" onClick={() => setActionModal("REQUEST_REVIEW")}>
                         Send for review
                       </Button>
@@ -325,7 +329,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  !isApproved && scopeStatus === "SUBMITTED" && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && ["SUBMITTED", "IN_REVIEW"].includes(scopeStatus) && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
@@ -420,21 +424,15 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                 } else {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
                 }
-              } else if (scopeStatus === "SCHEDULED") {
-                if (actionModal === "REJECT") {
-                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
-                } else if (actionModal === "REVISION_REQUESTED") {
-                  mutateReview({ action: "REVISION_REQUESTED", note });
-                } else if (actionModal === "REQUEST_REVIEW") {
-                  populateOrder(true);
-                }
-              } else if (scopeStatus === "SUBMITTED") {
+              } else {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
                 } else if (actionModal === "REVISION_REQUESTED") {
                   mutateReview({ action: "REVISION_REQUESTED", note });
                 } else if (actionModal === "APPROVE") {
                   mutateReview({ action: "APPROVE", note });
+                } else if (actionModal === "REQUEST_REVIEW") {
+                  populateOrder(true);
                 }
               }
             }}

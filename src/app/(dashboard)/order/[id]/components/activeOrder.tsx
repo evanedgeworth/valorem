@@ -74,66 +74,71 @@ export default function ActiveOrder({
                   {(isEditing || isDeleting) && <Table.HeadCell>Action</Table.HeadCell>}
                 </Table.Head>
                 {item
-                  .map((product, index) => (
-                    <Table.Body className="divide-y" key={product.id}>
-                      <Table.Row
-                        className={
-                          `border-t-gray-200 border-t dark:border-t-gray-600 ` +
-                          ((product.status === "updated" && ` bg-amber-200 dark:bg-amber-800`) ||
-                            (product.status === "removed" && ` bg-red-200 dark:bg-red-800`) ||
-                            (product.status === "new" && ` bg-green-200 dark:bg-green-800`))
-                        }
-                      >
-                        <Table.Cell className="font-medium">
-                          <div>{product.categoryItem?.lineItem || ''}</div>
-                        </Table.Cell>
-                        <Table.Cell className="font-medium">
-                          <div>{product.categoryItem?.taskDescription || ''}</div>
-                        </Table.Cell>
-                        <Table.Cell>{product.quantity}</Table.Cell>
-                        <Table.Cell className="whitespace-nowrap">
-                          {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0))}
-                        </Table.Cell>
-                        <Table.Cell className="whitespace-nowrap">
-                          {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0) * product.quantity)}
-                        </Table.Cell>
-                        {isEditing && (
-                          <Table.Cell>
-                            <div className="relative cursor-pointer">
-                              <Dropdown renderTrigger={() => <BiDotsHorizontalRounded size={25} />} label="" className="!left-[-50px] !top-6">
-                                {
-                                  isEditing && (
-                                    <Dropdown.Item
-                                      onClick={() => {
-                                        selectedProduct.current = product;
-                                        setShowEditModal(true);
-                                      }}
-                                    >
-                                      Edit
-                                    </Dropdown.Item>
-                                  )
-                                }
+                  .map((product, index) => {
+                    const quantityEdited = (product.before && (product.before.quantity !== product.quantity));
 
-                                {
-                                  isDeleting && (
-                                    <Dropdown.Item
-                                      onClick={() => {
-                                        selectedProduct.current = product;
-                                        handleRemoveProduct(product);
-                                      }}
-                                      className="text-red-500"
-                                    >
-                                      Delete
-                                    </Dropdown.Item>
-                                  )
-                                }
-                              </Dropdown>
-                            </div>
+                    return (
+                      <Table.Body className="divide-y" key={product.id}>
+                        <Table.Row
+                          title={quantityEdited ? `Quantity edited from ${product?.before?.quantity} to ${product.quantity}` : ''}
+                          className={
+                            `border-t-gray-200 border-t dark:border-t-gray-600 ` +
+                            ((product.status === "updated" || quantityEdited && ` bg-amber-200 dark:bg-amber-600`) ||
+                              (product.status === "removed" && ` bg-red-200 dark:bg-red-800`) ||
+                              (product.status === "new" && ` bg-green-200 dark:bg-green-800`))
+                          }
+                        >
+                          <Table.Cell className="font-medium">
+                            <div>{product.categoryItem?.lineItem || ''}</div>
                           </Table.Cell>
-                        )}
-                      </Table.Row>
-                    </Table.Body>
-                  ))}
+                          <Table.Cell className="font-medium">
+                            <div>{product.categoryItem?.taskDescription || ''}</div>
+                          </Table.Cell>
+                          <Table.Cell>{product.quantity}</Table.Cell>
+                          <Table.Cell className="whitespace-nowrap">
+                            {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0))}
+                          </Table.Cell>
+                          <Table.Cell className="whitespace-nowrap">
+                            {"$" + numberWithCommas((parseCurrencyToNumber(product.targetClientPrice ?? product.categoryItem?.targetClientPrice) || 0) * product.quantity)}
+                          </Table.Cell>
+                          {isEditing && (
+                            <Table.Cell>
+                              <div className="relative cursor-pointer">
+                                <Dropdown renderTrigger={() => <BiDotsHorizontalRounded size={25} />} label="" className="!left-[-50px] !top-6">
+                                  {
+                                    isEditing && (
+                                      <Dropdown.Item
+                                        onClick={() => {
+                                          selectedProduct.current = product;
+                                          setShowEditModal(true);
+                                        }}
+                                      >
+                                        Edit
+                                      </Dropdown.Item>
+                                    )
+                                  }
+  
+                                  {
+                                    isDeleting && (
+                                      <Dropdown.Item
+                                        onClick={() => {
+                                          selectedProduct.current = product;
+                                          handleRemoveProduct(product);
+                                        }}
+                                        className="text-red-500"
+                                      >
+                                        Delete
+                                      </Dropdown.Item>
+                                    )
+                                  }
+                                </Dropdown>
+                              </div>
+                            </Table.Cell>
+                          )}
+                        </Table.Row>
+                      </Table.Body>
+                    )
+                  })}
               </Table>
             </Card>
           ))

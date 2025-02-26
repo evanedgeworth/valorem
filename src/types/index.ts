@@ -141,6 +141,7 @@ export interface ScopeItem {
     user: string;
     comment: string;
   }[];
+  before?: ScopeItem;
 }
 
 export interface ScopeItemRevision {
