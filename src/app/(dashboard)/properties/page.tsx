@@ -198,7 +198,7 @@ export default function Properties() {
         },
       });
 
-      if (res?.status === 200) {
+      if (res?.status !== 200) {
         errorItem.push({
           ...item,
           error: res?.data?.message,
@@ -292,7 +292,10 @@ export default function Properties() {
       <ScopeRequestModal setShowModal={setShowRequestModal} showModal={showRequestModal} property={selectedProperty.current} />
       <ImportModal
         showModal={isOpenImport}
-        setShowModal={(v) => setIsOpenImport(v)}
+        setShowModal={(v) => {
+          setIsOpenImport(v);
+          setErrorImport([]);
+        }}
         onSubmit={(data) => {
           handleImport(data);
         }}
