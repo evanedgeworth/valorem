@@ -65,7 +65,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       setAddedProducts(scopeItemRevision.scopeItems.map((item, index) => ({
         ...item,
         categoryItem: categoryItems.find(c => c.id === item.categoryItemId),
-        before: scopeItemRevision.status !== "APPROVED" ? scopeItemRevisionByPM?.scopeItems?.[index] : undefined
+        before: role?.roleName !== "CLIENT" && scopeItemRevision.status !== "APPROVED" ? scopeItemRevisionByPM?.scopeItems?.[index] : undefined
       })));
     }
   }, [scopeItemRevision, categoryItems]);
@@ -377,7 +377,7 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                 <div className="flex justify-between items-center">
                   <div>
                     <p>{roleMapper[item.role] || item.role}</p>
-                    {item.note && <p>
+                    {item.note && <p className="text-sm">
                       <b>Note: </b>
                       <span className="dark:text-gray-400">{item.note}</span>
                     </p>}

@@ -80,7 +80,7 @@ export default function ActiveOrder({
                     return (
                       <Table.Body className="divide-y" key={product.id}>
                         <Table.Row
-                          title={quantityEdited ? `Quantity edited from ${product?.before?.quantity} to ${product.quantity}` : ''}
+                          title={quantityEdited ? `The quantity was edited from ${product?.before?.quantity} to ${product.quantity}.` : ''}
                           className={
                             `border-t-gray-200 border-t dark:border-t-gray-600 ` +
                             ((product.status === "updated" || quantityEdited && ` bg-amber-200 dark:bg-amber-600`) ||
