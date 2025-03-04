@@ -26,6 +26,7 @@ export type Property = {
   rightImages: { fileUrl: string }[];
   assigneeId: string | null;
   assignee: User | null;
+  rooms: Room[];
 };
 
 export type Role = {
@@ -265,7 +266,7 @@ export enum RoomType {
 
 export type Room = {
   name: string;
-  roomImages: ImageFile[];
+  roomImages: PropertyImage[];
   type: RoomType;
 };
 

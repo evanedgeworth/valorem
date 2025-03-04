@@ -1,15 +1,21 @@
-import { Room, RoomType } from "@/types";
+import { ImageFile, RoomType } from "@/types";
 import { Button, Card, Label, Select, TextInput } from "flowbite-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import ImageInput from "./image-input";
 import { DeleteIcon } from "@/components/icon";
 
+export type RoomInput = {
+    name: string;
+    roomImages: ImageFile[];
+    type: RoomType;
+}
+
 type RoomFormInput = {
-  rooms: Room[];
+  rooms: RoomInput[];
 }
 
 type RoomFormProps = {
-  rooms: Room[];
+  rooms: RoomInput[];
   onSubmit: (value: RoomFormInput) => void;
   isLoading: boolean;
   onClose: () => void;
@@ -36,8 +42,6 @@ export default function RoomForm({
     control,
     name: 'rooms',
   });
-
-  console.log(fields);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

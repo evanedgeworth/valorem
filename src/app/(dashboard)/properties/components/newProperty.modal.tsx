@@ -8,8 +8,8 @@ import PropertyForm, { PropertyInput } from "./propertyForm";
 import uploadFiles from "@/utils/uploadFile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/context/toastContext";
-import RoomForm from "./roomForm";
-import { Room, RoomType } from "@/types";
+import RoomForm, { RoomInput } from "./roomForm";
+import { RoomType } from "@/types";
 
 export default function NewPropertyModal({ showModal, setShowModal }: { showModal: boolean; setShowModal: (value: boolean) => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -20,7 +20,7 @@ export default function NewPropertyModal({ showModal, setShowModal }: { showModa
   const [data, setData] = useState<any>({});
   const [step, setStep] = useState(1);
 
-  async function handleCreateProperty(data: PropertyInput & { rooms: Room[] }) {
+  async function handleCreateProperty(data: PropertyInput & { rooms: RoomInput[] }) {
     try {
       setIsLoading(true);
 

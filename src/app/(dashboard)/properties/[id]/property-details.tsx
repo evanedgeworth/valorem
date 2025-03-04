@@ -11,7 +11,7 @@ import { useContext, useMemo } from "react";
 import OrderStatus from "../../order/orderStatus";
 import Link from "next/link";
 import { Tabs } from "flowbite-react";
-import PropertyImages from "../components/property-images";
+import PropertyRooms from "../components/property-rooms";
 
 export default function PropertyDetails({ propertyId }: { propertyId: string }) {
   const { user, selectedOrganization, role } = useContext(UserContext);
@@ -22,6 +22,9 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
     queryFn: async () => {
       const res = await request({
         url: `/properties/${propertyId}`,
+        params: {
+          includeRooms: true,
+        }
       });
 
       if (res?.status === 200) {
@@ -137,8 +140,8 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
             </div>
           </div>
         </Tabs.Item>
-        <Tabs.Item title="Images">
-          <PropertyImages property={property} />
+        <Tabs.Item title="Rooms">
+          <PropertyRooms property={property} />
         </Tabs.Item>
       </Tabs>
     </section>
