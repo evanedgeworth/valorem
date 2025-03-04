@@ -18,14 +18,14 @@ type RoomFormProps = {
   rooms: RoomInput[];
   onSubmit: (value: RoomFormInput) => void;
   isLoading: boolean;
-  onClose: () => void;
+  onBack: () => void;
 }
 
 export default function RoomForm({
   rooms,
   onSubmit,
   isLoading,
-  onClose,
+  onBack,
 }: RoomFormProps) {
 
   const {
@@ -54,7 +54,7 @@ export default function RoomForm({
           Add Area
         </Button>
       </div>
-      <div>
+      <div className="overflow-y-auto max-h-[65vh]">
         {
           fields.map((room, index) => (
             <Card key={room.name + index} className="mb-2 relative">
@@ -105,8 +105,8 @@ export default function RoomForm({
         }
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="button" onClick={onClose} fullSized outline color="gray">
-          Close
+        <Button type="button" onClick={onBack} fullSized outline color="gray">
+          Back
         </Button>
         <Button disabled={isLoading} isProcessing={isLoading} type="submit" fullSized color="gray">
           {"Save"}

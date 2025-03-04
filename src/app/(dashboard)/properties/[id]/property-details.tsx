@@ -140,9 +140,9 @@ export default function PropertyDetails({ propertyId }: { propertyId: string }) 
             </div>
           </div>
         </Tabs.Item>
-        <Tabs.Item title="Rooms">
+        {/* <Tabs.Item title="Rooms">
           <PropertyRooms property={property} />
-        </Tabs.Item>
+        </Tabs.Item> */}
       </Tabs>
     </section>
   )
