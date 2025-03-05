@@ -26,6 +26,7 @@ export type Property = {
   rightImages: { fileUrl: string }[];
   assigneeId: string | null;
   assignee: User | null;
+  rooms: Room[];
 };
 
 export type Role = {
@@ -84,7 +85,6 @@ export type Order = {
   scopeImages: ScopeImage[];
   scopeStatus: string;
 };
-
 
 export type OrderHistory = {
   orderId: string;
@@ -241,3 +241,36 @@ export type UserOrganization = {
   userId: string;
   user?: User;
 };
+
+export enum RoomType {
+  EXTERIOR = "EXTERIOR",
+  LANDSCAPING = "LANDSCAPING",
+  ENTRY_LEVEL = "ENTRY_LEVEL",
+  LIVING_ROOM = "LIVING_ROOM",
+  DINING_ROOM = "DINING_ROOM",
+  FAMILY_ROOM = "FAMILY_ROOM",
+  KITCHEN = "KITCHEN",
+  OFFICE = "OFFICE",
+  LAUNDRY_ROOM = "LAUNDRY_ROOM",
+  HALLWAY = "HALLWAY",
+  POWDER_ROOM = "POWDER_ROOM",
+  STAIRWAY = "STAIRWAY",
+  MASTER_BEDROOM = "MASTER_BEDROOM",
+  MASTER_BATHROOM = "MASTER_BATHROOM",
+  BEDROOM = "BEDROOM",
+  BATHROOM = "BATHROOM",
+  ATTIC = "ATTIC",
+  BASEMENT = "BASEMENT",
+  GENERAL_CATEGORIES = "GENERAL_CATEGORIES",
+}
+
+export type Room = {
+  name: string;
+  roomImages: PropertyImage[];
+  type: RoomType;
+};
+
+export type PropertyImage = {
+  fileId: string;
+  fileUrl: string;
+}
