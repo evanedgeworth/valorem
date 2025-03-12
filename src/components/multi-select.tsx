@@ -8,10 +8,11 @@ type MultiSelectProps = {
   placeholder?: string;
   options: { label: string; value: string }[];
   onChange: (data: string[]) => void;
+  defaultValues?: string[];
 };
 
-export default function MultiSelect({ label, options, onChange, placeholder }: MultiSelectProps) {
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+export default function MultiSelect({ label, options, onChange, placeholder, defaultValues }: MultiSelectProps) {
+  const [selectedValues, setSelectedValues] = useState<string[]>(defaultValues || []);
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -49,7 +50,7 @@ export default function MultiSelect({ label, options, onChange, placeholder }: M
                 className="mb-2 w-full"
                 icon={IoSearch}
               />
-              <div>
+              <div className="overflow-auto max-h-96">
                 {filteredOptions.map((option) => (
                   <label key={option.value} className="flex items-center gap-2 p-2 cursor-pointer">
                     <Checkbox
@@ -64,7 +65,7 @@ export default function MultiSelect({ label, options, onChange, placeholder }: M
             </div>
           ) : (
             <div className="flex justify-between dark:text-gray-400 items-center cursor-pointer" onClick={() => setIsOpen(true)}>
-              <p>{placeholder}</p>
+              <p>{selectedValues.length > 0 ? `${selectedValues.length} item selected` : placeholder}</p>
               <RiArrowDownSLine size={22} />
             </div>
           )

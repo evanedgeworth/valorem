@@ -7,35 +7,38 @@ import request from "@/utils/request";
 import { UserOrganization } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import TableData, { TableAction } from "@/components/table-data";
-import AddUserModal from "./components/add-user-modal";
-import { checkPermission } from "@/utils/commonUtils";
+import AddUserModal from "./components/add-user.modal";
+import { checkPermission, getFullName } from "@/utils/commonUtils";
 import { ViewUserModal } from "./components/view-user.modal";
 import UserRole from "./components/user-role";
 import { Button, Label, TextInput } from "flowbite-react";
 import { FaFilter } from "react-icons/fa";
-import FilterUserModal from "./components/filter-user-modal";
+import FilterUserModal from "./components/filter-user.modal";
 import { Pagination } from "flowbite-react";
+import ReviewUserModal from "./components/review-user.modal";
+import UserStatus from "@/components/userStatus";
 
 export default function UserPage() {
   const { selectedOrganization, role } = useUserContext();
   const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
   const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
 
   const [searchInput, setSearchInput] = useState<string>("");
+  const [filters, setFilters] = useState<string>("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [previousTokens, setPreviousTokens] = useState<string[]>([]);
   const nextToken = previousTokens[currentPage - 2] || null;
 
-  console.log(previousTokens, currentPage);
-
   const { data, isLoading: tableIsLoading, refetch } = useQuery({
-    queryKey: ['users', selectedOrganization?.organizationId, nextToken],
+    queryKey: ['users', selectedOrganization?.organizationId, nextToken, filters],
     queryFn: async () => {
       const res = await request({
         url: `/user_organizations`,
         method: "GET",
         params: {
+          filters,
           id: selectedOrganization?.type === "VALOREM" ? undefined : selectedOrganization?.organizationId,
           filterType: selectedOrganization?.type === "VALOREM" ? undefined : "organization",
           includeRoles: true,
@@ -61,8 +64,11 @@ export default function UserPage() {
 
   const userOrganizations: UserOrganization[] = useMemo(() => {
     const result: UserOrganization[] = data?.userOrganizations || [];
-    return result;
-  }, [data?.userOrganizations]);
+    return result.filter((item) => {
+      const fullName = getFullName(item.user);
+      return searchInput ? fullName.toLowerCase().includes(searchInput.toLowerCase()) : true;
+    });
+  }, [data?.userOrganizations, searchInput]);
 
   const selectedUserOrganization = useRef<UserOrganization | null>(null);
 
@@ -79,8 +85,18 @@ export default function UserPage() {
       });
     }
 
+    if (selectedOrganization?.type === "VALOREM") {
+      result.push({
+        label: "Review",
+        onClick: (row) => {
+          selectedUserOrganization.current = row;
+          setShowReviewModal(true);
+        },
+      });
+    }
+
     return result;
-  }, [role]);
+  }, [role, selectedOrganization]);
 
   return (
     <section className="p-5 w-full">
@@ -123,6 +139,13 @@ export default function UserPage() {
             key: "user",
             render: (value) => value ? `${value.email}` : ''
           },
+          {
+            label: "STATUS",
+            key: "user",
+            render: (value) => value ? (
+              <UserStatus status={value.status} />
+            ) : ''
+          },
         ]}
         actions={actions}
       />
@@ -147,6 +170,20 @@ export default function UserPage() {
       <FilterUserModal
         onClose={() => setShowFilterModal(false)}
         open={showFilterModal}
+        onSubmit={(filter) => {
+          setFilters(filter);
+          setShowFilterModal(false);
+          setPreviousTokens([]);
+          setCurrentPage(1);
+        }}
+      />
+      <ReviewUserModal
+        onClose={() => setShowReviewModal(false)}
+        open={showReviewModal}
+        userOrganization={selectedUserOrganization.current}
+        onSuccess={() => {
+          refetch();
+        }}
       />
     </section>
   );

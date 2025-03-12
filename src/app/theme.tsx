@@ -17,7 +17,7 @@ export const flowbiteTheme: CustomFlowbiteTheme = {
     icon: {
       base: "text-zinc-400 hover:text-zinc-900 dark:hover:text-white",
     },
-  },
+  }, 
   modal: {
     header: {
       base: "flex justify-between rounded-t dark:border-gray-800 dark:bg-gray-800 border-b-0 p-2 items-center px-6 pt-4",
