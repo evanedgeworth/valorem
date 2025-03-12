@@ -150,7 +150,7 @@ export default function AddTrades() {
                         name={`${index}.expiration_date`}
                         control={control}
                         render={({ field: { onChange, value } }) => (
-                          <Datepicker {...register(`${index}.expiration_date`)} required onSelectedDateChanged={onChange} value={value} />
+                          <Datepicker {...register(`${index}.expiration_date`)} required onChange={onChange} value={new Date(value || '')} />
                         )}
                       />
                     </div>

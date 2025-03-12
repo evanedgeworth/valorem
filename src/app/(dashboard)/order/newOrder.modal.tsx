@@ -83,7 +83,7 @@ export default function NewOrderModal({ showModal, setShowModal }: { showModal: 
 
               <div>
                 <Label>Due Date</Label>
-                <Datepicker {...register("dueDate")} required minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
+                <Datepicker {...register("dueDate")} required minDate={new Date()} onChange={(date) => date && setValue("dueDate", date)} />
               </div>
               <div>
                 <Label>Budget</Label>
