@@ -21,10 +21,15 @@ type CompanyFormValues = {
   markets: Market[];
 };
 
+type GroupedMarket = {
+  key: string;
+  value: Market[]
+};
+
 export default function CompanyForm() {
   const { onHandleNext, setFormData, formData } = useFormState();
   const [inputValue, setInputValue] = useState("");
-  const [marketValue, setMarketValue] = useState<Market[]>([]);
+  const [marketValue, setMarketValue] = useState<GroupedMarket[]>([]);
 
   const debouncedSearch = useDebounce(inputValue, 500);
   const {
@@ -35,16 +40,15 @@ export default function CompanyForm() {
     control,
   } = useForm<CompanyFormValues>();
 
-  const onSubmit = handleSubmit((data) => {
-    setFormData((prev: any) => ({ ...prev, ...data, markets }));
-    onHandleNext();
-  });
-
   const { data, isLoading } = useQuery({
     queryKey: ["markets", debouncedSearch],
     queryFn: async () => {
       const res = await request({
-        url: `/markets?searchInput=${debouncedSearch}`,
+        url: `/markets`,
+        params: {
+          groupedBy: 'city',
+          all: true
+        },
         method: "GET",
       });
 
@@ -56,7 +60,17 @@ export default function CompanyForm() {
     },
   });
 
-  const markets: Market[] = data?.markets || [];
+  const marketList: GroupedMarket[] = data?.groupedMarkets || [];
+
+  const onSubmit = handleSubmit((data) => {
+    const markets: Market[] = [];
+    marketValue.forEach(item => {
+      markets.push(...item.value)
+    });
+    
+    setFormData((prev: any) => ({ ...prev, ...data, markets: markets.map(item => item.id) }));
+    onHandleNext();
+  });
 
   return (
     <form onSubmit={onSubmit} className="w-full place-self-center lg:col-span-6">
@@ -104,8 +118,8 @@ export default function CompanyForm() {
               <Autocomplete
                 multiple
                 id="multiple-limit-tags"
-                options={markets}
-                getOptionLabel={(option) => `${option.zipCode}, ${option.city}, ${option.stateId}`}
+                options={marketList}
+                getOptionLabel={(option) => `${option.key}`}
                 onChange={(e, data) => setMarketValue(data)}
                 onInputChange={(e, v) => {
                   setInputValue(v);
