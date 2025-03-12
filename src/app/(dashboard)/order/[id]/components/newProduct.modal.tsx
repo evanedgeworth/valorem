@@ -2,10 +2,10 @@
 
 import { useState, useRef } from "react";
 import { Button, Label, Modal, TextInput, Select } from "flowbite-react";
-import request from "@/utils/request";
-import { useQuery } from "@tanstack/react-query";
 import { CategoryItem } from "@/types";
 import Autocomplete from "@/components/autocomplete";
+import { useUserContext } from "@/context/userContext";
+import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 
 export const areaOptions = [
   "Exterior",
@@ -43,7 +43,7 @@ export default function NewProductModal({
   const [category, setCategory] = useState<string | null>("");
   const [quantity, setQuantity] = useState<number>(0);
   const [selectedCatalog, setSelectedCatalog] = useState<CategoryItem>();
-
+  const { categoryItems, customCategoryItems } = useUserContext();
   function handleAddProduct() {
     let product = {
       categoryItemId: selectedCatalog?.id,
@@ -57,29 +57,17 @@ export default function NewProductModal({
     addProduct(product);
     setShowModal(false);
   }
-  const { data, isLoading } = useQuery({
-    queryKey: ["category-items"],
-    queryFn: async () => {
-      const res = await request({
-        url: `/category-items`,
-        method: "GET",
-        params: {
-          all: true,
-        },
-      });
-      if (res?.status === 200) {
-        return res.data;
-      }
-      throw Error(res?.data?.message);
-    },
-  });
 
-  const catalog: CategoryItem[] = data?.categoryItems || [];
-  const loading = isLoading;
+  const catalog = [...categoryItems, ...customCategoryItems];
+  const loading = false;
 
   function handleSelectCatalogItem(value: CategoryItem) {
     setSelectedCatalog(value);
-    setQuantity(1);
+  }
+
+  function handleClose() {
+    setShowModal(false);
+    setSelectedCatalog(undefined)
   }
 
   return (
@@ -87,7 +75,7 @@ export default function NewProductModal({
       <Button size="sm" onClick={() => setShowModal(true)} color="gray">
         + Add Product
       </Button>
-      <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
+      <Modal show={showModal} size="2xl" popup onClose={handleClose} root={rootRef.current ?? undefined}>
         <Modal.Header>
           <h3 className="text-xl font-medium px-5 pt-3">Add product</h3>
         </Modal.Header>
@@ -100,29 +88,55 @@ export default function NewProductModal({
                 isLoading={loading}
                 getOptionLabel={(option) => option.lineItem || ""}
                 onOptionSelect={handleSelectCatalogItem}
+                placeholder="Search for a product"
               />
             </div>
             {selectedCatalog && (
-              <>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddProduct();
+                }}
+                className="space-y-6"
+              >
+                <div className="mt-1">
+                  <p className="text-xl font-medium">Description</p>
+                  <p className="dark:text-gray-400">{selectedCatalog?.taskDescription || '-'}</p>
+                </div>
                 <div>
                   <Label htmlFor="area">Room / Area</Label>
-                  <Select id="area" required value={category || ""} onChange={(e) => setCategory(e.target.value)}>
-                    <option>{category}</option>
+                  <Select id="area"
+                    required
+                    value={category || ""}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="Select an area"
+                  >
+                    <option value="">{'Select an area'}</option>
                     {areaOptions.map((option) => (
-                      <option key={option}>{option}</option>
+                      <option value={option} key={option}>{option}</option>
                     ))}
                   </Select>
                 </div>
-
-                <div>
-                  <Label>Quantity</Label>
-                  <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
+                <div className="grid gap-4 grid-cols-12">
+                  <div className="col-span-6">
+                    <Label>Quantity</Label>
+                    <TextInput required type="number" value={quantity} onChange={(e) => setQuantity(e.target.valueAsNumber)} />
+                  </div>
+                  <div className="col-span-3">
+                    <p className="text-sm mt-1">Price per item</p>
+                    <p className="mt-3">{selectedCatalog?.targetClientPrice}</p>
+                  </div>
+                  <div className="col-span-3">
+                    <p className="text-sm mt-1">Price total</p>
+                    <p className="mt-3">$ {numberWithCommas(parseCurrencyToNumber(selectedCatalog?.targetClientPrice || "0") * (isNaN(quantity) ? 0 : quantity))}</p>
+                  </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button color="gray" onClick={handleAddProduct}>Save</Button>
+                <div className="flex gap-4">
+                  <Button fullSized color="gray" outline onClick={handleClose}>Close</Button>
+                  <Button type="submit" fullSized color="gray">Save</Button>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </Modal.Body>

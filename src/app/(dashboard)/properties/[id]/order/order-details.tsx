@@ -6,23 +6,29 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Card, Spinner } from "flowbite-react";
 import { HiOutlineArrowSmLeft } from "react-icons/hi";
 import { useRouter } from 'next/navigation'
-import { useContext, useEffect, useMemo, useState } from "react";
-import { numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
+import { useEffect, useMemo, useState } from "react";
+import { generateUUID, numberWithCommas, parseCurrencyToNumber } from "@/utils/commonUtils";
 import ActiveOrder from "@/app/(dashboard)/order/[id]/components/activeOrder";
-import { UserContext, useUserContext } from "@/context/userContext";
+import { useUserContext } from "@/context/userContext";
 import moment from "moment";
 import { useToast } from "@/context/toastContext";
 import ReviewModal from "./review.modal";
+import ImportModal from "@/components/import.modal";
+import OrderStatus from "@/app/(dashboard)/order/orderStatus";
+import { roleMapper } from "@/utils/constants";
 
 type ScopeStatus = "REQUESTED" | "SCHEDULED" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "REJECTED";
 
 export default function OrderDetails({ propertyId, orderId }: { propertyId: string, orderId: string }) {
   const router = useRouter()
   const [addedProducts, setAddedProducts] = useState<ScopeItem[]>([]);
-  const { categoryItems, role } = useUserContext();
+  const { categoryItems, role, selectedOrganization, handleGetCustomCatalog, customCategoryItems } = useUserContext();
   const [isEdited, setIsEdited] = useState<boolean>(false);
   const [actionModal, setActionModal] = useState<"APPROVE" | "REJECT" | "REVISION_REQUESTED" | "REQUEST_REVIEW" | null>(null);
   const { showToast } = useToast();
+  const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
+  const [isLoadingImport, setIsLoadingImport] = useState<boolean>(false);
+  const [errorImport, setErrorImport] = useState<any[]>([]);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['order', 'detail', orderId],
@@ -38,12 +44,13 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       throw Error(res?.data?.message);
     }
   });
-  
+
   const order = data as Scope;
   const scopeStatus = order?.scopeStatus;
   const assigneeId = order?.property?.assigneeId;
 
   const scopeItemRevision = order?.scopeItemRevisions[order.scopeItemRevisions.length - 1];
+  const scopeItemRevisionByPM = order?.scopeItemRevisions[order.scopeItemRevisions.length - 2];
 
   const totalAmount = useMemo(() => {
     let total = 0;
@@ -53,15 +60,23 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     return total;
   }, [addedProducts]);
 
-
   useEffect(() => {
     if (scopeItemRevision && categoryItems.length > 0) {
-      setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+      setAddedProducts(scopeItemRevision.scopeItems.map((item, index) => ({
         ...item,
-        categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+        categoryItem: categoryItems.find(c => c.id === item.categoryItemId),
+        before: role?.roleName !== "CLIENT" && scopeStatus === 'IN_REVIEW' && scopeItemRevision.status !== "APPROVED" ? scopeItemRevisionByPM?.scopeItems?.[index] : undefined
       })));
     }
-  }, [scopeItemRevision, categoryItems]);
+  }, [scopeItemRevision, categoryItems, scopeStatus]);
+
+  function cancelEdit() {
+    setAddedProducts(scopeItemRevision.scopeItems.map(item => ({
+      ...item,
+      categoryItem: categoryItems.find(c => c.id === item.categoryItemId)
+    })));
+    setIsEdited(false);
+  }
 
   const { mutate, isPending: isPendingPopulate } = useMutation({
     mutationFn: async (body: any) => {
@@ -90,10 +105,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
-  const { mutate: mutateReview, isPending: isPendingReview } = useMutation({
+  const { mutate: mutateReview, mutateAsync: mutateAsyncReview, isPending: isPendingReview } = useMutation({
     mutationFn: async (body: {
       action: "APPROVE" | "REJECT" | "REVISION_REQUESTED",
-      note: string
+      note: string,
+      shouldSkipNotif?: boolean,
     }) => {
       const res = await request({
         url: `/scope/${orderId}/review`,
@@ -106,10 +122,12 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
       }
       throw Error(res?.data?.message);
     },
-    onSuccess: () => {
-      showToast('Successfully updated data.');
-      setActionModal(null);
-      refetch();
+    onSuccess: (res, body) => {
+      if (!body.shouldSkipNotif) {
+        showToast('Successfully updated data.');
+        setActionModal(null);
+        refetch();
+      }
     },
     onError: (error) => {
       showToast(error.message, 'error');
@@ -142,7 +160,11 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     }
   });
 
+
   async function populateOrder(sendForApproval: boolean) {
+    if (role?.roleName === 'CLIENT') {
+      await mutateAsyncReview({ action: 'REVISION_REQUESTED', note: '', shouldSkipNotif: true });
+    }
     const formattedScopeItems = [...addedProducts].filter(item => item.status !== 'removed');
     await mutate({
       scopeItems: formattedScopeItems.map(item => ({
@@ -162,6 +184,90 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
     )
   }
 
+  const handleImport = async (data: any[]) => {
+    const items = data.map(item => ({
+      ...item,
+      materialId: item.materialId || "",
+      quantity: Number(item.quantity)
+    }));
+
+    const categoryMap = new Map([...categoryItems, ...customCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
+
+    const foundItems: any[] = [];
+    const newItems: any[] = [];
+
+    items.forEach(item => {
+      if (categoryMap.has(item.lineItem.toLowerCase())) {
+        foundItems.push(item);
+      } else {
+        newItems.push(item);
+      }
+    });
+
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < newItems.length; i += batchSize) {
+      batches.push(newItems.slice(i, i + batchSize));
+    }
+
+    setIsLoadingImport(true);
+    const errorItem: any[] = [];
+    for (const batch of batches) {
+      const res = await request({
+        url: `/custom-catalogs`,
+        method: 'POST',
+        data: {
+          organizationId: selectedOrganization?.organizationId,
+          newCategoryItems: batch
+        }
+      });
+      if (res && res?.status !== 200) {
+        errorItem.push(...batch.map(item => ({ ...item, error: res?.data?.message })));
+      }
+    }
+
+    if (errorItem.length > 0) {
+      setErrorImport(errorItem);
+      return;
+    }
+
+    const resCategoryItems = newItems.length === 0 ? customCategoryItems : await handleGetCustomCatalog(selectedOrganization?.organizationId ?? "");
+
+    const categoryItemMap = new Map([...categoryItems, ...resCategoryItems].map(item => [item.lineItem.toLowerCase(), item]));
+    const products: any[] = [];
+    [...foundItems, ...newItems].forEach((item) => {
+      const categoryItem = categoryItemMap.get(item.lineItem.toLowerCase());
+
+      if (categoryItem) {
+        products.push({
+          categoryItemId: categoryItem.id,
+          categoryItem,
+          quantity: item.quantity,
+          area: item.area,
+          orderId,
+          status: "new",
+          id: categoryItem.id + item.area,
+        })
+      }
+    });
+
+    setAddedProducts([...addedProducts, ...products]);
+
+    setIsLoadingImport(false);
+    setIsOpenImport(false);
+    setIsEdited(true);
+
+    showToast("Successfully imported data.", "success");
+  }
+
+
+  const approval = order.approvalChain.find(item => (roleMapper[item.role] === role?.roleName) || (role?.roleName === 'SENIOR PROJECT MANAGER' ? ['PM'].includes(item.role) : false));
+  const isApproved = approval?.status === 'APPROVED';
+
+  const isEditing = !["APPROVED", "REQUESTED"].includes(scopeStatus);
+  const isAdding = role?.roleName === 'CLIENT' ? false : !["APPROVED", "REQUESTED"].includes(scopeStatus);
+  const isDeleting = isAdding;
+
   return (
     <div className="w-full p-5">
       <Card className="mb-4">
@@ -172,32 +278,50 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             </button>
             <h3 className="font-semibold text-xl">{order.projectName}</h3>
           </div>
+
           {
             isEdited ? (
               <div className="flex gap-4">
-                <Button color="gray" isProcessing={isPendingPopulate} onClick={() => populateOrder(false)}>
-                  Save
+                <Button color="gray" outline onClick={cancelEdit}>Cancel</Button>
+                <Button color="gray" isProcessing={isPendingPopulate || isPendingReview} onClick={() => populateOrder(true)}>
+                  Send for review
                 </Button>
               </div>
             ) : (
               <div className="flex gap-4">
                 {
-                  scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                  order?.scopeItemRevisions?.length === 0 && isAdding && (
+                    <Button
+                      onClick={() => setIsOpenImport(true)}
+                    >
+                      Import
+                    </Button>
                   )
                 }
                 {
-                  scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
-                    <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                  )
-                }
-                {
-                  scopeStatus === "SCHEDULED" && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && scopeStatus === "REQUESTED" && !assigneeId && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
-                      <Button color="gray" onClick={() => setActionModal("REVISION_REQUESTED")}>
-                        Request changes
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
                       </Button>
+                    </>
+                  )
+                }
+                {
+                  !isApproved && scopeStatus === "REQUESTED" && assigneeId && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
+                  )
+                }
+                {
+                  !isApproved && ["SCHEDULED", "IN_REVIEW"].includes(scopeStatus) && ["PROJECT MANAGER", "JUNIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("REQUEST_REVIEW")}>
                         Send for review
                       </Button>
@@ -205,7 +329,17 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
                   )
                 }
                 {
-                  scopeStatus === "SUBMITTED" && ["CLIENT", "SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                  !isApproved && ["SUBMITTED", "IN_REVIEW"].includes(scopeStatus) && ["SENIOR PROJECT MANAGER"].includes(role?.roleName || "") && (
+                    <>
+                      <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
+                      <Button color="gray" onClick={() => setActionModal("APPROVE")}>
+                        Accept
+                      </Button>
+                    </>
+                  )
+                }
+                {
+                  !isApproved && scopeStatus === "SUBMITTED" && ["CLIENT"].includes(role?.roleName || "") && (
                     <>
                       <Button color="gray" outline onClick={() => setActionModal("REJECT")}>Decline</Button>
                       <Button color="gray" onClick={() => setActionModal("APPROVE")}>
@@ -227,9 +361,38 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             <p>$ {numberWithCommas(totalAmount)}</p>
           </div>
         </div>
+        <div className="flex justify-between border-b border-b-gray-200 pb-3 dark:border-b-gray-700">
+          <div>
+            <p className="text-base">Scope Status</p>
+          </div>
+          <div className="flex gap-8 text-lg">
+            <OrderStatus status={order.scopeStatus} />
+          </div>
+        </div>
+        <div>
+          <p className="text-lg font-bold">Approval:</p>
+          {
+            order.approvalChain?.map(item => (
+              <div key={item.role} className="border-b border-b-gray-200 dark:border-b-gray-700 py-1">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p>{roleMapper[item.role] || item.role}</p>
+                    {item.note && <p className="text-sm">
+                      <b>Note: </b>
+                      <span className="dark:text-gray-400">{item.note}</span>
+                    </p>}
+                  </div>
+                  <OrderStatus status={item.status} />
+                </div>
+              </div>
+            ))
+          }
+        </div>
       </Card>
       <ActiveOrder
-        isEditing={scopeStatus !== "APPROVED"}
+        isAdding={isAdding}
+        isDeleting={isDeleting}
+        isEditing={isEditing}
         remove={(product) => {
           const filter = [...addedProducts].filter(item => item.id !== product.id);
           setAddedProducts([...filter]);
@@ -256,26 +419,37 @@ export default function OrderDetails({ propertyId, orderId }: { propertyId: stri
             title={`Are you sure you want to ${actionModal?.replaceAll('_', ' ').toLowerCase()}?`}
             handleConfirm={(note) => {
               if (scopeStatus === "REQUESTED") {
-                mutateInitiate({ scopeStatus: "REJECTED", reason: note });
-              } else if (scopeStatus === "SCHEDULED") {
+                if (actionModal === "APPROVE") {
+                  mutateInitiate({ scopeStatus: "SCHEDULED", reason: note });
+                } else {
+                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
+                }
+              } else {
                 if (actionModal === "REJECT") {
                   mutateInitiate({ scopeStatus: "REJECTED", reason: note });
                 } else if (actionModal === "REVISION_REQUESTED") {
                   mutateReview({ action: "REVISION_REQUESTED", note });
-                } else if (actionModal === "REQUEST_REVIEW") {
-                  populateOrder(true);
-                }
-              } else if (scopeStatus === "SUBMITTED") {
-                if (actionModal === "REJECT") {
-                  mutateInitiate({ scopeStatus: "REJECTED", reason: note });
                 } else if (actionModal === "APPROVE") {
                   mutateReview({ action: "APPROVE", note });
+                } else if (actionModal === "REQUEST_REVIEW") {
+                  populateOrder(true);
                 }
               }
             }}
           />
         )
       }
+      <ImportModal
+        showModal={isOpenImport}
+        setShowModal={(v) => setIsOpenImport(v)}
+        onSubmit={(data) => {
+          handleImport(data);
+        }}
+        options={["area", "quantity", "lineItem", "taskDescription", "targetClientPrice", "costCategory", "costCode", "options", "notes", "uom", "originalMaterialId", "materialId", "targetVendorPrice", "equipmentUsageRental"]}
+        requiredOptions={["lineItem", "taskDescription", "targetClientPrice", "area", "quantity"]}
+        errors={errorImport}
+        isLoading={isLoadingImport}
+      />
     </div>
   )
 }

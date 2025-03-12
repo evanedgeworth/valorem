@@ -9,6 +9,7 @@ import request from "@/utils/request";
 import { Market } from "@/types";
 import { useState } from "react";
 import useDebounce from "@/utils/useDebounce";
+import classNames from "classnames";
 
 type CompanyFormValues = {
   companyName: string;
@@ -113,6 +114,9 @@ export default function CompanyForm() {
                 size="small"
                 loading={isLoading}
                 disableCloseOnSelect
+                ChipProps={{
+                  className: "text-gray-900 dark:text-white"
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -120,8 +124,8 @@ export default function CompanyForm() {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 p-10"
                     inputProps={{
                       ...params.inputProps,
-                      style: { fontSize: "14px" },
-                      className: "dark:text-white"
+                      style: { fontSize: "14px"},
+                      className: classNames("text-gray-900 dark:text-white", params.inputProps.className)
                     }}
                   />
                 )}

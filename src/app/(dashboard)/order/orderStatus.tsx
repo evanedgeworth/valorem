@@ -9,9 +9,13 @@ export default function OrderStatus({ status }: { status: string }) {
   if (status === "APPROVED") {
     color = "#008000";
   }
+
+  if (status === "REVISION_REQUESTED") {
+    color = "yellow";
+  }
   return (
     <Badge size="xs" style={{ backgroundColor: color }} className="justify-center text-black">
-      {status}
+      {status?.replaceAll('_', ' ')}
     </Badge>
   );
 }

@@ -29,7 +29,6 @@ const CSVSelector = ({
   const papaparseOptions = {
     header: true,
     dynamicTyping: true,
-    skipEmptyLines: "greedy",
     transformHeader: (header: string) => header.toLowerCase().replace(/\W/g, ""),
   };
   const selectedOrder = useRef<any>(null);
