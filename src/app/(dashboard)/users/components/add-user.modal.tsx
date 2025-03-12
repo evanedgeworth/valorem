@@ -94,7 +94,7 @@ export default function AddUserModal() {
       <Modal show={showModal} size="lg" popup onClose={() => setShowModal(false)} root={rootRef.current ?? undefined}>
         <Modal.Header></Modal.Header>
         <Modal.Body>
-          <form onSubmit={handleSubmit(handleAddUser)}>
+          <form onSubmit={handleSubmit(handleAddUser)} className="max-w-lg">
             <div className="space-y-2">
               <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add User</h3>
               <div className="flex flex-row gap-4">

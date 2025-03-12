@@ -61,7 +61,7 @@ export default function AddEventModal({ products, orderId }: { products: Product
             </div>
             <div>
               <Label htmlFor="countries">Date</Label>
-              <Datepicker onSelectedDateChanged={(e) => setStartDate(e.toDateString())} value={startDate} />
+              <Datepicker onChange={(e) => e && setStartDate(e.toDateString())} value={new Date(startDate)} />
             </div>
             <div>
               <Label>Time</Label>

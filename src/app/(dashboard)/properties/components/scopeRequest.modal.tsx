@@ -112,7 +112,7 @@ export default function ScopeRequestModal({ showModal, setShowModal, property }:
               </div>
               <div>
                 <Label>Due Date</Label>
-                <Datepicker {...register("dueDate")} minDate={new Date()} onSelectedDateChanged={(date) => setValue("dueDate", date)} />
+                <Datepicker {...register("dueDate")} minDate={new Date()} onChange={(date) => date && setValue("dueDate", date)} />
               </div>
               <div>
                 <Label>Estimated budget (optional)</Label>

@@ -160,6 +160,7 @@ export type User = {
   lastName: string;
   phone: string;
   roleId: string;
+  status: string;
   markets: string[];
   profileImage: {
     fileId: string;
@@ -240,6 +241,11 @@ export type UserOrganization = {
   updatedAt: Date;
   userId: string;
   user?: User;
+};
+
+export type GroupedMarket = {
+  key: string;
+  value: Market[]
 };
 
 export enum RoomType {

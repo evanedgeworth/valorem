@@ -10,8 +10,7 @@ import Link from "next/link";
 import Notifications from "./notifications";
 import Cookies from "js-cookie";
 import { localStorageKey } from "@/utils/useLocalStorage";
-import { Organization } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
+import { Organization, UserOrganization } from "@/types";
 
 export default function NavbarWithDropdown() {
   const router = useRouter();
@@ -26,7 +25,7 @@ export default function NavbarWithDropdown() {
     signOut();
   }
 
-  const handleChangeOrganization = (org: Organization) => {
+  const handleChangeOrganization = (org: UserOrganization) => {
     setSelectedOrganization(org);
     Cookies.set(localStorageKey.roleId, org.roleId);
   }
