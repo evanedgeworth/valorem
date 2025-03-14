@@ -263,3 +263,20 @@ export function toTitleCase(input: string): string {
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+type FullName = {
+  firstName: string;
+  lastName?: string;
+};
+
+export function splitFullName(fullName: string): FullName {
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts[0] || "";
+  const lastName = parts.length > 1 ? parts.slice(1).join(" ") : undefined;
+
+  return { firstName, lastName };
+}
+
+export function joinFullName({ firstName, lastName }: FullName): string {
+  return [firstName, lastName].filter(Boolean).join(" ");
+}

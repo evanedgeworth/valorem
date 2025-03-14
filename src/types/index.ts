@@ -160,6 +160,9 @@ export type User = {
   lastName: string;
   phone: string;
   roleId: string;
+  username: string;
+  city: string;
+  country: string;
   markets: string[];
   profileImage: {
     fileId: string;
