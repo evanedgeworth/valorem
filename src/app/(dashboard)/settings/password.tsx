@@ -2,6 +2,9 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Button, Label, TextInput } from "flowbite-react";
 import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
+import request, { saveSession } from "@/utils/request";
+import { useToast } from "@/context/toastContext";
+import { useUserContext } from "@/context/userContext";
 
 type FormValues = {
   currentPassword: string;
@@ -14,8 +17,11 @@ export default function PasswordChangeForm() {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    reset,
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>();
+  const { showToast } = useToast();
+  const { user } = useUserContext();
 
   const newPassword = watch("newPassword", "");
   const currentPassword = watch("currentPassword", "");
@@ -36,8 +42,24 @@ export default function PasswordChangeForm() {
     });
   };
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Submitted Data:", data);
+  const onSubmit = async (data: FormValues) => {
+    const res = await request({
+      method: "PUT",
+      url: `/password`,
+      data: {
+        email: user?.email,
+        password: data.currentPassword,
+        newPassword: data.newPassword,
+      }
+    });
+    if (res?.status === 200) {
+      saveSession(res.data);
+      showToast("Password updated successfully.", "success");
+      reset();
+    } else {
+      showToast("Current password is invalid.", "error");
+    }
+
   };
 
   return (
@@ -116,7 +138,7 @@ export default function PasswordChangeForm() {
       </div>
 
       <div className="border-t border-t-gray-200 pt-4 dark:border-t-gray-600">
-        <Button type="submit" color="gray">
+        <Button type="submit" color="gray" isProcessing={isSubmitting}>
           Save changes
         </Button>
       </div>

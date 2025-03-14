@@ -91,8 +91,6 @@ export default function CompanyInfoForm() {
           </div>
           <div className="flex flex-col">
             <MarketSelect
-            
-            
             />
    
           </div>

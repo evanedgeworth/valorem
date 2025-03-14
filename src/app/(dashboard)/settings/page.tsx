@@ -17,8 +17,8 @@ export default function Settings() {
             [
               { label: 'Account', value: 'profile' },
               { label: 'Security', value: 'password' },
-              { label: 'Notifications', value: 'notifications' },
-              { label: 'Company Info', value: 'company' },
+              // { label: 'Notifications', value: 'notifications' },
+              // { label: 'Company Info', value: 'company' },
             ].map(item => (
               <Button
                 key={item.label}
