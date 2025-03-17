@@ -137,7 +137,6 @@ export default function UserProvider({ children }: { children: JSX.Element[] }) 
       localStorage.clear();
       setSelectedOrganization(null);
       setUser(null);
-      signOut('/signup');
     }
   }, []);
 
